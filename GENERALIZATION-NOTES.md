@@ -1,6 +1,11 @@
-# Generalization notes (v0.1)
+# Generalization notes (v0.2)
 
 Honest scope of the extraction, so you know exactly what's done and what to tailor before this reads as a truly project-agnostic framework.
+
+## New in v0.2
+
+- **`template/STACK.md`** — a single "edit this first" adaptation surface: commands, test tiers, core invariant(s), business guardrails, sensitive fields, tech-governance, perf budgets, platform. The review checklists point here for project specifics.
+- **The `code-review` and `security-review` checklists are now generic** — universal categories, no vehicle-domain examples; project-specific edges are declared in STACK.md.
 
 ## Done
 

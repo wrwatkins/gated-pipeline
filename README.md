@@ -48,7 +48,7 @@ Each gate is a persona (`.claude/agents/`) driven by a **gate card** (`.claude/r
 
 ## Status & generalization
 
-This is **v0.1**. The framework files are fully functional but still carry **example stack and domain wording** from the project they were extracted from (a Next.js / Drizzle / pnpm web app). Project *identity* has been stripped to placeholders; the *stack/domain examples* (e.g. specific test tiers, a data-purity rule, a redirect-route example) are still concrete. See **[GENERALIZATION-NOTES.md](GENERALIZATION-NOTES.md)** for exactly what to adapt to your stack — most of it is find-and-replace in the gate cards, and much of it is useful as-is as a worked example.
+This is **v0.2**. The method is stack-agnostic; the gate cards ship as a **worked example** in one stack (TypeScript / Next.js / Drizzle / pnpm). Project *identity* is stripped to installer placeholders, and the two most-read review checklists (`code-review`, `security-review`) are now **generic**. The remaining stack/domain wording in the gate cards is intentionally left as a filled-in example — you adapt it via one file: **[`STACK.md`](template/STACK.md)** (scaffolded into your repo), which the reviewers read for your invariants, guardrails, sensitive fields, commands, and governance. See **[GENERALIZATION-NOTES.md](GENERALIZATION-NOTES.md)** for the full adaptation map.
 
 ## License
 

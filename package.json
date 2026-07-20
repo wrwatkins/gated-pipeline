@@ -1,6 +1,6 @@
 {
   "name": "gated-pipeline",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A gated, agent-driven SDLC pipeline for Claude Code — nine review gates, an optional discovery phase, a cadence review suite, file-based agent memory, and typed handoffs. Scaffolds into any repo.",
   "type": "module",
   "bin": {
