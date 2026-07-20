@@ -1,0 +1,29 @@
+{
+  "_comment": "Classifies template files. FRAMEWORK files are owned by this package and OVERWRITTEN on `sync` (re-applying your tokens). Everything else is PROJECT-once: written on first install, never touched again. A project can protect additional paths via `protect` in its .gated-pipeline.json. Match is by exact path or directory prefix (a trailing / is a prefix).",
+  "framework": [
+    ".claude/agents/",
+    ".claude/rules/gates/",
+    ".claude/rules/checklists/",
+    ".claude/rules/handoff-schema.md",
+    ".claude/rules/engineering.md",
+    ".claude/rules/working-discipline.md",
+    ".claude/rules/pr-workflow.md",
+    ".claude/rules/security-conduct.md",
+    ".claude/hooks/",
+    ".claude/workflows/",
+    "docs/PROCESS.md"
+  ],
+  "projectOnce": [
+    "STACK.md",
+    ".claude/pipeline/REGISTRY.json",
+    ".claude/rules/api-routes.md",
+    ".claude/rules/perf-budgets.md",
+    ".claude/rules/security-deploy.md",
+    ".claude/rules/playwright.md",
+    "docs/requirements/",
+    "docs/design/",
+    "docs/decisions/",
+    "docs/discovery/",
+    "docs/spikes/"
+  ]
+}

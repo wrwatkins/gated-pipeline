@@ -20,6 +20,19 @@ npx gated-pipeline --slug=my-app --name="My App" --domain=my.app --coauthor="Cla
 
 Add `--dry-run` to preview, or `--yes` to accept defaults for anything unspecified.
 
+## Staying up to date (use it across projects)
+
+Install once, then pull framework improvements without losing your customizations:
+
+```
+pnpm add -D github:wrwatkins/gated-pipeline   # or a published npm version
+pnpm gated-pipeline sync                       # update framework files in place
+```
+
+`sync` **overwrites the framework files** (agents, gate cards, checklists, PROCESS, handoff-schema, hooks, workflow — re-applying your tokens) and **never touches your project-owned files** (`STACK.md`, your docs/BRs/ADRs, `REGISTRY.json`, the stack-specific rules). The split is declared in [`framework-manifest.json`](framework-manifest.json); a project can protect *additional* paths by adding them to `protect` in its generated `.gated-pipeline.json`. Review the `git diff` and commit — nothing is hidden (unlike a submodule).
+
+This is the model for **multiple projects sharing one pipeline**: each repo deps the package and syncs; a fix to a gate card lands everywhere on the next sync. Your project-specifics live in `STACK.md` and your own docs, so they survive every update.
+
 ## What you get
 
 **A nine-gate delivery pipeline** — every unit of work passes, in order:
