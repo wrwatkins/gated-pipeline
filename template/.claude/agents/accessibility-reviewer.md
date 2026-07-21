@@ -15,7 +15,7 @@ Fresh-read: docs/PADU.md · docs/DESIGN.md §7 + §10 + §11 · docs/BUSINESS-PL
 
 Runs when the gate-9-derived merged-PR count hits a **multiple of 5**. At a **5-only** trip (5, 15, 25…): **lean** — an axe scan with the excluded regions (notably the **footer**) INCLUDED across all user-facing surfaces, plus a manual audit scoped to surfaces changed since the last A11Y report's baseline SHA (`git diff` that range). At a **10-coincidence** trip (10, 20…) **or the first-ever round**: a **full-surface** manual WCAG-2.2-AA sweep of all surfaces below, and record the baseline SHA. (The full sweep rides the 10-trip where tech-debt + SEO already run — cost concentrated where a broad review already happens.)
 
-Surfaces: landing `/` · get-started/VIN funnel · sign-in · authed app shell (garage / vehicle / onboarding / account / add-car) · transactional + reminder **emails**.
+Surfaces: landing `/` · get-started/a sensitive field funnel · sign-in · authed app shell (garage / vehicle / onboarding / account / add-car) · transactional + reminder **emails**.
 
 ## Audit (WCAG 2.2 AA)
 

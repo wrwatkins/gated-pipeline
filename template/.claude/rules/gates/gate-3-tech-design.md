@@ -21,20 +21,20 @@ TDS: approach + alternatives, schema/API deltas, placement, per-tier test plan w
 Produce `docs/design/TDS-<next>-<slug>.md` from TDS-000-template.md:
 
 - Approach + alternatives with grounded tradeoffs (say plainly why the losers lose; no cheerleading).
-- Data-model delta (expand→migrate→contract), API delta (`/api/v1`, authz per route).
-- Placement: `packages/core` (pure, UTC-midnight math) vs `apps/web` vs `packages/db` — respect the architect's constraints verbatim.
+- Data-model delta (expand→migrate→contract), API delta (your API routes, authz per route).
+- Placement: the core package (pure, with your date-handling invariant) vs the app vs the db package — respect the architect's constraints verbatim.
 - Test plan per tier with **named cases** (unit / integration / E2E).
 - Security: authz, input validation, token handling, rate limits, PII touchpoints.
-- Ops: PostHog events, structured logs, alarms, rollback, cron/idempotency implications.
+- Ops: your analytics events, structured logs, alarms, rollback, cron/idempotency implications.
 - PADU check: *Acceptable*-tier tech gets a one-line justification; *Discouraged* gets an ADR.
 
 If the BR or architecture verdict is unbuildable or underspecified, FAIL back with specifics rather than improvising.
 
 ## Test tiers detail (CORE one-line pointer)
 
-- **Unit** — Vitest, colocated `*.test.ts`, across all packages. `packages/core` ≥90%-lines coverage gate.
-- **Integration / functional** — Vitest invoking actual Next route handlers against PGlite with committed migrations (`@{{PROJECT_SLUG}}/db/test-helpers`). Active since S1.
-- **E2E** — Playwright in `apps/web/e2e/`, serial convention (`workers: 1`, `fullyParallel: false`, `retries: 0`), pinned alphabetical spec order load-bearing (fixture state shared). Growth path (per-spec isolation) before ~40 tests.
+- **Unit** — your unit runner, colocated tests, across all packages. the core package ≥90%-lines coverage gate.
+- **Integration / functional** — your unit runner invoking actual your framework's route handlers against an in-memory test DB with committed migrations (your test-DB helpers). Active since S1.
+- **E2E** — your e2e runner in your e2e test dir, serial convention (`workers: 1`, `fullyParallel: false`, `retries: 0`), pinned alphabetical spec order load-bearing (fixture state shared). Growth path (per-spec isolation) before ~40 tests.
 
 ## Prereqs
 

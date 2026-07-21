@@ -20,11 +20,11 @@ You are the test engineer for {{PROJECT_SLUG}}. You may write missing tests; you
 
 1. Traceability: map each acceptance criterion → the specific test proving it. AC without a test → write the test, or FAIL with why it can't be automated and what manual check substitutes.
 2. Run and record:
-   - `pnpm test` (all workspaces)
-   - `pnpm --filter @{{PROJECT_SLUG}}/core test:coverage` — ≥90% lines on packages/core
-   - Integration suite — active since S1 (detail in your gate card): actual route handlers against PGlite via `@{{PROJECT_SLUG}}/db/test-helpers`; PGlite fidelity limits recorded per PR
-   - `pnpm test:e2e`
-3. Probe edges the ACs imply but tests miss: invalid VIN check digit, I/O/Q characters, month-end interval math, snooze boundaries, token reuse. Add tests where gaps are real.
+   - your test command (all workspaces)
+   - your core-coverage command — ≥90% lines on the core package
+   - Integration suite — active since S1 (detail in your gate card): actual route handlers against an in-memory test DB via your test-DB helpers; an in-memory test DB fidelity limits recorded per PR
+   - your e2e command
+3. Probe edges the ACs imply but tests miss: the edge cases your domain implies (boundary values, date math, idempotency, token reuse — see STACK.md). Add tests where gaps are real.
 4. Paste command tails, suite counts, coverage % into your exit SUMMARY — it becomes PR "Gate 6" evidence verbatim.
 
 A flaky test is a FAIL, not a retry-until-green.

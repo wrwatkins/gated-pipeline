@@ -38,7 +38,7 @@ Phase 0 **diverges** (reframe the problem, brainstorm ≥3 distinct approaches, 
 | 4 | Develop | `developer` | Implementation + tests; `lint`/`typecheck`/`test` green locally (recorded verbatim); docs updated | Feature branch / diff | [gate-4](../.claude/rules/gates/gate-4-developer.md) |
 | 5 | Code review | `code-reviewer` | Verdict recorded; zero unresolved BLOCKING findings | Review block → PR | [gate-5](../.claude/rules/gates/gate-5-code-reviewer.md) |
 | 6 | Test | `tester` | Every AC traced to an automated test; all tiers green; core coverage ≥90% lines | Evidence block → PR | [gate-6](../.claude/rules/gates/gate-6-tester.md) |
-| 7 | Security | `security-reviewer` | Semgrep clean (no unresolved high/critical), `pnpm audit --prod` clean at high, checklist reviewed | Evidence block → PR | [gate-7](../.claude/rules/gates/gate-7-security-reviewer.md) |
+| 7 | Security | `security-reviewer` | your SAST tool clean (no unresolved high/critical), your dependency audit clean at high, checklist reviewed | Evidence block → PR | [gate-7](../.claude/rules/gates/gate-7-security-reviewer.md) |
 | 8 | Ops | `ops-reviewer` | CI green; new paths instrumented; alerting story; rollback stated; migrations backward-compatible | Evidence block → PR | [gate-8](../.claude/rules/gates/gate-8-ops-reviewer.md) |
 | 9 | PR approval | `pr-approver` | Template fully evidenced; process-complete audit passes | PR approval / merge | [gate-9](../.claude/rules/gates/gate-9-pr-approver.md) |
 
@@ -51,9 +51,9 @@ The table above defines the **full** profile. §Gate profiles assigns reduced pr
 ### Assignment
 
 - Every PR body records **`Gate profile: <full | docs | chore> — <one-line eligibility reasoning>`**. Gate 9 audits the assignment; a wrong profile is a bounce.
-- **full** (default) — mandatory for any diff with **prod-runtime surface**: prod dependencies, schema/migrations, routes/handlers/UI, auth/token/email surfaces, seed data affecting fitment verification, infra/IaC. When in doubt, full.
+- **full** (default) — mandatory for any diff with **prod-runtime surface**: prod dependencies, schema/migrations, routes/handlers/UI, auth/token/email surfaces, seed data affecting the domain-critical verification, infra/IaC. When in doubt, full.
 - **docs** — units whose deliverable *is* a docs artifact (cadence/review reports, BR/ADR/TDS-only units, requirements PRs, regulatory/reference captures with no loader changes).
-- **chore** — zero-prod-runtime-surface diffs: devDep/test-tier version bumps, docs batches riding tooling edits, CI pins/workflow hygiene, reference/data files that don't feed fitment verification.
+- **chore** — zero-prod-runtime-surface diffs: devDep/test-tier version bumps, docs batches riding tooling edits, CI pins/workflow hygiene, reference/data files that don't feed the domain-critical verification.
 - **Upgrades are one-way and recorded:** ambiguity resolves upward; if mid-flight the diff is found to touch an excluded surface, all remaining gates run full and the PR body records the upgrade. Until reviewed, the excluded-surface list may only grow.
 
 Profile detail per gate (what full/docs/chore means for *that* gate — chore depth, disposition form, scan tier, CI-only) lives in each gate's card. Items 1–4 and 6 of the docs profile also apply *within* any profile whenever a gate lacks an object:
@@ -145,11 +145,11 @@ Receiver resolves by editing to `STATUS: resolved — <by, one-line note>`.
 
 ## Test tiers (all required) — one-line pointer
 
-Detail in [gate-3 card](../.claude/rules/gates/gate-3-tech-design.md) (which the developer reads) and [gate-6 card](../.claude/rules/gates/gate-6-tester.md). Summary: **Unit** (Vitest, colocated, ≥90% core lines) · **Integration** (Vitest + actual Next route handlers + PGlite, active S1+) · **E2E** (Playwright, serial, pinned alphabetical spec order, `apps/web/e2e/`).
+Detail in [gate-3 card](../.claude/rules/gates/gate-3-tech-design.md) (which the developer reads) and [gate-6 card](../.claude/rules/gates/gate-6-tester.md). Summary: **Unit** (your unit runner, colocated, ≥90% core lines) · **Integration** (your unit runner + actual your framework's route handlers + an in-memory test DB, active S1+) · **E2E** (your e2e runner, serial, pinned alphabetical spec order, your e2e test dir).
 
 ## Scans (all required, blocking) — one-line pointer
 
-Detail in [gate-7 card](../.claude/rules/gates/gate-7-security-reviewer.md). Summary: **SAST** Semgrep `p/default`+`p/typescript`+`p/owasp-top-ten` · **Code quality** ESLint+tsc · **Structural** architectural-boundary lint (§Structural lint) · **Dependencies** `pnpm audit --prod --audit-level high`.
+Detail in [gate-7 card](../.claude/rules/gates/gate-7-security-reviewer.md). Summary: **SAST** your SAST scan · **Code quality** ESLint+tsc · **Structural** architectural-boundary lint (§Structural lint) · **Dependencies** your dependency audit.
 
 ## Structural lint (blocking) — one-line pointer
 
@@ -174,7 +174,7 @@ Detail in [gate-9 card](../.claude/rules/gates/gate-9-pr-approver.md) (enforces 
 
 ## PR evidence (required on every PR) — one-line pointer
 
-Detail in [gate-9 card](../.claude/rules/gates/gate-9-pr-approver.md). Paste (links don't substitute): (1) unit tail + core coverage % · (2) integration/functional results or recorded n/a · (3) E2E tail · (4) Semgrep summary · (5) lint + typecheck · (6) gate 5, 7, 8 blocks.
+Detail in [gate-9 card](../.claude/rules/gates/gate-9-pr-approver.md). Paste (links don't substitute): (1) unit tail + core coverage % · (2) integration/functional results or recorded n/a · (3) E2E tail · (4) your SAST tool summary · (5) lint + typecheck · (6) gate 5, 7, 8 blocks.
 
 ---
 

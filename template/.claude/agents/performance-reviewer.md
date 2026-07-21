@@ -18,7 +18,7 @@ Runs at each **multiple of 10** merged PRs, alongside tech-debt + SEO. Diff the 
 Audit:
 1. **Bundle trend** — `next build` first-load JS per route vs the ≤130 KB public / ≤180 KB app-shell ceilings AND vs the last report's numbers; flag creep even when still under ceiling (a slow climb is the escape a single PR hides).
 2. **Core Web Vitals** — LCP / CLS / INP against the perf-budgets thresholds on the money/funnel routes (build output + dev-server signals until the S6 Lighthouse wiring arms).
-3. **Runtime/query** — grep new/changed request paths for N+1 patterns and unindexed hot-path queries (schema indexes per DESIGN §5); confirm cron/sweep engines carry timing annotations / PostHog duration events.
+3. **Runtime/query** — grep new/changed request paths for N+1 patterns and unindexed hot-path queries (schema indexes per DESIGN §5); confirm cron/sweep engines carry timing annotations / your analytics duration events.
 4. **Dependency weight** — notable size regressions from added deps.
 
 ## Output

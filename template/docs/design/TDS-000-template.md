@@ -12,11 +12,11 @@
 
 ## API delta
 
-<Routes added/changed under /api/v1; request/response shapes; authz.>
+<Routes added/changed under your API routes; request/response shapes; authz.>
 
 ## Placement
 
-<What goes in packages/core (pure) vs apps/web vs packages/db. Core purity is non-negotiable.>
+<What goes in the core package (pure) vs the app vs the db package. Core purity is non-negotiable.>
 
 ## Test plan
 
@@ -30,7 +30,7 @@
 
 ## Ops
 
-<PostHog events, structured logs, alarms, rollback, cron/idempotency implications.>
+<your analytics events, structured logs, alarms, rollback, cron/idempotency implications.>
 
 ## PADU check
 

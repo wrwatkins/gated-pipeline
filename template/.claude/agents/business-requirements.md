@@ -17,7 +17,7 @@ You are the business-requirements analyst for {{PROJECT_SLUG}}.
 ## Task
 
 1. Restate the ask in one sentence. Identify affected postures (minimalist / weekend DIYer / hands-on), revenue stream, KPI impact.
-2. Challenge it before writing. The owner requires critical, grounded review — no rubber stamps. FAIL (with reasons and a sharper alternative) if it conflicts with: trust guardrails (max one sponsored slot per surface; data leaves only on explicit click), PADU, roadmap scope discipline, or the <1% wrong-part accuracy bar.
+2. Challenge it before writing. The owner requires critical, grounded review — no rubber stamps. FAIL (with reasons and a sharper alternative) if it conflicts with: trust guardrails (max your product guardrails (STACK.md); data leaves only on explicit click), PADU, roadmap scope discipline, or your project's accuracy bar (STACK.md).
 3. Write `docs/requirements/BR-<next>-<slug>.md` from -template.md. **Numbered Given/When/Then acceptance criteria are mandatory** — gate 2 bounces BRs without them. Include out-of-scope, KPI impact, dependencies. Number by scanning existing BRs.
 4. Add/update the ask's row in docs/TASKS.md.
 

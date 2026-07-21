@@ -20,20 +20,20 @@ Under **chore**, gate 6 merges into the combined 5–6 review-and-verify run (on
 
 1. **Traceability:** map each acceptance criterion → the specific test proving it. AC without a test → write the test, or FAIL with why it can't be automated and what manual check substitutes.
 2. **Run and record:**
-   - `pnpm test` (all workspaces)
-   - `pnpm --filter @{{PROJECT_SLUG}}/core test:coverage` — ≥90% lines on packages/core
-   - Integration suite — actual route handlers against PGlite via `@{{PROJECT_SLUG}}/db/test-helpers`; PGlite fidelity limits recorded per PR
-   - `pnpm test:e2e`
-3. **Probe edges** the ACs imply but tests miss: invalid VIN check digit, I/O/Q characters, month-end interval math, snooze boundaries, token reuse.
+   - your test command (all workspaces)
+   - your core-coverage command — ≥90% lines on the core package
+   - Integration suite — actual route handlers against an in-memory test DB via your test-DB helpers; an in-memory test DB fidelity limits recorded per PR
+   - your e2e command
+3. **Probe edges** the ACs imply but tests miss: the edge cases your domain implies (boundary values, date math, idempotency, token reuse — see STACK.md).
 4. Paste command tails, suite counts, coverage % into your exit SUMMARY.
 
 A flaky test is a FAIL, not a retry-until-green.
 
 ## Test tiers detail (CORE one-line pointer)
 
-- **Unit** — Vitest, colocated `*.test.ts`, across all packages. `packages/core` ≥90%-lines coverage gate.
-- **Integration / functional** — Vitest invoking actual Next route handlers against PGlite with committed migrations (`@{{PROJECT_SLUG}}/db/test-helpers`). Active since S1 — no handler mocks, no fake suites; PGlite fidelity limits recorded per PR.
-- **E2E** — Playwright in `apps/web/e2e/`, serial (`workers: 1`, `fullyParallel: false`, `retries: 0`), pinned alphabetical spec order load-bearing (specs share fixture state). A new or renamed spec file is checked against the fixture-mutation order at gate 8. Growth path (per-spec fixture isolation) decided before ~40 tests.
+- **Unit** — your unit runner, colocated tests, across all packages. the core package ≥90%-lines coverage gate.
+- **Integration / functional** — your unit runner invoking actual your framework's route handlers against an in-memory test DB with committed migrations (your test-DB helpers). Active since S1 — no handler mocks, no fake suites; an in-memory test DB fidelity limits recorded per PR.
+- **E2E** — your e2e runner in your e2e test dir, serial (`workers: 1`, `fullyParallel: false`, `retries: 0`), pinned alphabetical spec order load-bearing (specs share fixture state). A new or renamed spec file is checked against the fixture-mutation order at gate 8. Growth path (per-spec fixture isolation) decided before ~40 tests.
 
 ## Client perf budget (folded dimension — gate 6 owns; CORE one-line pointer)
 

@@ -20,11 +20,11 @@ Under **chore**, gate 8 = **exact-head CI verification** (§Branch & merge check
 
 Check, with evidence:
 1. **CI:** all jobs green for this change (quality, unit, build, e2e, sast, audit); new code paths exercised by at least one tier.
-2. **Instrumentation:** new user-facing paths emit PostHog server events + structured JSON logs (ids only, no PII). List events added. A user-visible feature with zero instrumentation is a FAIL.
-3. **Alerting:** failure modes on send/cron/webhook paths have an alerting story (CloudWatch alarm, or an explicit ROADMAP row if deferred). Silent failure paths are a FAIL per PADU.
+2. **Instrumentation:** new user-facing paths emit your analytics events + structured JSON logs (ids only, no PII). List events added. A user-visible feature with zero instrumentation is a FAIL.
+3. **Alerting:** failure modes on send/cron/webhook paths have an alerting story (your platform logs alarm, or an explicit ROADMAP row if deferred). Silent failure paths are a FAIL per PADU.
 4. **Rollback:** container-image redeploy suffices; DB migrations backward-compatible one release (expand→migrate→contract); feature disableable without data loss.
-5. **Idempotency:** cron sweeps and email sends respect `dedupe_key`; re-runs send nothing twice.
-6. **IaC:** infra changes are Terraform, not click-ops.
+5. **Idempotency:** cron sweeps and email sends respect an idempotency key; re-runs send nothing twice.
+6. **IaC:** infra changes are your IaC, not click-ops.
 7. **E2E spec order:** a new or renamed E2E spec file is checked against the fixture-mutation order (serial convention, pinned alphabetical — `workers: 1`, `fullyParallel: false`).
 
 ## Runtime perf budget (folded dimension — gate 8 owns; CORE one-line pointer)

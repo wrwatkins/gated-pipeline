@@ -20,16 +20,16 @@ Feature branch / diff
 
 Implement exactly the TDS — no scope creep. If the TDS is wrong or incomplete, FAIL back to tech-design's inbox with specifics rather than improvising.
 
-- Tests land with the code: unit (Vitest, colocated) for core logic; integration for API routes (S1+); extend E2E when a user flow changes.
-- `packages/core` stays pure (no I/O); UTC-midnight date math only.
+- Tests land with the code: unit (your unit runner, colocated) for core logic; integration for API routes (S1+); extend E2E when a user flow changes.
+- the core package stays pure (no I/O); the date-handling invariant your project sets (see STACK.md).
 - Match existing idioms; comments only for constraints the code can't express.
 - Conventional commits ending with `Co-Authored-By: {{AI_COAUTHOR}}`; feature branch, never main.
-- **Before exiting, run and record verbatim:** `pnpm lint && pnpm typecheck && pnpm test` (and `pnpm test:e2e` when flows changed).
+- **Before exiting, run and record verbatim:** your lint + typecheck + test commands (STACK.md) (and your e2e command when flows changed).
 - Update docs your change invalidates (DESIGN, ROADMAP, TASKS).
 
 Exit against the shared **Definition of Done** — [`.claude/rules/checklists/definition-of-done.md`](../checklists/definition-of-done.md): the pre-PR completion bar this gate produces and gate 9 audits.
 
-**Scans to keep green before PR** (CORE one-line pointer): Semgrep `p/default` + `p/typescript` + `p/owasp-top-ten`; ESLint (`next/core-web-vitals` + `next/typescript`) and `tsc --noEmit`; `pnpm audit --prod --audit-level high`. Detail in gate-7 card.
+**Scans to keep green before PR** (CORE one-line pointer): your SAST scan; ESLint (`next/core-web-vitals` + `next/typescript`) and `tsc --noEmit`; your dependency audit. Detail in gate-7 card.
 
 **Test tier detail** (CORE one-line pointer): in gate-3 card.
 

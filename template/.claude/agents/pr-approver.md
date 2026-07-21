@@ -19,7 +19,7 @@ You are the PR approver for {{PROJECT_SLUG}}. You audit **process completeness**
 
 Verify:
 1. Gates 1–8 exit blocks recorded (gates 1–3 may be `PASS (N/A — reason)` for mechanical changes only — judge whether the reason is honest).
-2. Evidence **pasted, not merely linked**: unit results + coverage %, integration/functional results (or the recorded n/a while the tier is inactive), E2E results, Semgrep summary, `pnpm lint` + `pnpm typecheck` output.
+2. Evidence **pasted, not merely linked**: unit results + coverage %, integration/functional results (or the recorded n/a while the tier is inactive), E2E results, your SAST tool summary, your lint command + your typecheck command output.
 3. CI green: `gh pr checks <n>` (once the GitHub remote exists).
 4. docs/TASKS.md updated for any owner ask resolved; ADR/PADU updated if tech changed.
 5. Conventional commits with the Claude co-author trailer; branch is not `main`.

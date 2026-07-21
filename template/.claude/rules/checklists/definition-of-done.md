@@ -4,11 +4,11 @@ Canonical home for the pre-PR completion bar. Referenced by the [gate-4 card](..
 
 A unit is done when all of the following hold (or carry a recorded, honest n/a):
 
-1. **Tests at the right tier** — new/changed logic covered: unit (Vitest, colocated) for pure logic; integration (Next route handlers + PGlite) for API routes; E2E (Playwright) for user flows. `packages/core` ≥90% lines.
-2. **Green locally, recorded verbatim** — `pnpm lint && pnpm typecheck && pnpm test` (and `pnpm test:e2e` when a flow changed). A flaky test is a FAIL, not a retry-until-green.
-3. **SAST clean** — Semgrep (`p/default` + `p/typescript` + `p/owasp-top-ten`) with no unresolved high/critical.
+1. **Tests at the right tier** — new/changed logic covered: unit (your unit runner, colocated) for pure logic; integration (your framework's route handlers + an in-memory test DB) for API routes; E2E (your e2e runner) for user flows. the core package ≥90% lines.
+2. **Green locally, recorded verbatim** — your lint + typecheck + test commands (STACK.md) (and your e2e command when a flow changed). A flaky test is a FAIL, not a retry-until-green.
+3. **SAST clean** — your SAST scan with no unresolved high/critical.
 3b. **Structural lint clean** — the architectural-boundary linter (per `STACK.md`) passes: no layer/purity/import violations, no new cycles (PROCESS §Structural lint).
-4. **Dependencies clean** — `pnpm audit --prod --audit-level high` clean (false positives triaged in the PR, not silenced).
+4. **Dependencies clean** — your dependency audit clean (false positives triaged in the PR, not silenced).
 5. **Docs updated** — anything the change invalidates (DESIGN / ROADMAP / TASKS / ADR / PADU / README).
-6. **Evidence pasted, not linked** — the PR body carries the actual output (unit tail + core coverage %, integration/E2E results or recorded n/a, Semgrep summary, lint + typecheck). Links expire; paste.
+6. **Evidence pasted, not linked** — the PR body carries the actual output (unit tail + core coverage %, integration/E2E results or recorded n/a, your SAST tool summary, lint + typecheck). Links expire; paste.
 7. **Hygiene** — conventional commits with the Claude co-author trailer; feature branch, never `main`; `README updated: yes|no — <justification>` line present.

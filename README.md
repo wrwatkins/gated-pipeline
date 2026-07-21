@@ -102,7 +102,7 @@ Skill libraries and plugins (BMAD, and the Claude Code skill ecosystems) optimiz
 
 ## Adapt it to your stack
 
-Everything project-specific lives in **[`STACK.md`](template/STACK.md)** — commands, test tiers, core invariants, guardrails, sensitive fields, governance, budgets. The gate cards ship as a worked example (TypeScript / Next.js / pnpm) you adapt there; [`GENERALIZATION-NOTES.md`](GENERALIZATION-NOTES.md) maps exactly what to change.
+Everything project-specific lives in **[`STACK.md`](template/STACK.md)** — commands, test tiers, core invariants, guardrails, sensitive fields, governance, budgets. The gate cards are **stack-agnostic**: they reference `STACK.md` rather than hard-coding a stack or domain. Fill it in once and the pipeline runs on any stack.
 
 ## License
 

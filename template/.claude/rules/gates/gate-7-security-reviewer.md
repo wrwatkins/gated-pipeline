@@ -4,7 +4,7 @@ Agent: `security-reviewer` · Model tier: **opus** (judgment gate; default; sonn
 
 ## Exit criterion
 
-Semgrep clean (no unresolved high/critical), `pnpm audit --prod` clean at high, checklist reviewed.
+your SAST tool clean (no unresolved high/critical), your dependency audit clean at high, checklist reviewed.
 
 ## Artifact
 
@@ -20,7 +20,7 @@ Under **chore**, gate 7 = **scans + diff-hygiene only**, UNLESS the diff touches
 
 Run and record (state which runner):
 - `uvx semgrep scan --config p/default --config p/typescript --config p/owasp-top-ten --error` — or the Docker container equivalent, or cite CI job if local unavailable.
-- `pnpm audit --prod --audit-level high`
+- your dependency audit
 
 **Review the diff against [`.claude/rules/checklists/security-review.md`](../checklists/security-review.md)** (canonical home — injection, authz, token hygiene, secrets, PII, redirect abuse, token-namespace). Fan-out dimension-checkers (SAST / supply-chain / authz-token / PII) read the same checklist.
 
@@ -28,15 +28,15 @@ Severity: CRITICAL/HIGH block; MEDIUM fix-or-justify in PR; LOW note. Suppressed
 
 ## Scans detail (CORE one-line pointer)
 
-- **SAST** — Semgrep rulesets `p/default`, `p/typescript`, `p/owasp-top-ten`; CI runs the `semgrep/semgrep` container.
+- **SAST** — your SAST scan; CI runs the your SAST runner.
 - **Code quality** — ESLint (`next/core-web-vitals` + `next/typescript`) and `tsc --noEmit` strict. Both blocking.
-- **Dependencies** — `pnpm audit --prod --audit-level high`, blocking. False positives triaged in PR with justification, not silenced.
+- **Dependencies** — your dependency audit, blocking. False positives triaged in PR with justification, not silenced.
 
 ## Cadence duties (CORE one-line pointer)
 
 At each cadence trip, gate 7:
-- **Pin-freshness sweep:** re-dereference CI action SHAs against live release tags; refresh CI image digests (mailpit / semgrep / postgres); run `pnpm outdated` on prod deps. Interim until Renovate.
-- **Release-age exemption runbook:** if `minimumReleaseAge` blocks an urgent security bump, or landing a threshold ratchet whose retro-validation rejects already-merged young entries, the exemption is `minimumReleaseAgeExclude: [<pkg>]` in `pnpm-workspace.yaml` + inline justification + TASKS row to remove it. Never lower the global threshold.
+- **Pin-freshness sweep:** re-dereference CI action SHAs against live release tags; refresh CI image digests (mailpit / semgrep / postgres); run your outdated-deps command on prod deps. Interim until Renovate.
+- **Release-age exemption runbook:** if `minimumReleaseAge` blocks an urgent security bump, or landing a threshold ratchet whose retro-validation rejects already-merged young entries, the exemption is `minimumReleaseAgeExclude: [<pkg>]` in `your workspace config` + inline justification + TASKS row to remove it. Never lower the global threshold.
 - **Shared-source security re-diff** (consequence; homes re-pointed by): re-diff any upstream shared-rules source (if the project syncs from one) against `.claude/rules/security-conduct.md` + `.claude/rules/security-deploy.md` — improvements ported consciously, never inherited.
 
 ## Prereqs

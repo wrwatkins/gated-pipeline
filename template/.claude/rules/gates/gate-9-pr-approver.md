@@ -22,7 +22,7 @@ Gate 9 runs unchanged under every profile. Additionally, gate 9:
 
 Verify:
 1. Gates 1–8 exit blocks recorded (gates 1–3 may be `PASS (N/A — reason)` for mechanical changes only — judge whether the reason is honest).
-2. Evidence **pasted, not merely linked:** unit results + coverage %, integration/functional results (or the recorded n/a), E2E results, Semgrep summary, `pnpm lint` + `pnpm typecheck` output.
+2. Evidence **pasted, not merely linked:** unit results + coverage %, integration/functional results (or the recorded n/a), E2E results, your SAST tool summary, your lint command + your typecheck command output.
 3. CI green: `gh pr checks <n>` (once the GitHub remote exists).
 4. docs/TASKS.md updated for any owner ask resolved; ADR/PADU updated if tech changed.
 5. Conventional commits with the Claude co-author trailer; branch is not `main`.
@@ -39,11 +39,11 @@ On PASS: with a remote, `gh pr review --approve` and squash-merge per convention
 ## PR evidence checklist (CORE one-line pointer)
 
 Audit the diff against the shared **Definition of Done** — [`.claude/rules/checklists/definition-of-done.md`](../checklists/definition-of-done.md) (gate 4 produces it). Paste into the PR template (links don't substitute — CI logs expire):
-1. Unit: `pnpm test` tail (counts) + coverage % for `packages/core`
+1. Unit: your test command tail (counts) + coverage % for the core package
 2. Integration/functional: results, or the recorded n/a while the tier is inactive
-3. E2E: `pnpm test:e2e` tail
-4. SAST: Semgrep summary (rulesets, findings, triage)
-5. Quality: `pnpm lint` + `pnpm typecheck` results
+3. E2E: your e2e command tail
+4. SAST: your SAST tool summary (rulesets, findings, triage)
+5. Quality: your lint command + your typecheck command results
 6. Gate 5, 7, 8 verdict blocks
 
 ## Cadence mechanics (CORE one-line pointer)

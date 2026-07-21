@@ -1,6 +1,6 @@
 # STACK.md — adapt the pipeline to your project (edit this first)
 
-The gate cards and rules ship as a **worked example** written for one stack (a TypeScript / Next.js / Drizzle / pnpm web app in a specific product domain). The *method* is stack-agnostic; the *examples* are not. This file is the single place to declare your project's specifics, and the place reviewers/agents look for them.
+The gate cards and rules are **stack-agnostic**: they say "your test command", "the core package", "your date-handling invariant" and defer the specifics to this file. **`STACK.md` is the single place to declare them** — the commands, tools, paths, invariants, guardrails, sensitive fields, and governance your project uses. Reviewers and gate agents read it. Fill it in once; the pipeline reads generically forever.
 
 Fill it in, then skim the gate cards (`.claude/rules/gates/*.md`) once and swap the example commands/paths for yours — most of it is find-and-replace.
 

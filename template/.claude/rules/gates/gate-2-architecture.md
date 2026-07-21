@@ -18,7 +18,7 @@ DESIGN.md deltas + ADRs, or "fits — constraints: …"
 
 ## Procedure
 
-1. **Fit:** does the feature fit the current architecture, or does it change package boundaries (`packages/core` purity is non-negotiable), the data model (DESIGN §5), integration points (§9), or hosting/infra (§4)?
+1. **Fit:** does the feature fit the current architecture, or does it change package boundaries (the core package purity is non-negotiable), the data model (DESIGN §5), integration points (§9), or hosting/infra (§4)?
 2. **Deltas:** update DESIGN.md sections that change and write an ADR for each notable decision. Data-model changes must be expand→migrate→contract compatible.
 3. **PADU:** classify any new technology; *Acceptable* needs justification, *Discouraged* needs an ADR, *Unacceptable* is a refusal.
 4. **Constraints out:** hand tech-design explicit constraints (placement, invariants, scale/cost bounds) rather than solutions.

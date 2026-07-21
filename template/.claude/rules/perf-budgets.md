@@ -1,6 +1,6 @@
 # Performance budgets
 
-Path-scoped rule file. Applies to `apps/web/**`. Single source of the perf budget numbers; gate-6 and gate-8 cards point here, never restate. DESIGN §10 also carries a pointer row.
+Path-scoped rule file. Applies to your app. Single source of the perf budget numbers; gate-6 and gate-8 cards point here, never restate. DESIGN §10 also carries a pointer row.
 
 ## Bundle size (client — gate 6 owns, blocking)
 
@@ -29,6 +29,6 @@ Blocking at gate 6 once the S6 Lighthouse wiring arms. Until then, gate 6 notes 
 
 - **No N+1 query patterns** on any request path.
 - **No unindexed hot-path query** (review query explain / schema indexes per DESIGN §5 for any new query touching a large table).
-- **Server-side response-time discipline** for the digest and sweep cron engines — new cron paths must include a timing annotation or PostHog duration event.
+- **Server-side response-time discipline** for the digest and sweep cron engines — new cron paths must include a timing annotation or your analytics duration event.
 
 A breach is a **blocking** finding at gate 8.
