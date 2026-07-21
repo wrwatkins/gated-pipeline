@@ -4,7 +4,7 @@ paths: ["apps/web/e2e/**", "**/playwright.config.*"]
 
 # Playwright / E2E rules
 
-Project rule file (ADR-014; formerly `docs/AI-INSTRUCTIONS.md` §Playwright rules + the §Testing console-watcher rule). Loads when E2E files are worked on.
+Project rule file (ADR-014; formerly `the project's earlier instructions file` §Playwright rules + the §Testing console-watcher rule). Loads when E2E files are worked on.
 
 - `getByRole()` / `getByLabel()` over CSS/XPath selectors.
 - Never `page.waitForTimeout()` — use web-first assertions.

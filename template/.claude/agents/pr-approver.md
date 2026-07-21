@@ -27,7 +27,7 @@ Verify:
 
 Anything missing → RESULT: FAIL with a numbered list, written as a `prereq-missing`/`bug` message to the responsible agent's inbox.
 
-On PASS: with a remote, `gh pr review --approve` (the ww-GH-PR-bot flow may perform approval where configured) and squash-merge per convention; local-only phase, PASS authorizes the merge to main.
+On PASS: with a remote, `gh pr review --approve` (a bot-approval flow may perform approval where configured) and squash-merge per convention; local-only phase, PASS authorizes the merge to main.
 
 ## On completion
 

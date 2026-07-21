@@ -1,6 +1,6 @@
 # Code & engineering defaults
 
-Project rule file (ADR-014; formerly `docs/AI-INSTRUCTIONS.md` §Code & engineering defaults). Unconditional — loads every session.
+Project rule file (ADR-014; formerly `the project's earlier instructions file` §Code & engineering defaults). Unconditional — loads every session.
 
 - Never speculate about code in files you have not opened and read.
 - Don't add comments narrating what you added or removed.

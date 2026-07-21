@@ -4,7 +4,7 @@ paths: ["apps/web/app/api/**", "apps/web/app/go/**", "apps/web/app/a/**", "apps/
 
 # API routes, dates & integration tests (Next.js/Drizzle — not Django)
 
-Project rule file (ADR-014 §4; the one normative home of the former CLAUDE.md §PR-review stack overrides, plus the API-adjacent rules from former `docs/AI-INSTRUCTIONS.md` §Testing/§Security & deploy). Binds authoring (gate 4) and review (gate 5); `.claude/skills/pr-review/SKILL.md` restates the checklist by pointer — if the two diverge, this file wins and the skill gets fixed.
+Project rule file (ADR-014 §4; the one normative home of the former CLAUDE.md §PR-review stack overrides, plus the API-adjacent rules from former `the project's earlier instructions file` §Testing/§Security & deploy). Binds authoring (gate 4) and review (gate 5); `.claude/skills/pr-review/SKILL.md` restates the checklist by pointer — if the two diverge, this file wins and the skill gets fixed.
 
 ## `/api/v1` mutation skeleton
 

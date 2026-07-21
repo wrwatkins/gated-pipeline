@@ -1,6 +1,6 @@
 # Working discipline
 
-Project rule file (ADR-014; formerly `docs/AI-INSTRUCTIONS.md` §Working discipline). Unconditional — loads every session.
+Project rule file (ADR-014; formerly `the project's earlier instructions file` §Working discipline). Unconditional — loads every session.
 
 - **One rule, one home:** where a rule is already normative elsewhere (CLAUDE.md, PROCESS.md, DESIGN.md), rule files point there instead of duplicating it; any restatement carries an explicit pointer + precedence line (ADR-007).
 - Maintain a visible todo list once more than 2–3 asks pile up; mark items in-progress/completed as you go, never batch.
