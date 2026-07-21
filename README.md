@@ -54,6 +54,11 @@ Each gate is a persona (`.claude/agents/`) driven by a **gate card** (`.claude/r
 - **Deterministic rule loading** — unconditional rules load every session; path-scoped rules load when matching files are worked; gate cards load by manifest. The harness loads them, not an obedience ritual.
 - **A verification-fan-out Workflow** (`.claude/workflows/`) — optional, opt-in parallel review of the mechanical gates.
 - **A `block-push-to-main` hook** — enforces the PR-only workflow.
+- **Structural lint** — an architectural-boundary dimension (distinct from style/types) enforcing your layer/purity/import rules, configured in `STACK.md`; a boundary violation is blocking.
+- **Two self-improvement loops** so the pipeline gets *smarter*, not just runs:
+  - **Knowledge compounding** (forward) — each unit distills its reusable lesson into `docs/solutions/` (the `compound` skill, at merge) which planning reads back (the `recall-solutions` skill). Each unit makes the next easier.
+  - **Tracing + process-trace review** (backward) — every merge appends a structured line to `docs/traces/pipeline-log.jsonl`; a cadence agent computes catch/rework/**escape**/calibration metrics and recommends evidence-based pipeline changes.
+- **Auto-triggering skills** (`.claude/skills/`) — context-fired helpers (`compound`, `recall-solutions`) alongside the gates.
 
 ## Concepts, in one place
 

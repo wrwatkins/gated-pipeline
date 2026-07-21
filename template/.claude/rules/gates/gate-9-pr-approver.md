@@ -32,6 +32,10 @@ Anything missing → RESULT: FAIL with a numbered list, written as a `prereq-mis
 
 On PASS: with a remote, `gh pr review --approve` (the ww-GH-PR-bot flow may perform approval where configured) and squash-merge per convention; local-only phase, PASS authorizes the merge to main.
 
+**On merge — close the self-improvement loops (PROCESS §Knowledge compounding + §Tracing):**
+- **Trace:** append one structured line to `docs/traces/pipeline-log.jsonl` for this unit — distilled from the gate typed-mirrors (per-gate result/tier/findings/rework, the profile, total rework rounds, empty `escapes`). Machine-aggregatable; the `process-trace-reviewer` reads it.
+- **Compound:** run the `compound` skill — distill the unit's reusable lesson into `docs/solutions/` (only on a genuine lesson: a FAIL round, a surprising finding, a reusable pattern; skip honestly if none).
+
 ## PR evidence checklist (CORE one-line pointer; R35)
 
 Audit the diff against the shared **Definition of Done** — [`.claude/rules/checklists/definition-of-done.md`](../checklists/definition-of-done.md) (ADR-024; gate 4 produces it). Paste into the PR template (links don't substitute — CI logs expire):

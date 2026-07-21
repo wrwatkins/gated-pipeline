@@ -21,6 +21,7 @@ A discovery brief that reframes the problem, lays out ≥3 distinct approaches, 
 
 ## Procedure
 
+0. **Recall** — run the `recall-solutions` skill first: surface prior `docs/solutions/` lessons that apply, so discovery reuses what was learned (PROCESS §Knowledge compounding).
 1. **Reframe** the underlying problem in one paragraph — the problem, not the owner's proposed solution. Postures + KPI/stream in play.
 2. **Diverge:** ≥3 distinct approaches (not variations of one) — each with who it serves, rough effort, key risk. Breadth first; no premature pruning.
 3. **Field scan:** proportionate competitor/market check (WebSearch/WebFetch, cite sources) — table-stakes vs differentiator vs anti-pattern.

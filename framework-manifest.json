@@ -11,7 +11,11 @@
     ".claude/rules/security-conduct.md",
     ".claude/hooks/",
     ".claude/workflows/",
-    "docs/PROCESS.md"
+    ".claude/skills/",
+    "docs/PROCESS.md",
+    "docs/solutions/README.md",
+    "docs/solutions/SOLUTION-000-template.md",
+    "docs/traces/README.md"
   ],
   "projectOnce": [
     "STACK.md",

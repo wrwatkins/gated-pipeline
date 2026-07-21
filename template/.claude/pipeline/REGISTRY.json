@@ -30,6 +30,7 @@
     { "agent": "tech-debt-reviewer (global agent/skill)", "trigger": "every 10 merged PRs" },
     { "agent": "performance-reviewer", "trigger": "every 10 merged PRs", "br": "BR-018", "note": "trend deep-dive; does not duplicate the per-PR folded budgets (gate 6/8)" },
     { "agent": "dependency-currency-reviewer", "trigger": "every 10 merged PRs", "br": "BR-019", "note": "dependabot-backlog + CVE triage; does not duplicate dependabot or gate-7 audit" },
-    { "agent": "accessibility-reviewer", "trigger": "every 5 merged PRs", "br": "BR-016", "note": "runs alone at 5-only trips; joins the others at multiples of 10 (ADR-027)" }
+    { "agent": "accessibility-reviewer", "trigger": "every 5 merged PRs", "br": "BR-016", "note": "runs alone at 5-only trips; joins the others at multiples of 10 (ADR-027)" },
+    { "agent": "process-trace-reviewer", "trigger": "every 10 merged PRs", "note": "reads docs/traces/pipeline-log.jsonl; computes catch/rework/escape/calibration metrics; recommends pipeline improvements (self-improvement loop)" }
   ]
 }

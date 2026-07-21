@@ -149,13 +149,25 @@ Detail in [gate-3 card](../.claude/rules/gates/gate-3-tech-design.md) (which the
 
 ## Scans (all required, blocking) — one-line pointer
 
-Detail in [gate-7 card](../.claude/rules/gates/gate-7-security-reviewer.md). Summary: **SAST** Semgrep `p/default`+`p/typescript`+`p/owasp-top-ten` · **Code quality** ESLint+tsc · **Dependencies** `pnpm audit --prod --audit-level high`.
+Detail in [gate-7 card](../.claude/rules/gates/gate-7-security-reviewer.md). Summary: **SAST** Semgrep `p/default`+`p/typescript`+`p/owasp-top-ten` · **Code quality** ESLint+tsc · **Structural** architectural-boundary lint (§Structural lint) · **Dependencies** `pnpm audit --prod --audit-level high`.
+
+## Structural lint (blocking) — one-line pointer
+
+A distinct dimension from style (ESLint) and types (tsc): **architectural boundaries** — a project's layer/purity/import invariants enforced by a structural linter (e.g. dependency-cruiser, eslint-plugin-boundaries, Nx boundaries). Declare the rules + tool + command in `STACK.md` (e.g. "the pure-core package must not import I/O; no cross-layer imports; no cycles"). Green before any PR; a boundary violation is **blocking** (gate 4 keeps it green, gate 5 reviews structure, DoD lists it). This automates the architectural invariants that gate 5 otherwise only human-reviews.
+
+## Knowledge compounding — one-line pointer
+
+The forward self-improvement loop: each unit distills its **reusable lesson** into `docs/solutions/` so the next unit is easier. **Written** at merge by the `compound` skill (gate 9 invokes it — only on a genuine lesson, never filler); **read** at planning by the `recall-solutions` skill (Phase 0 / gate 1). Distinct from ADRs (decisions), memory (agent state), and reviews (periodic). Index: `docs/solutions/README.md`.
+
+## Tracing & process-trace review — one-line pointer
+
+The backward self-improvement loop. Gate 9 appends one structured line per merged unit to **`docs/traces/pipeline-log.jsonl`** (distilled from the typed gate mirrors: result/tier/findings/rework per gate + escapes). The `process-trace-reviewer` cadence agent (every 10 PRs) computes metrics — catch distribution, rework rate, **escape rate**, profile/tier calibration, cost — and recommends evidence-based pipeline changes (graduated as ADRs). Spec + metric definitions: `docs/traces/README.md`. This is the pipeline improving itself with data, and the standing form of the profile/tier trial.
 
 ## Cadence reviews — one-line pointer
 
 Detail in [gate-9 card](../.claude/rules/gates/gate-9-pr-approver.md) (enforces trigger) and [gate-7 card](../.claude/rules/gates/gate-7-security-reviewer.md) (owns security re-diff + pin-freshness). Count derived at gate 9 from `gh pr list --state merged`. All report-only — findings graduate into BRs through gate 1; reviews identify and prioritize, they don't auto-fix. Interval scheme + precedence: [ADR-027](decisions/ADR-027-cadence-review-suite-expansion.md).
 
-- **Every 10 merged PRs** (combined obligation): **tech-debt** (three pillars → `docs/reviews/DEBT-<date>.md`) · **SEO** (`SEO-<date>.md`) · **performance** ([BR-018](requirements/BR-018-performance-cadence-review.md); trend deep-dive, not a per-PR budget re-run → `PERF-<date>.md`) · **dependency-currency/CVE** ([BR-019](requirements/BR-019-dependency-currency-cadence-review.md); dependabot backlog + advisory triage → `DEPS-<date>.md`).
+- **Every 10 merged PRs** (combined obligation): **tech-debt** (three pillars → `docs/reviews/DEBT-<date>.md`) · **SEO** (`SEO-<date>.md`) · **performance** ([BR-018](requirements/BR-018-performance-cadence-review.md); trend deep-dive, not a per-PR budget re-run → `PERF-<date>.md`) · **dependency-currency/CVE** ([BR-019](requirements/BR-019-dependency-currency-cadence-review.md); dependabot backlog + advisory triage → `DEPS-<date>.md`) · **process-trace** (`process-trace-reviewer`; pipeline metrics from `docs/traces/` → `TRACE-<date>.md`; §Tracing).
 - **Every 5 merged PRs**: **accessibility** ([BR-016](requirements/BR-016-accessibility-cadence-review.md); WCAG-2.2-AA classes the per-PR axe misses → `A11Y-<date>.md`). Runs **alone** at a multiple-of-5-not-10 trip; **joins** the 10-PR set at multiples of 10 (one combined obligation, no double-count — ADR-027). Lean at 5-only trips (axe-with-excluded-regions + changed-surface manual audit), full-surface sweep at the 10-coincidence or first round.
 
 **Rationalization / arch-decisions review** (detail in [gate-2 card](../.claude/rules/gates/gate-2-architecture.md)) — a third review type, owner-triggered, owned by @architect.

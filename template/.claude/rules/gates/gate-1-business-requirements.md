@@ -29,3 +29,5 @@ Owner ask (verbatim or from TASKS.md). If too ambiguous to write testable ACs, e
 ## Handoff
 
 Append a `handoff` message with the gate exit block to `.claude/pipeline/agents/architect/inbox.md`.
+
+**Before scoping:** run the `recall-solutions` skill — check `docs/solutions/` for prior lessons that apply to this work and fold them into the BR (PROCESS §Knowledge compounding).
