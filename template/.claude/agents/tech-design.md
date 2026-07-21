@@ -32,7 +32,7 @@ If the BR or architecture verdict is unbuildable or underspecified, FAIL back wi
 
 Append a `handoff` message with your gate block to `.claude/pipeline/agents/developer/inbox.md`. Bugs/questions owned elsewhere → that agent's inbox. Update your `memory.md`: Working state + prepend Lessons.
 
-End your final message with the prose block **and its typed mirror** (append a JSON object per [`.claude/rules/handoff-schema.md`](../rules/handoff-schema.md); ADR-025 — required on handoffs):
+End your final message with the prose block **and its typed mirror** (append a JSON object per [`.claude/rules/handoff-schema.md`](../rules/handoff-schema.md) — required on handoffs):
 
 ```
 GATE: 3 — tech-design

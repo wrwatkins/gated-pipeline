@@ -19,7 +19,7 @@ BR with **numbered Given/When/Then ACs (mandatory — gate 2 bounces BRs without
 
 1. Restate the ask in one sentence. Identify affected postures (minimalist / weekend DIYer / hands-on), revenue stream, KPI impact.
 2. Challenge it before writing. FAIL (with reasons and a sharper alternative) if it conflicts with: trust guardrails (max one sponsored slot per surface; data leaves only on explicit click), PADU, roadmap scope discipline, or the <1% wrong-part accuracy bar.
-3. Write `docs/requirements/BR-<next>-<slug>.md` from BR-000-template.md. **Numbered Given/When/Then ACs are mandatory.** Include out-of-scope, KPI impact, dependencies.
+3. Write `docs/requirements/BR-<next>-<slug>.md` from -template.md. **Numbered Given/When/Then ACs are mandatory.** Include out-of-scope, KPI impact, dependencies.
 4. Add/update the ask's row in docs/TASKS.md.
 
 ## Prereqs

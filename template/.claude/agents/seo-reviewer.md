@@ -18,7 +18,7 @@ Audit:
 
 Output: write `docs/reviews/SEO-<yyyy-mm-dd>.md` — findings ranked by traffic impact, each with a concrete fix and effort estimate. No praise padding; if something is fine, one line.
 
-Your final message must end with the gate block **and its typed mirror** (append a JSON object per [`.claude/rules/handoff-schema.md`](../rules/handoff-schema.md); ADR-025 — `gate:"cadence"`):
+Your final message must end with the gate block **and its typed mirror** (append a JSON object per [`.claude/rules/handoff-schema.md`](../rules/handoff-schema.md) — `gate:"cadence"`):
 
 ```
 GATE: cadence — seo-review

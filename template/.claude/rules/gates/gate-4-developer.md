@@ -27,11 +27,11 @@ Implement exactly the TDS — no scope creep. If the TDS is wrong or incomplete,
 - **Before exiting, run and record verbatim:** `pnpm lint && pnpm typecheck && pnpm test` (and `pnpm test:e2e` when flows changed).
 - Update docs your change invalidates (DESIGN, ROADMAP, TASKS).
 
-Exit against the shared **Definition of Done** — [`.claude/rules/checklists/definition-of-done.md`](../checklists/definition-of-done.md) (ADR-024): the pre-PR completion bar this gate produces and gate 9 audits.
+Exit against the shared **Definition of Done** — [`.claude/rules/checklists/definition-of-done.md`](../checklists/definition-of-done.md): the pre-PR completion bar this gate produces and gate 9 audits.
 
-**Scans to keep green before PR** (CORE one-line pointer; R30): Semgrep `p/default` + `p/typescript` + `p/owasp-top-ten`; ESLint (`next/core-web-vitals` + `next/typescript`) and `tsc --noEmit`; `pnpm audit --prod --audit-level high`. Detail in gate-7 card.
+**Scans to keep green before PR** (CORE one-line pointer): Semgrep `p/default` + `p/typescript` + `p/owasp-top-ten`; ESLint (`next/core-web-vitals` + `next/typescript`) and `tsc --noEmit`; `pnpm audit --prod --audit-level high`. Detail in gate-7 card.
 
-**Test tier detail** (CORE one-line pointer; R29): in gate-3 card.
+**Test tier detail** (CORE one-line pointer): in gate-3 card.
 
 ## Prereqs
 

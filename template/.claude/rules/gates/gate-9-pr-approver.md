@@ -26,7 +26,7 @@ Verify:
 3. CI green: `gh pr checks <n>` (once the GitHub remote exists).
 4. docs/TASKS.md updated for any owner ask resolved; ADR/PADU updated if tech changed.
 5. Conventional commits with the Claude co-author trailer; branch is not `main`.
-6. Cadence reviews per the interval scheme (§Cadence mechanics / ADR-027): every 10th merged PR → tech-debt + SEO + performance + dependency-currency + accessibility; every 5th (not 10th) → accessibility alone. Scheduled or done; block further feature work if overdue.
+6. Cadence reviews per the interval scheme (§Cadence mechanics): every 10th merged PR → tech-debt + SEO + performance + dependency-currency + accessibility; every 5th (not 10th) → accessibility alone. Scheduled or done; block further feature work if overdue.
 
 Anything missing → RESULT: FAIL with a numbered list, written as a `prereq-missing`/`bug` message to the responsible agent's inbox.
 
@@ -36,9 +36,9 @@ On PASS: with a remote, `gh pr review --approve` and squash-merge per convention
 - **Trace:** append one structured line to `docs/traces/pipeline-log.jsonl` for this unit — distilled from the gate typed-mirrors (per-gate result/tier/findings/rework, the profile, total rework rounds, empty `escapes`). Machine-aggregatable; the `process-trace-reviewer` reads it.
 - **Compound:** run the `compound` skill — distill the unit's reusable lesson into `docs/solutions/` (only on a genuine lesson: a FAIL round, a surprising finding, a reusable pattern; skip honestly if none).
 
-## PR evidence checklist (CORE one-line pointer; R35)
+## PR evidence checklist (CORE one-line pointer)
 
-Audit the diff against the shared **Definition of Done** — [`.claude/rules/checklists/definition-of-done.md`](../checklists/definition-of-done.md) (ADR-024; gate 4 produces it). Paste into the PR template (links don't substitute — CI logs expire):
+Audit the diff against the shared **Definition of Done** — [`.claude/rules/checklists/definition-of-done.md`](../checklists/definition-of-done.md) (gate 4 produces it). Paste into the PR template (links don't substitute — CI logs expire):
 1. Unit: `pnpm test` tail (counts) + coverage % for `packages/core`
 2. Integration/functional: results, or the recorded n/a while the tier is inactive
 3. E2E: `pnpm test:e2e` tail
@@ -46,10 +46,10 @@ Audit the diff against the shared **Definition of Done** — [`.claude/rules/che
 5. Quality: `pnpm lint` + `pnpm typecheck` results
 6. Gate 5, 7, 8 verdict blocks
 
-## Cadence mechanics (CORE one-line pointer; R31)
+## Cadence mechanics (CORE one-line pointer)
 
 - Merged-PR count derived at gate 9 from `gh pr list --state merged` (never hand-carried in memory).
-- **Interval scheme (ADR-027):** at a **multiple of 10** → the combined obligation (tech-debt + SEO + performance + dependency-currency + accessibility) is required before further feature work. At a **multiple of 5 that is not a multiple of 10** → **accessibility alone** is required. Each round is keyed to its own interval; the 10-trip is the union of the due rounds, not a re-trigger of the 5-trip (no double-count).
+- **Interval scheme:** at a **multiple of 10** → the combined obligation (tech-debt + SEO + performance + dependency-currency + accessibility) is required before further feature work. At a **multiple of 5 that is not a multiple of 10** → **accessibility alone** is required. Each round is keyed to its own interval; the 10-trip is the union of the due rounds, not a re-trigger of the 5-trip (no double-count).
 - The cadence-triggering merge may itself carry the review artifacts — obligation satisfied at trigger; gate 9 records which rounds ran explicitly.
 - Owner-directed ad-hoc review rounds do not shift any schedule (5-PR or 10-PR).
 

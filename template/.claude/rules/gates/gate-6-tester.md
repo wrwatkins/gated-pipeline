@@ -29,13 +29,13 @@ Under **chore**, gate 6 merges into the combined 5–6 review-and-verify run (on
 
 A flaky test is a FAIL, not a retry-until-green.
 
-## Test tiers detail (CORE one-line pointer; R29)
+## Test tiers detail (CORE one-line pointer)
 
 - **Unit** — Vitest, colocated `*.test.ts`, across all packages. `packages/core` ≥90%-lines coverage gate.
 - **Integration / functional** — Vitest invoking actual Next route handlers against PGlite with committed migrations (`@{{PROJECT_SLUG}}/db/test-helpers`). Active since S1 — no handler mocks, no fake suites; PGlite fidelity limits recorded per PR.
 - **E2E** — Playwright in `apps/web/e2e/`, serial (`workers: 1`, `fullyParallel: false`, `retries: 0`), pinned alphabetical spec order load-bearing (specs share fixture state). A new or renamed spec file is checked against the fixture-mutation order at gate 8. Growth path (per-spec fixture isolation) decided before ~40 tests.
 
-## Client perf budget (folded dimension — gate 6 owns; CORE one-line pointer; R35)
+## Client perf budget (folded dimension — gate 6 owns; CORE one-line pointer)
 
 Reference **[`.claude/rules/perf-budgets.md`](../perf-budgets.md)** for the single source of the numbers. The budgets this gate enforces:
 - **Bundle size:** public route first-load JS ≤ 130 KB (gz); app-shell (`/a`, `/u`) first-load JS ≤ 180 KB (gz).

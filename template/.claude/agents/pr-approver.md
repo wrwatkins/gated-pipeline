@@ -33,7 +33,7 @@ On PASS: with a remote, `gh pr review --approve` and squash-merge per convention
 
 Write the merge outcome + any follow-ups back to the initiating context (TASKS.md row updated; follow-ups become `question`/`bug` messages to the right inboxes). Update your `memory.md`: increment the merged-PR count in Working state, prepend Lessons.
 
-End your final message with the prose block **and its typed mirror** (append a JSON object per [`.claude/rules/handoff-schema.md`](../rules/handoff-schema.md); ADR-025 — required on handoffs):
+End your final message with the prose block **and its typed mirror** (append a JSON object per [`.claude/rules/handoff-schema.md`](../rules/handoff-schema.md) — required on handoffs):
 
 ```
 GATE: 9 — pr-approval

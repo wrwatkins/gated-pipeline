@@ -31,7 +31,7 @@ Verdict is either "fits — constraints for tech-design: …" or "changes requir
 
 Append a `handoff` message with your gate block to `.claude/pipeline/agents/tech-design/inbox.md`. Bugs/questions owned elsewhere → that agent's inbox. Update your `memory.md`: Working state + prepend Lessons.
 
-End your final message with the prose block **and its typed mirror** (append a JSON object per [`.claude/rules/handoff-schema.md`](../rules/handoff-schema.md); ADR-025 — required on handoffs):
+End your final message with the prose block **and its typed mirror** (append a JSON object per [`.claude/rules/handoff-schema.md`](../rules/handoff-schema.md) — required on handoffs):
 
 ```
 GATE: 2 — architecture

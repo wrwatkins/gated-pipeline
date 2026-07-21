@@ -4,15 +4,15 @@ paths: ["apps/web/app/api/**", "apps/web/app/go/**", "apps/web/app/a/**", "apps/
 
 # API routes, dates & integration tests (Next.js/Drizzle — not Django)
 
-Project rule file (ADR-014 §4; the one normative home of the former CLAUDE.md §PR-review stack overrides, plus the API-adjacent rules from former `the project's earlier instructions file` §Testing/§Security & deploy). Binds authoring (gate 4) and review (gate 5); `.claude/skills/pr-review/SKILL.md` restates the checklist by pointer — if the two diverge, this file wins and the skill gets fixed.
+Project rule file (the one normative home of the former CLAUDE.md §PR-review stack overrides, plus the API-adjacent rules from former `the project's earlier instructions file` §Testing/§Security & deploy). Binds authoring (gate 4) and review (gate 5); `.claude/skills/pr-review/SKILL.md` restates the checklist by pointer — if the two diverge, this file wins and the skill gets fixed.
 
 ## `/api/v1` mutation skeleton
 
-Every `/api/v1` mutation must (1) check session → 401, (2) consume a `rateLimit` bucket, (3) resolve ownership via `getOwnedVehicle`/`getOwnedTask` → 404 (never 403 — no existence leak), (4) zod-parse the body (`z.iso.date()` for day strings, never bare regex; zod 4 canonical forms).
+Every `/api/v1` mutation must (1) check session → 401, (2) consume a `rateLimit` bucket, (3) resolve ownership via `getOwnedVehicle`/`getOwnedTask` → 404 (never 403 — no existence leak), (4) zod-parse the body (`z.iso.date` for day strings, never bare regex; zod 4 canonical forms).
 
 ## Dates
 
-Day values are `YYYY-MM-DD` strings parsed/serialized **only** through UTC (``new Date(`${s}T00:00:00Z`)`` in, `toISOString().slice(0,10)` out). `packages/core` stays pure — no I/O, UTC-midnight date math only (CLAUDE.md §Architecture is the home of the purity rule).
+Day values are `YYYY-MM-DD` strings parsed/serialized **only** through UTC (``new Date(`${s}T00:00:00Z`)`` in, `toISOString.slice(0,10)` out). `packages/core` stays pure — no I/O, UTC-midnight date math only (CLAUDE.md §Architecture is the home of the purity rule).
 
 ## Integration tests
 

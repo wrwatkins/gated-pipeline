@@ -27,7 +27,7 @@ Check, with evidence:
 6. **IaC:** infra changes are Terraform, not click-ops.
 7. **E2E spec order:** a new or renamed E2E spec file is checked against the fixture-mutation order (serial convention, pinned alphabetical — `workers: 1`, `fullyParallel: false`).
 
-## Runtime perf budget (folded dimension — gate 8 owns; CORE one-line pointer; R35)
+## Runtime perf budget (folded dimension — gate 8 owns; CORE one-line pointer)
 
 Reference **[`.claude/rules/perf-budgets.md`](../perf-budgets.md)** for the single source of the numbers. The budgets this gate enforces:
 - **No N+1 query patterns** on request paths.
@@ -36,7 +36,7 @@ Reference **[`.claude/rules/perf-budgets.md`](../perf-budgets.md)** for the sing
 
 A breach is a **blocking** finding at this gate.
 
-## Merge procedure (CORE rule; R38)
+## Merge procedure (CORE rule)
 
 Never merge until: (1) `gh api repos/{owner}/{repo}/commits/<head-sha>/check-runs` polls up to the full expected check count (registration race: `gh pr checks --watch` exits 0 on "no checks reported"); (2) `gh pr checks <n> --watch` completes; (3) explicit pass-count check (`grep -c pass || true`). If head moves after gate 8, re-verify CI on the new SHA before merging.
 

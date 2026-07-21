@@ -12,25 +12,83 @@
     "agent": "analyst",
     "optional": true,
     "next": "business-requirements",
-    "note": "OPTIONAL Phase 0 — not a gate. Runs only for genuinely new/ambiguous product features; feeds gate 1 (ADR-023). Most units skip it."
+    "note": "OPTIONAL Phase 0 — not a gate. Runs only for genuinely new/ambiguous product features; feeds gate 1. Most units skip it."
   },
   "pipeline": [
-    { "gate": 1, "agent": "business-requirements", "next": "architect" },
-    { "gate": 2, "agent": "architect", "next": "tech-design" },
-    { "gate": 3, "agent": "tech-design", "next": "developer" },
-    { "gate": 4, "agent": "developer", "next": "code-reviewer" },
-    { "gate": 5, "agent": "code-reviewer", "next": "tester" },
-    { "gate": 6, "agent": "tester", "next": "security-reviewer" },
-    { "gate": 7, "agent": "security-reviewer", "next": "ops-reviewer" },
-    { "gate": 8, "agent": "ops-reviewer", "next": "pr-approver" },
-    { "gate": 9, "agent": "pr-approver", "next": null }
+    {
+      "gate": 1,
+      "agent": "business-requirements",
+      "next": "architect"
+    },
+    {
+      "gate": 2,
+      "agent": "architect",
+      "next": "tech-design"
+    },
+    {
+      "gate": 3,
+      "agent": "tech-design",
+      "next": "developer"
+    },
+    {
+      "gate": 4,
+      "agent": "developer",
+      "next": "code-reviewer"
+    },
+    {
+      "gate": 5,
+      "agent": "code-reviewer",
+      "next": "tester"
+    },
+    {
+      "gate": 6,
+      "agent": "tester",
+      "next": "security-reviewer"
+    },
+    {
+      "gate": 7,
+      "agent": "security-reviewer",
+      "next": "ops-reviewer"
+    },
+    {
+      "gate": 8,
+      "agent": "ops-reviewer",
+      "next": "pr-approver"
+    },
+    {
+      "gate": 9,
+      "agent": "pr-approver",
+      "next": null
+    }
   ],
   "cadence": [
-    { "agent": "seo-reviewer", "trigger": "every 10 merged PRs" },
-    { "agent": "tech-debt-reviewer (global agent/skill)", "trigger": "every 10 merged PRs" },
-    { "agent": "performance-reviewer", "trigger": "every 10 merged PRs", "br": "BR-018", "note": "trend deep-dive; does not duplicate the per-PR folded budgets (gate 6/8)" },
-    { "agent": "dependency-currency-reviewer", "trigger": "every 10 merged PRs", "br": "BR-019", "note": "dependabot-backlog + CVE triage; does not duplicate dependabot or gate-7 audit" },
-    { "agent": "accessibility-reviewer", "trigger": "every 5 merged PRs", "br": "BR-016", "note": "runs alone at 5-only trips; joins the others at multiples of 10 (ADR-027)" },
-    { "agent": "process-trace-reviewer", "trigger": "every 10 merged PRs", "note": "reads docs/traces/pipeline-log.jsonl; computes catch/rework/escape/calibration metrics; recommends pipeline improvements (self-improvement loop)" }
+    {
+      "agent": "seo-reviewer",
+      "trigger": "every 10 merged PRs"
+    },
+    {
+      "agent": "tech-debt-reviewer (global agent/skill)",
+      "trigger": "every 10 merged PRs"
+    },
+    {
+      "agent": "performance-reviewer",
+      "trigger": "every 10 merged PRs",
+      "note": "trend deep-dive; does not duplicate the per-PR folded budgets (gate 6/8)"
+    },
+    {
+      "agent": "dependency-currency-reviewer",
+      "trigger": "every 10 merged PRs",
+      "note": "dependabot-backlog + CVE triage; does not duplicate dependabot or gate-7 audit"
+    },
+    {
+      "agent": "accessibility-reviewer",
+      "trigger": "every 5 merged PRs",
+      "note": "runs alone at 5-only trips; joins the others at multiples of 10"
+    },
+    {
+      "agent": "process-trace-reviewer",
+      "trigger": "every 10 merged PRs",
+      "note": "reads docs/traces/pipeline-log.jsonl; computes catch/rework/escape/calibration metrics; recommends pipeline improvements (self-improvement loop)"
+    }
   ]
 }

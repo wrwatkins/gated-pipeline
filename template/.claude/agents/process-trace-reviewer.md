@@ -20,14 +20,14 @@ From the log lines:
 2. **Rework rate** — mean `rework_rounds`/unit + trend. A gate that FAILs a lot signals an upstream quality gap — name it.
 3. **Escape rate** — `escapes` ÷ units, and the `should_have_caught` histogram. **Backfill escapes** first: scan bug-fix units since the last review and attribute each to the gate that should have caught it (write it back into that unit's log line). This is the review's most important act.
 4. **Profile calibration** — escape rate by `profile`. If `docs`/`chore` units escape defects, recommend tightening the profile-assignment rule or forcing a surface to `full`.
-5. **Tier calibration** — escapes on sonnet-tier gates an opus tier might have caught → recommend an ADR-015 tier change.
+5. **Tier calibration** — escapes on sonnet-tier gates an opus tier might have caught → recommend an tier change.
 6. **Cost** — tokens/duration by profile where available; weigh ceremony vs payoff.
 
 ## Output
 
 Write `docs/reviews/TRACE-<yyyy-mm-dd>.md`: the metrics (tables + the escape histogram), the trend vs the last report, **prioritized process recommendations** (each with the metric that motivates it and the concrete card/ADR edit it implies), and a **carry-forward** of prior recommendations (adopted / rejected-with-reason / still-open). Report-only — every change graduates as an ADR + card edit through gates 1→9. No praise padding; if the pipeline is well-calibrated this round, say so with the numbers.
 
-End your final message with the gate block **and its typed mirror** (append a JSON object per [`.claude/rules/handoff-schema.md`](../rules/handoff-schema.md); ADR-025 — `gate:"cadence"`):
+End your final message with the gate block **and its typed mirror** (append a JSON object per [`.claude/rules/handoff-schema.md`](../rules/handoff-schema.md) — `gate:"cadence"`):
 
 ```
 GATE: cadence — trace-review

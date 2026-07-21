@@ -1,6 +1,6 @@
 # Handoff schema — typed mirror for gate exit blocks & inbox messages
 
-Canonical home ([ADR-025](../../docs/decisions/ADR-025-typed-gate-handoff-envelope.md)). The prose `GATE/RESULT/ARTIFACT/SUMMARY/HANDOFF` block and the `## MSG` envelope (PROCESS CORE §Gate exit block, §Messaging) stay human-canonical; this defines the **machine-readable mirror** appended to them. On any divergence, the prose wins and the mirror is the bug.
+Canonical home. The prose `GATE/RESULT/ARTIFACT/SUMMARY/HANDOFF` block and the `## MSG` envelope (PROCESS CORE §Gate exit block, §Messaging) stay human-canonical; this defines the **machine-readable mirror** appended to them. On any divergence, the prose wins and the mirror is the bug.
 
 ## When required
 
@@ -31,7 +31,7 @@ Canonical home ([ADR-025](../../docs/decisions/ADR-025-typed-gate-handoff-envelo
   "result": "PASS",
   "profile": "docs",
   "head_sha": "1c1f581",
-  "artifact": ["docs/requirements/BR-017-...md", ".claude/rules/checklists/"],
+  "artifact": ["docs/requirements/my-feature.md", ".claude/rules/checklists/"],
   "next": "code-reviewer",
   "blocking": [],
   "needs": ["confirm 'one rule one home' — no list duplicated between a card and a checklist"],

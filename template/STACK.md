@@ -29,7 +29,7 @@ The example enforces "the `core` package stays pure — no I/O — and does UTC-
 
 The tool + command + rules that enforce your architecture as a **blocking** check (PROCESS §Structural lint) — distinct from ESLint (style) and tsc (types). Pick a tool (dependency-cruiser, eslint-plugin-boundaries, Nx boundaries, ts-arch) and declare:
 
-- **Command:** e.g. `pnpm structure` (`depcruise ...`).
+- **Command:** e.g. `pnpm structure` (`depcruise...`).
 - **Rules:** the boundaries that must hold, e.g. "the pure-core package imports no I/O (`node:fs/http/net`, db, network); no package depends on the app layer; no dependency cycles."
 
 The example project enforces `packages/core` purity + monorepo package boundaries via dependency-cruiser. Delete this section if you don't gate on structure.

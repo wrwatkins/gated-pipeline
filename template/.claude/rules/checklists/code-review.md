@@ -1,6 +1,6 @@
 # Checklist — Code review dimensions
 
-Canonical home for the gate-5 review dimensions (ADR-024 pattern). Read by the [gate-5 card](../gates/gate-5-code-reviewer.md) and by any code-review fan-out dimension-checker. Severity ladder, profile behaviour, and handoff live in the gate-5 card, not here.
+Canonical home for the gate-5 review dimensions. Read by the [gate-5 card](../gates/gate-5-code-reviewer.md) and by any code-review fan-out dimension-checker. Severity ladder, profile behaviour, and handoff live in the gate-5 card, not here.
 
 > The **categories** below are universal; the **examples** are illustrative. Declare your project's specific invariants and known-sharp edges in [`STACK.md`](../../../STACK.md), and the reviewer will hunt those too.
 

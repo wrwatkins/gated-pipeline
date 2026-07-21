@@ -1,6 +1,6 @@
 # Checklist — Definition of Done (pre-PR)
 
-Canonical home for the pre-PR completion bar ([ADR-024](../../../docs/decisions/ADR-024-shared-checklist-primitives.md)). Referenced by the [gate-4 card](../gates/gate-4-developer.md) (produce), the [gate-9 card](../gates/gate-9-pr-approver.md) (audit), and [`engineering.md`](../engineering.md). The gate cards own *how* each item is run/evidenced and the per-profile depth; this is the shared item-list.
+Canonical home for the pre-PR completion bar. Referenced by the [gate-4 card](../gates/gate-4-developer.md) (produce), the [gate-9 card](../gates/gate-9-pr-approver.md) (audit), and [`engineering.md`](../engineering.md). The gate cards own *how* each item is run/evidenced and the per-profile depth; this is the shared item-list.
 
 A unit is done when all of the following hold (or carry a recorded, honest n/a):
 

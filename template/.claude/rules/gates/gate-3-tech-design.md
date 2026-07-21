@@ -12,7 +12,7 @@ TDS: approach + alternatives, schema/API deltas, placement, per-tier test plan w
 
 ## Profile behaviour
 
-- **Full / docs / chore:** gate 3 exits `PASS (N/A — gate has no object)` on owner-directed tooling/process changes where the complete spec is already determined by the BR + architecture ADR (BR-008/ADR-014 precedent). The recorded reason is audited at gate 9.
+- **Full / docs / chore:** gate 3 exits `PASS (N/A — gate has no object)` on owner-directed tooling/process changes where the complete spec is already determined by the BR + architecture ADR. The recorded reason is audited at gate 9.
 - Block carrier: gate-3 block may be delivered in the PR body when the gate-3 artifact is the architect's gate-2 ADR carrying the binding inventory.
 - Combined `GATE: 1–3` block sanctioned when all three share one reason.
 
@@ -30,7 +30,7 @@ Produce `docs/design/TDS-<next>-<slug>.md` from TDS-000-template.md:
 
 If the BR or architecture verdict is unbuildable or underspecified, FAIL back with specifics rather than improvising.
 
-## Test tiers detail (CORE one-line pointer; R29)
+## Test tiers detail (CORE one-line pointer)
 
 - **Unit** — Vitest, colocated `*.test.ts`, across all packages. `packages/core` ≥90%-lines coverage gate.
 - **Integration / functional** — Vitest invoking actual Next route handlers against PGlite with committed migrations (`@{{PROJECT_SLUG}}/db/test-helpers`). Active since S1.

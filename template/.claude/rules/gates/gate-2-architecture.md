@@ -23,7 +23,7 @@ DESIGN.md deltas + ADRs, or "fits — constraints: …"
 3. **PADU:** classify any new technology; *Acceptable* needs justification, *Discouraged* needs an ADR, *Unacceptable* is a refusal.
 4. **Constraints out:** hand tech-design explicit constraints (placement, invariants, scale/cost bounds) rather than solutions.
 
-**Rationalization / arch-decisions review** (CORE one-line pointer; R32): an owner-triggered read-only review owned by the architect; scope is business case ↔ requirements ↔ traceability ↔ DESIGN ↔ ADRs ↔ PADU ↔ process-vs-practice coherence; reports land in `docs/reviews/RATIONALIZATION-<date>.md` / `ARCH-DECISIONS-<date>.md`; fixes graduate through the normal gates.
+**Rationalization / arch-decisions review** (CORE one-line pointer): an owner-triggered read-only review owned by the architect; scope is business case ↔ requirements ↔ traceability ↔ DESIGN ↔ ADRs ↔ PADU ↔ process-vs-practice coherence; reports land in `docs/reviews/RATIONALIZATION-<date>.md` / `ARCH-DECISIONS-<date>.md`; fixes graduate through the normal gates.
 
 **Prior decisions are changeable — documentation is the rule, not preservation.** The mechanics: a superseding ADR carrying that reasoning (mark the old one `superseded by ADR-###`), the PADU row updated, DESIGN.md edited.
 

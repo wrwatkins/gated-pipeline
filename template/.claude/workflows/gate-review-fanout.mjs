@@ -1,10 +1,10 @@
 export const meta = {
   name: 'gate-review-fanout',
-  description: 'Gates 5–8 review fan-out: review a target across correctness/security/perf/ops in parallel, emit ADR-025 typed handoff blocks',
-  whenToUse: 'Opt-in, billed. Automates the mechanical verification gates (5 code-review, 6 client-perf, 7 security, 8 runtime/ops) as a parallel dimension fan-out (ADR-016) producing typed verdicts (ADR-025). Not for the judgment/HITL gates (1, 2, 9).',
+  description: 'Gates 5–8 review fan-out: review a target across correctness/security/perf/ops in parallel, emit typed handoff blocks',
+  whenToUse: 'Opt-in, billed. Automates the mechanical verification gates (5 code-review, 6 client-perf, 7 security, 8 runtime/ops) as a parallel dimension fan-out producing typed verdicts. Not for the judgment/HITL gates (1, 2, 9).',
   phases: [
     { title: 'Review', detail: 'one reviewer per gate dimension, in parallel' },
-    { title: 'Synthesize', detail: 'combine into one verdict + ADR-025 typed blocks' },
+    { title: 'Synthesize', detail: 'combine into one verdict + typed blocks' },
   ],
 }
 
@@ -14,13 +14,13 @@ const target = (args && args.target) || 'apps/web/app/go/[offerId]/route.ts'
 const profile = (args && args.profile) || 'full'
 
 // One reviewer per verification gate. Prompts mirror the gate cards + the
-// extracted checklists (ADR-024): .claude/rules/checklists/{code-review,security-review}.md
-// and .claude/rules/perf-budgets.md.
+// extracted checklists:.claude/rules/checklists/{code-review,security-review}.md
+// and.claude/rules/perf-budgets.md.
 const DIMENSIONS = [
   {
     gate: 5, key: 'code-review',
     prompt: `You are gate 5 (code review) for {{PROJECT_SLUG}}. Read \`${target}\`.
-Hunt the dimensions in .claude/rules/checklists/code-review.md: logic errors / unhandled edges
+Hunt the dimensions in.claude/rules/checklists/code-review.md: logic errors / unhandled edges
 (null history, UTC-midnight timezone drift, VIN charset/check-digit, month-end dates); invariant
 violations (packages/core purity — no fetch/db/fs; idempotent sends via dedupe_key; signed tokens
 single-purpose+expiring; trust guardrails — one sponsored slot, no passive data sharing); TDS drift,
@@ -29,7 +29,7 @@ needless abstraction, dead code; missing/vacuous tests. Report only real finding
   {
     gate: 7, key: 'security',
     prompt: `You are gate 7 (security) for {{PROJECT_SLUG}}. Read \`${target}\`.
-Review against .claude/rules/checklists/security-review.md: injection (Drizzle builder only, no
+Review against.claude/rules/checklists/security-review.md: injection (Drizzle builder only, no
 string SQL); authz on every /api route + rate limits on VIN-decode/token endpoints; token hygiene
 (signed, single-purpose, expiring, constant-time compare); secrets (env only, none in logs/bundles);
 PII (ids-only in logs/analytics, VIN quasi-PII, err.name only); redirect abuse (/go/:offerId ->
@@ -80,15 +80,15 @@ const FINDINGS_SCHEMA = {
 
 phase('Review')
 const reviews = await parallel(
-  DIMENSIONS.map(d => () =>
+  DIMENSIONS.map(d => =>
     agent(d.prompt, { label: `gate-${d.gate}:${d.key}`, phase: 'Review', schema: FINDINGS_SCHEMA })
-      .then(r => ({ ...d, review: r }))
-      .catch(() => ({ ...d, review: null }))
-  )
+.then(r => ({...d, review: r }))
+.catch( => ({...d, review: null }))
+)
 )
 
 phase('Synthesize')
-// Build one ADR-025-shaped typed block per gate dimension (the machine mirror).
+// Build one-shaped typed block per gate dimension (the machine mirror).
 const blocks = reviews.filter(Boolean).map(({ gate, key, review }) => {
   const r = review || { result: 'FAIL', findings: [{ severity: 'BLOCKING', what: 'reviewer failed to return', where: target }] }
   const blocking = (r.findings || []).filter(f => ['BLOCKING', 'CRITICAL', 'HIGH'].includes(f.severity))

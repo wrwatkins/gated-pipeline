@@ -1,6 +1,6 @@
 # Checklist — Security diff-review dimensions
 
-Canonical home for the gate-7 diff-review dimensions (ADR-024 pattern). Read by the [gate-7 card](../gates/gate-7-security-reviewer.md) and by any security fan-out dimension-checker (SAST / supply-chain / authz-token / PII). Scan commands, severity ladder, cadence duties, and supply-chain rules live in the gate-7 card, not here.
+Canonical home for the gate-7 diff-review dimensions. Read by the [gate-7 card](../gates/gate-7-security-reviewer.md) and by any security fan-out dimension-checker (SAST / supply-chain / authz-token / PII). Scan commands, severity ladder, cadence duties, and supply-chain rules live in the gate-7 card, not here.
 
 > The **categories** are universal; add your project's specific sensitive fields, endpoints, and allowlists in [`STACK.md`](../../../STACK.md).
 

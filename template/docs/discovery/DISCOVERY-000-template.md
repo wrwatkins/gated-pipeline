@@ -1,6 +1,6 @@
 # DISCOVERY-### — <title>
 
-**Status:** draft | fed-to-gate-1 | superseded · **Date:** YYYY-MM-DD · **TASKS row:** #__ · **Phase 0 (ADR-023) — input to gate 1, not a decision.**
+**Status:** draft | fed-to-gate-1 | superseded · **Date:** YYYY-MM-DD · **TASKS row:** #__ · **Phase 0 — input to gate 1, not a decision.**
 
 ## Problem (reframed)
 

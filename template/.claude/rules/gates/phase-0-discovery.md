@@ -1,6 +1,6 @@
 # Phase 0 — Discovery (OPTIONAL — not a gate)
 
-Agent: `analyst` · Model tier: **opus** (judgment; divergent framing) · [ADR-023](../../../docs/decisions/ADR-023-optional-discovery-phase.md)
+Agent: `analyst` · Model tier: **opus** (judgment; divergent framing) · 
 
 **This is not one of the nine gates.** It does not block, it is opt-in, and most units skip it. Its output is an *input* to gate 1, never a substitute — gate 1 still challenges and can FAIL. Phase 0 **diverges** (widen the option space); gate 1 **converges** (commit testable ACs).
 

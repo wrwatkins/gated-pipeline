@@ -29,7 +29,7 @@ Check, with evidence:
 
 PASS → `handoff` with your gate block to `.claude/pipeline/agents/pr-approver/inbox.md`. Gaps owned elsewhere → that agent's inbox. Update your `memory.md`: Working state + prepend Lessons.
 
-End your final message with the prose block **and its typed mirror** (append a JSON object per [`.claude/rules/handoff-schema.md`](../rules/handoff-schema.md); ADR-025 — required on handoffs):
+End your final message with the prose block **and its typed mirror** (append a JSON object per [`.claude/rules/handoff-schema.md`](../rules/handoff-schema.md) — required on handoffs):
 
 ```
 GATE: 8 — ops

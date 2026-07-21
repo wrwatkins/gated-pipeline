@@ -4,7 +4,7 @@ paths: ["**/*.tf", "**/*.tfvars", ".github/workflows/**", "infra/**", "**/Docker
 
 # Security & deploy (S6 AWS path, per PADU)
 
-Project rule file (ADR-014; the IaC/deploy subset of former `the project's earlier instructions file` §Security & deploy — BR-008 D6 split). Loads when IaC/workflow/container files are worked on. Session-wide conduct rules (secrets, logs, no-"barely-covers") live in `.claude/rules/security-conduct.md` (unconditional).
+Project rule file (the IaC/deploy subset of former `the project's earlier instructions file` §Security & deploy D6 split). Loads when IaC/workflow/container files are worked on. Session-wide conduct rules (secrets, logs, no-"barely-covers") live in `.claude/rules/security-conduct.md` (unconditional).
 
 - Secrets pattern: **SSM Parameter Store** (runtime) + **gitignored `*.tfvars`** (Terraform-time). Nothing else without the owner's written acceptance.
 - Every AWS IaC resource carries a `Project` tag via module-level `default_tags`. Untagged resources block the PR.

@@ -1,6 +1,6 @@
 # Performance budgets
 
-Path-scoped rule file ([ADR-014](../../docs/decisions/ADR-014-deterministic-ai-instruction-loading.md), [ADR-016](../../docs/decisions/ADR-016-gate-card-restructure-scoped-manifests.md)). Applies to `apps/web/**`. Single source of the perf budget numbers; gate-6 and gate-8 cards point here, never restate. DESIGN §10 also carries a pointer row.
+Path-scoped rule file. Applies to `apps/web/**`. Single source of the perf budget numbers; gate-6 and gate-8 cards point here, never restate. DESIGN §10 also carries a pointer row.
 
 ## Bundle size (client — gate 6 owns, blocking)
 
@@ -11,9 +11,9 @@ Grounded on S5 gate-8/9 build record: landing first-load JS = **106 kB** (`○ /
 
 A breach at either ceiling is a **blocking** finding at gate 6.
 
-Until the S6 CI bundle-assert exists (BR-009 AC-9; S6 deploy BR wires the CI step), gate 6 enforces by inspecting the `next build` output's first-load-JS line.
+Until the S6 CI bundle-assert exists (AC-9; S6 deploy BR wires the CI step), gate 6 enforces by inspecting the `next build` output's first-load-JS line.
 
-**S6 wiring (cross-reference):** the CI bundle-size assert (≤ 130 KB gz route JS, blocking in PR CI) and the pre-deploy Lighthouse run (LCP/INP blocking) are S6 deploy build work. The S6 deploy BR wires them; BR-009 AC-9 defines the shape; the S6 deploy DESIGN §10 Launch gates name the enforcement point.
+**S6 wiring (cross-reference):** the CI bundle-size assert (≤ 130 KB gz route JS, blocking in PR CI) and the pre-deploy Lighthouse run (LCP/INP blocking) are S6 deploy build work. The S6 deploy BR wires them AC-9 defines the shape; the S6 deploy DESIGN §10 Launch gates name the enforcement point.
 
 ## Core Web Vitals (client — gate 6 owns, blocking once S6 Lighthouse arms)
 

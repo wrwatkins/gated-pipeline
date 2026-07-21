@@ -1,6 +1,6 @@
 # Workflows
 
-Optional, opt-in Claude Code **Workflow** scripts ([ADR-026](../../docs/decisions/ADR-026-workflow-verification-fanout.md); research: [SPIKE-claude-workflow-primitive](../../docs/spikes/SPIKE-claude-workflow-primitive-2026-07.md)).
+Optional, opt-in Claude Code **Workflow** scripts.
 
 A Workflow is a deterministic JavaScript orchestration script the Claude Code **Workflow** tool runs, spawning subagents in the background under the existing subscription (nothing deployed). Scope here is **verification fan-out only** — the mechanical review gates (5 code-review, 6 client-perf, 7 security, 8 runtime/ops). The judgment / human-in-the-loop gates (1, 2, 9) are never Workflow-driven. Billed; run on request or when clearly warranted, not on every unit.
 
@@ -8,6 +8,6 @@ A Workflow is a deterministic JavaScript orchestration script the Claude Code **
 
 ## Scripts
 
-- **`gate-review-fanout.mjs`** — fans out four reviewers (one per verification gate) over a target in parallel, each returning a validated findings object, synthesized into one verdict + ADR-025 typed handoff blocks.
+- **`gate-review-fanout.mjs`** — fans out four reviewers (one per verification gate) over a target in parallel, each returning a validated findings object, synthesized into one verdict + typed handoff blocks.
   - Run: `Workflow({ scriptPath: ".claude/workflows/gate-review-fanout.mjs", args: { target: "<file path or diff ref>", profile: "full|docs|chore" } })`
   - `args.target` defaults to the affiliate redirect route for a self-contained demo.

@@ -31,7 +31,7 @@ Append-only, one JSON object per merged unit (gate 9 writes it on merge). Greppa
 - **Rework rate** — mean FAIL rounds/unit and its trend; a gate that FAILs often points to an upstream-gate quality gap.
 - **Escape rate** — escapes ÷ units, and *which gate* each escape should have been caught by. The core "is the pipeline actually working" number.
 - **Profile calibration** — escape rate by profile: are `docs`/`chore` letting defects through? Should a surface be forced to `full`?
-- **Tier calibration** — escapes on sonnet-tier gates that opus might have caught (adjust ADR-015 tiers).
+- **Tier calibration** — escapes on sonnet-tier gates that opus might have caught (adjust tiers).
 - **Cost** — tokens/duration by profile, to weigh ceremony against payoff.
 
 Findings graduate as process changes (an ADR + a card edit) through the normal gates — the pipeline improving itself with evidence, not vibes.
