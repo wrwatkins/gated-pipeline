@@ -1,37 +1,17 @@
-# Traces — pipeline self-observability (smart logging + metrics)
+# Pipeline events and review metrics
 
-The compounding loop makes each *unit* smarter; this makes the *pipeline* smarter. Every merged unit appends one structured line to **`pipeline-log.jsonl`** — a machine-aggregatable trace of how the pipeline actually ran — and a periodic **process-trace review** computes metrics over the log and recommends process changes (profile/tier calibration, new gate checks, retired ceremony).
+Use append-only `docs/traces/events.jsonl`. Do not rewrite historical merge records to add later observations. Existing `pipeline-log.jsonl` files remain historical evidence; do not fabricate events from incomplete rows.
 
-The trace data already exists: it's the **typed handoff mirrors** each gate emits (`.claude/rules/handoff-schema.md`). Tracing just persists them per unit, plus a few derived counts.
-
-## The log — `docs/traces/pipeline-log.jsonl`
-
-Append-only, one JSON object per merged unit (gate 9 writes it on merge). Greppable, diffable, never rewritten. One line:
+Each event has a unique `id` and a `type`. Minimal examples:
 
 ```json
-{
-  "pr": 0, "date": "YYYY-MM-DD", "unit": "<slug>", "profile": "full|docs|chore",
-  "gates": [
-    {"gate": 5, "result": "PASS", "tier": "opus", "findings": {"blocking": 0, "important": 1, "nit": 1}, "fail_rounds": 0}
-  ],
-  "rework_rounds": 0,
-  "escapes": [],
-  "cost": {"tokens": null, "duration_min": null}
-}
+{"id":"merge-42","type":"merge","pr":42,"headSha":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","profile":"full","evidence":"<durable gate evidence reference>"}
+{"id":"escape-42-F1","type":"escape_found","originPr":42,"foundPr":51,"what":"<observed defect and source attribution>","evidence":"<reproduction>"}
+{"id":"cadence-trace-50","type":"cadence_completed","role":"process-trace-reviewer","boundary":50,"report":"docs/reviews/TRACE-50.md"}
 ```
 
-- `gates` — one entry per gate that ran, distilled from its typed mirror (result, model tier, findings by severity, FAIL/loop-back rounds).
-- `rework_rounds` — total FAIL loop-backs this unit (a rework signal).
-- `escapes` — defects found **after** merge that an earlier gate should have caught. Usually empty at write time; the process-trace review (or a later bug traced to this unit) **backfills** it: `{"found_pr": N, "should_have_caught": "gate-7", "what": "…"}`. This is the highest-value signal in the whole log.
-- `cost` — tokens/duration if the harness exposes them; null otherwise.
+Merge IDs/PRs must be unique; PR numbers are actual identifiers, not the total merged count. A cadence boundary is the total merged count. Roles and intervals come from `.gated-pipeline/REGISTRY.json`. `gated-pipeline cadence` reports due intervals and rejects malformed/duplicate event identities and missing cadence reports.
 
-## Metrics the process-trace review computes
+At review, compare the authoritative merged-PR list with recorded PRs before calculating metrics. Report missing unit records as unknown. Attribute escapes to the demonstrated originating change, not to the most recent security PR. Include findings, actual tool/model, rework, costs and test limitations only when recorded in the unit evidence; unknown values stay unknown. No tier change is justified solely by speculation that a different model would have caught a defect.
 
-- **Catch distribution** — findings by gate: which gates earn their keep, which rarely catch anything.
-- **Rework rate** — mean FAIL rounds/unit and its trend; a gate that FAILs often points to an upstream-gate quality gap.
-- **Escape rate** — escapes ÷ units, and *which gate* each escape should have been caught by. The core "is the pipeline actually working" number.
-- **Profile calibration** — escape rate by profile: are `docs`/`chore` letting defects through? Should a surface be forced to `full`?
-- **Tier calibration** — escapes on sonnet-tier gates that opus might have caught (adjust tiers).
-- **Cost** — tokens/duration by profile, to weigh ceremony against payoff.
-
-Findings graduate as process changes (an ADR + a card edit) through the normal gates — the pipeline improving itself with evidence, not vibes.
+Post-merge records ride the next normal PR. They do not authorize direct protected-branch commits or new external messages. Keep pending record obligations visible in docs/TASKS.md. Model cost and runtime are optional observations, not fabricated estimates.

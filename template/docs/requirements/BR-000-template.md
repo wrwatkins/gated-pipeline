@@ -4,11 +4,11 @@
 
 ## Problem
 
-<What user/business problem, in one short paragraph. Which posture(s): minimalist / weekend DIYer / hands-on.>
+<What user/business problem, in one short paragraph. Name the affected users and their needs.>
 
 ## KPI / revenue impact
 
-<Which DESIGN §11 metric or BUSINESS-PLAN §5 stream this moves, and the expected direction.>
+<Name the success measure this affects and the expected direction.>
 
 ## Acceptance criteria (numbered, testable)
 
@@ -21,4 +21,4 @@
 
 ## Dependencies & constraints
 
-<Data, integrations, PADU notes, trust-guardrail implications.>
+<Data, integrations, technology-policy notes, trust-guardrail implications.>

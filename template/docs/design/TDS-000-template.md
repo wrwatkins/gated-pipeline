@@ -16,7 +16,7 @@
 
 ## Placement
 
-<What goes in the core package (pure) vs the app vs the db package. Core purity is non-negotiable.>
+<Name affected modules and their boundaries; follow the project invariants in STACK.md.>
 
 ## Test plan
 
@@ -32,9 +32,9 @@
 
 <your analytics events, structured logs, alarms, rollback, cron/idempotency implications.>
 
-## PADU check
+## Technology policy
 
-<New/changed tech and its PADU tier; justification or ADR link.>
+<New or changed technology, the applicable project policy, and justification or ADR link.>
 
 ## Open questions
 

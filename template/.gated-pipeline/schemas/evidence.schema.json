@@ -1,0 +1,236 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Attributed gate evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "unit": {
+      "type": "string",
+      "minLength": 1
+    },
+    "profile": {
+      "enum": [
+        "full",
+        "docs",
+        "chore"
+      ]
+    },
+    "headSha": {
+      "type": "string",
+      "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"
+    },
+    "attempts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "gate": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9
+          },
+          "attempt": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "result": {
+            "enum": [
+              "PASS",
+              "FAIL",
+              "PASS_NA"
+            ]
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1
+          },
+          "headSha": {
+            "type": "string",
+            "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"
+          },
+          "actor": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "enum": [
+                  "human",
+                  "agent"
+                ]
+              },
+              "tool": {
+                "type": "string",
+                "minLength": 1
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "minLength": 1
+              },
+              "runId": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "tool",
+              "model",
+              "runId"
+            ]
+          },
+          "artifacts": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "check": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "status": {
+                  "enum": [
+                    "pass",
+                    "fail",
+                    "na"
+                  ]
+                },
+                "source": {
+                  "enum": [
+                    "command",
+                    "ci",
+                    "manual"
+                  ]
+                },
+                "command": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "minLength": 1
+                },
+                "exitCode": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "reference": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reason": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "check",
+                "status",
+                "source",
+                "command",
+                "exitCode",
+                "reference",
+                "reason"
+              ]
+            }
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "severity": {
+                  "enum": [
+                    "BLOCKING",
+                    "CRITICAL",
+                    "HIGH",
+                    "IMPORTANT",
+                    "MEDIUM",
+                    "LOW",
+                    "NIT"
+                  ]
+                },
+                "what": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "file": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "line": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "resolved": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "severity",
+                "what",
+                "file",
+                "line",
+                "resolved"
+              ]
+            }
+          }
+        },
+        "required": [
+          "gate",
+          "attempt",
+          "result",
+          "reason",
+          "headSha",
+          "actor",
+          "artifacts",
+          "evidence",
+          "findings"
+        ]
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "unit",
+    "profile",
+    "headSha",
+    "attempts"
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "name": "gated-pipeline",
-  "version": "0.6.0",
-  "description": "A gated, agent-driven SDLC pipeline for Claude Code — nine review gates, an optional discovery phase, a cadence review suite, file-based agent memory, and typed handoffs. Scaffolds into any repo.",
+  "version": "0.7.0",
+  "description": "Agent-neutral delivery gates with safe scaffold updates, setup diagnostics, evidence validation, and PR attribution.",
   "type": "module",
   "bin": {
     "gated-pipeline": "bin/install.mjs"
@@ -12,7 +12,10 @@
     "template/",
     "README.md",
     "GENERALIZATION-NOTES.md",
-    "LICENSE"
+    "LICENSE",
+    "lib/",
+    "migrations/",
+    "examples/"
   ],
   "engines": {
     "node": ">=18"
@@ -24,7 +27,14 @@
     "pipeline",
     "agentic",
     "code-review",
-    "scaffold"
+    "scaffold",
+    "codex",
+    "agent-agnostic",
+    "attribution"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "check": "node scripts/check-templates.mjs"
+  }
 }

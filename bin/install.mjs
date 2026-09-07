@@ -1,113 +1,113 @@
 #!/usr/bin/env node
-// gated-pipeline CLI — `install` (first-time scaffold) and `sync` (update the
-// framework files in place, preserving your project-owned files). Zero deps.
-import { readdir, readFile, writeFile, mkdir } from 'node:fs/promises'
-import { existsSync, readFileSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
-import { dirname, join, relative } from 'node:path'
 import { createInterface } from 'node:readline/promises'
-import { stdin, stdout, argv, exit } from 'node:process'
+import { readFile } from 'node:fs/promises'
+import { resolve, join } from 'node:path'
+import { pathToFileURL } from 'node:url'
+import { scaffold, defaults, readProject, validateTokens } from '../lib/scaffold.mjs'
+import { read, safePath } from '../lib/files.mjs'
+import { doctor } from '../lib/doctor.mjs'
+import { checkEvidence, prBody } from '../lib/evidence.mjs'
+import { gitHooks } from '../lib/hooks.mjs'
+import { mergedCount, parseEvents, cadenceDue } from '../lib/cadence.mjs'
 
-const HERE = dirname(fileURLToPath(import.meta.url))
-const PKG_ROOT = join(HERE, '..')
-const TEMPLATE = join(PKG_ROOT, 'template')
-const PKG = JSON.parse(readFileSync(join(PKG_ROOT, 'package.json'), 'utf8'))
-const MANIFEST = JSON.parse(readFileSync(join(PKG_ROOT, 'framework-manifest.json'), 'utf8'))
-const CONFIG_NAME = '.gated-pipeline.json'
+const usage=`gated-pipeline — agent-neutral delivery gates
 
-const TOKENS = [
-  { key: 'PROJECT_SLUG', flag: 'slug', q: 'Project slug (repo/package name)', def: 'my-app' },
-  { key: 'PROJECT_NAME', flag: 'name', q: 'Project display name', def: 'My App' },
-  { key: 'PROJECT_DOMAIN', flag: 'domain', q: 'Public domain (blank if none)', def: '' },
-  { key: 'AI_COAUTHOR', flag: 'coauthor', q: 'Commit co-author trailer', def: 'Claude <noreply@anthropic.com>' },
-]
+  install [directory] [--yes] [--slug=x --name=x --domain=x --coauthor=x]
+                      [--agents=both|codex|claude|none] [--dry-run]
+  sync [directory] [--dry-run]
+  doctor [directory] [--json]
+  hooks [directory] [--check]
+  check <evidence.json> --head=<full-SHA> [--through=1..9] [--dir=project] [--json]
+  pr-body <evidence.json> --head=<full-SHA> [--through=1..9] [--dir=project]
+  cadence [directory] [--count=N] [--events=path] [--json]
 
-// ---- args ----
-const rest = argv.slice(2)
-const flags = new Map()
-for (const a of rest) { const m = a.match(/^--([a-z-]+)(?:=(.*))?$/); if (m) flags.set(m[1], m[2] ?? true) }
-const positional = rest.filter((a) => !a.startsWith('-'))
-const CMD = ['install', 'sync'].includes(positional[0]) ? positional[0] : 'install'
-const DEST = positional.find((p) => p !== CMD) || process.cwd()
-const DRY = flags.has('dry-run')
-const YES = flags.has('yes')
-
-// ---- helpers ----
-async function walk(dir) {
-  const out = []
-  for (const e of await readdir(dir, { withFileTypes: true })) {
-    const p = join(dir, e.name)
-    if (e.isDirectory()) out.push(...(await walk(p))); else out.push(p)
+Install defaults to both Codex and Claude Code adapters. --yes supplies identity
+ defaults without prompting. Existing installations are preserved; use sync.
+Hooks installs a shared Git pre-push guard and refuses unrelated existing hooks.
+check validates recorded evidence; it does not run tests or contact a model.
+pr-body renders validated gate results and author/reviewer/verifier attribution.
+cadence reads GitHub's exact merged count unless --count is supplied explicitly.
+`
+const booleans=new Set(['yes','dry-run','json','check','help'])
+const values=new Set(['slug','name','domain','coauthor','agents','head','through','dir','count','events'])
+const allowed={install:['yes','dry-run','slug','name','domain','coauthor','agents'],sync:['dry-run'],doctor:['json'],hooks:['check'],check:['head','through','dir','json'],'pr-body':['head','through','dir'],cadence:['count','events','json']}
+export function parseArgs(argv) {
+  const flags=new Map(),positionals=[]
+  for(let i=0;i<argv.length;i++) {
+    const arg=argv[i]
+    if(arg==='-h'){flags.set('help',true);continue}
+    if(!arg.startsWith('-')){positionals.push(arg);continue}
+    const match=arg.match(/^--([a-z-]+)(?:=(.*))?$/s)
+    if(!match)throw new Error(`Unknown option ${arg}`)
+    const [,key,inline]=match
+    if(flags.has(key)) throw new Error(`Duplicate option --${key}`)
+    if(booleans.has(key)){if(inline!==undefined)throw new Error(`--${key} takes no value`);flags.set(key,true)}
+    else if(values.has(key)){const value=inline??argv[++i];if(value===undefined||value.startsWith('--'))throw new Error(`--${key} requires a value`);flags.set(key,value)}
+    else throw new Error(`Unknown option --${key}`)
   }
-  return out
+  const command=positionals.shift()||'install'
+  if(flags.has('help'))return {help:true}
+  if(!Object.hasOwn(allowed,command)) throw new Error(`Unknown command ${command}; use --help`)
+  if(positionals.length>1) throw new Error('Too many positional arguments')
+  for(const key of flags.keys())if(!allowed[command].includes(key))throw new Error(`--${key} is not valid for ${command}`)
+  return {command,argument:positionals[0],flags}
 }
-const apply = (t, v) => t.replace(/\{\{([A-Z_]+)\}\}/g, (m, k) => (k in v ? v[k] : m))
-const matches = (rel, list) => list.some((p) => rel === p || (p.endsWith('/') && rel.startsWith(p)))
-function isFramework(rel, protect) {
-  return matches(rel, MANIFEST.framework) && !matches(rel, protect)
+async function gather(flags) {
+  const mapping={slug:'PROJECT_SLUG',name:'PROJECT_NAME',domain:'PROJECT_DOMAIN',coauthor:'AI_COAUTHOR'}
+  const tokens={...defaults},missing=[]
+  for(const [flag,key] of Object.entries(mapping)) {
+    if(flags.has(flag)) tokens[key]=flags.get(flag)
+    else if(['slug','name'].includes(flag))missing.push([flag,key])
+  }
+  if(missing.length&&!flags.has('yes')) {
+    if(!process.stdin.isTTY) throw new Error('Non-interactive install needs --yes or both --slug and --name')
+    const rl=createInterface({input:process.stdin,output:process.stdout})
+    try{for(const [flag,key] of missing)tokens[key]=(await rl.question(`${flag} [${tokens[key]}]: `)).trim()||tokens[key]}finally{rl.close()}
+  }
+  validateTokens(tokens)
+  return tokens
 }
-
-async function gatherTokens() {
-  const vals = {}
-  const missing = TOKENS.filter((t) => !flags.has(t.flag))
-  for (const t of TOKENS) if (flags.has(t.flag)) vals[t.key] = String(flags.get(t.flag))
-  if (missing.length && !YES) {
-    const rl = createInterface({ input: stdin, output: stdout })
-    for (const t of missing) { const a = await rl.question(`  ${t.q}${t.def ? ` [${t.def}]` : ''}: `); vals[t.key] = a.trim() || t.def }
-    await rl.close()
-  } else for (const t of missing) vals[t.key] = t.def
-  return vals
-}
-
-async function main() {
-  if (!existsSync(TEMPLATE)) { console.error('  template/ not found. Aborting.'); exit(1) }
-  const cfgPath = join(DEST, CONFIG_NAME)
-  const files = await walk(TEMPLATE)
-
-  if (CMD === 'install') {
-    console.log(`\n  gated-pipeline install → ${DEST}\n`)
-    const vals = await gatherTokens()
-    let wrote = 0, skipped = 0
-    for (const src of files) {
-      const rel = relative(TEMPLATE, src), dst = join(DEST, rel)
-      if (existsSync(dst)) { skipped++; continue }
-      if (!DRY) { await mkdir(dirname(dst), { recursive: true }); await writeFile(dst, apply(await readFile(src, 'utf8'), vals)) }
-      wrote++
-    }
-    if (!DRY) await writeFile(cfgPath, JSON.stringify({ version: PKG.version, tokens: vals, protect: [] }, null, 2) + '\n')
-    console.log(`  ${DRY ? 'would write' : 'wrote'} ${wrote}, skipped ${skipped} (already present).`)
-    console.log(`  Wrote ${CONFIG_NAME}. Adapt STACK.md, then run your first unit through the gates.`)
-    console.log(`  Update later with: gated-pipeline sync\n`)
+export async function main(argv=process.argv.slice(2)) {
+  const args=parseArgs(argv)
+  if(args.help){console.log(usage);return}
+  const {command,argument,flags}=args
+  const evidenceCommand=['check','pr-body'].includes(command)
+  const dest=resolve(evidenceCommand?flags.get('dir')||process.cwd():argument||process.cwd())
+  if(command==='install'||command==='sync') {
+    const existing=await read(await safePath(dest,'.gated-pipeline.json'))
+    if(command==='install'&&existing!==null&&['slug','name','domain','coauthor','agents'].some(flag=>flags.has(flag)))throw new Error('Already installed; edit existing configuration explicitly, then sync')
+    let adapters
+    if(flags.has('agents')){adapters={both:['codex','claude'],codex:['codex'],claude:['claude'],none:[]}[flags.get('agents')];if(!adapters)throw new Error('agents must be both, codex, claude, or none')}
+    const result=await scaffold(dest,{command,tokens:command==='install'&&existing===null?await gather(flags):undefined,adapters,dry:flags.has('dry-run')})
+    console.log(result.messages.join('\n'))
+    console.log(`${flags.has('dry-run')?'Planned':'Applied'} ${result.changes} changes. Configure pipeline.config.json and STACK.md, then run doctor.`)
     return
   }
-
-  // ---- sync ----
-  if (!existsSync(cfgPath)) { console.error(`  ${CONFIG_NAME} not found in ${DEST} — run \`install\` first.`); exit(1) }
-  const cfg = JSON.parse(await readFile(cfgPath, 'utf8'))
-  const protect = cfg.protect || []
-  console.log(`\n  gated-pipeline sync → ${DEST}  (from v${PKG.version}, was v${cfg.version})`)
-  console.log(`  framework files are updated; project-owned + protected files are left alone.\n`)
-  let updated = 0, same = 0, added = 0, kept = 0
-  const changed = []
-  for (const src of files) {
-    const rel = relative(TEMPLATE, src), dst = join(DEST, rel)
-    const out = apply(await readFile(src, 'utf8'), cfg.tokens || {})
-    if (isFramework(rel, protect)) {
-      const prev = existsSync(dst) ? await readFile(dst, 'utf8') : null
-      if (prev === out) { same++; continue }
-      if (!DRY) { await mkdir(dirname(dst), { recursive: true }); await writeFile(dst, out) }
-      prev == null ? added++ : updated++
-      changed.push(`${prev == null ? 'new ' : 'upd '} ${rel}`)
-    } else {
-      if (existsSync(dst)) { kept++; continue }              // project file, present → never touch
-      if (!DRY) { await mkdir(dirname(dst), { recursive: true }); await writeFile(dst, out) }
-      added++; changed.push(`new  ${rel} (project-once)`)
-    }
+  if(command==='doctor') {
+    const result=await doctor(dest)
+    console.log(flags.has('json')?JSON.stringify(result,null,2):[...result.checks,...result.errors.map(e=>'ERROR: '+e),...result.warnings.map(w=>'NOTE: '+w)].join('\n'))
+    if(result.errors.length)process.exitCode=1
+    return
   }
-  if (!DRY && cfg.version !== PKG.version) { cfg.version = PKG.version; await writeFile(cfgPath, JSON.stringify(cfg, null, 2) + '\n') }
-  for (const c of changed) console.log('   ' + c)
-  console.log(`\n  ${DRY ? '[dry-run] ' : ''}framework: ${updated} updated, ${added} added, ${same} unchanged · project files kept: ${kept}`)
-  console.log('  Review the diff (git diff) and commit.\n')
+  if(command==='hooks'){console.log(await gitHooks(dest,{check:flags.has('check')}));return}
+  if(evidenceCommand) {
+    if(!argument)throw new Error('Supply an evidence JSON file')
+    const record=JSON.parse(await readFile(resolve(argument),'utf8')),project=await readProject(dest)
+    const through=flags.has('through')?Number(flags.get('through')):command==='pr-body'?8:9
+    const result=checkEvidence(record,project,{head:flags.get('head'),through})
+    if(result.errors.length){if(flags.has('json'))console.log(JSON.stringify({valid:false,errors:result.errors},null,2));else console.error(result.errors.join('\n'));process.exitCode=1;return}
+    console.log(command==='pr-body'?prBody(record,result.latest):flags.has('json')?JSON.stringify({valid:true,head:record.headSha,through}):`PASS: attributed gates 1–${through} at ${record.headSha}`)
+    return
+  }
+  if(command==='cadence') {
+    const project=await readProject(dest)
+    const registry=JSON.parse(await readFile(await safePath(dest,'.gated-pipeline/REGISTRY.json'),'utf8'))
+    const count=flags.has('count')?Number(flags.get('count')):mergedCount(dest)
+    const path=resolve(dest,flags.get('events')||'docs/traces/events.jsonl')
+    const events=parseEvents(await read(path)||'')
+    for(const event of events)if(event.type==='cadence_completed'&&await read(await safePath(dest,event.report))===null)throw new Error(`Missing cadence report: ${event.report}`)
+    const due=cadenceDue(registry,project,count,events)
+    console.log(flags.has('json')?JSON.stringify({count,source:flags.has('count')?'supplied':'GitHub totalCount',due},null,2):`Merged count ${count}\n${due.map(d=>`${d.boundary}: ${d.role}`).join('\n')||'No cadence reviews due'}`)
+  }
 }
-
-main().catch((e) => { console.error(e); exit(1) })
+if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href)main().catch(error=>{console.error(error.message);process.exitCode=1})

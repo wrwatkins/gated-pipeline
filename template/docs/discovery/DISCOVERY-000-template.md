@@ -4,12 +4,12 @@
 
 ## Problem (reframed)
 
-<The underlying user/business problem in one paragraph — the problem, NOT the owner's proposed solution. Which posture(s): minimalist / weekend DIYer / hands-on. Which DESIGN §11 metric / BUSINESS-PLAN stream is in play.>
+<The underlying user/business problem in one paragraph — the problem, NOT the owner's proposed solution. Name the affected users and their needs. Name the relevant product goal.>
 
 ## Option space (diverge — ≥3 distinct approaches)
 
 ### Option A — <name>
-- **What:** … · **Serves:** <posture> · **Rough effort:** S/M/L · **Key risk:** …
+- **What:** … · **Serves:** <affected users> · **Rough effort:** S/M/L · **Key risk:** …
 
 ### Option B — <name>
 - **What:** … · **Serves:** … · **Rough effort:** … · **Key risk:** …
@@ -34,4 +34,4 @@
 ## Explicitly out of scope for this brief
 
 - Numbered acceptance criteria (gate 1).
-- Architecture / placement / data-model / PADU decisions (gate 2).
+- Architecture / placement / data-model / technology-policy decisions (gate 2).
