@@ -16,6 +16,8 @@ test('shared Git guard operates on actual destination refs, including deletion',
  const script=join(dest,'.git/hooks/pre-push')
  for(const line of ['HEAD abc refs/heads/main def\n','(delete) 000 refs/heads/main def\n']){const r=spawnSync(process.execPath,[script],{cwd:dest,input:line,encoding:'utf8'});assert.equal(r.status,1);assert.match(r.stderr,/prohibited/)}
  assert.equal(spawnSync(process.execPath,[script],{cwd:dest,input:'HEAD abc refs/heads/main-fix def\n'}).status,0)
+ const blocked=spawnSync(script,[],{cwd:dest,input:'HEAD abc refs/heads/main def\n',encoding:'utf8'});assert.equal(blocked.status,1);assert.match(blocked.stderr,/prohibited/)
+ assert.equal(spawnSync(script,[],{cwd:dest,input:'HEAD abc refs/heads/feature def\n'}).status,0)
  assert.match(await gitHooks(dest,{check:true}),/installed/)
  await chmod(script,0o644);await assert.rejects(gitHooks(dest,{check:true}),/executable/)
 })
