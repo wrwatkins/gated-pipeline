@@ -27,7 +27,7 @@ npx gated-pipeline hooks           # optional shared Git pre-push guard
 npx gated-pipeline hooks --check
 ```
 
-A fresh scaffold deliberately reports an unconfigured test command until you supply one. `doctor` validates local setup; it does not assert that remote branch protection exists, CI passed, or an assistant loaded every instruction. The Git hook installer refuses conflicting hooks and custom `core.hooksPath` instead of replacing existing safeguards.
+A fresh scaffold deliberately reports an unconfigured test command until you supply one. `doctor` validates local setup; it does not assert that remote branch protection exists, CI passed, or an assistant loaded every instruction. The Git hook installer refuses conflicting hooks, symlinked hook paths and custom `core.hooksPath` instead of replacing existing safeguards.
 
 ## One process across agents
 
@@ -73,7 +73,7 @@ npx gated-pipeline sync
 
 `.gated-pipeline.json` records installed framework hashes, identity tokens, selected adapters and protected paths. Reinstall preserves an existing installation. Sync updates an unchanged managed file; it stops on local modifications. Add exact paths or directory prefixes ending in `/` to `protect`, or move project overrides out of framework files. Protected paths are never recreated. Instructions outside the managed AGENTS/CLAUDE blocks, project configuration, lesson indexes and role state remain project-owned.
 
-The included v0.6 snapshot permits safe migration of unchanged legacy templates. Old eager-loaded cards/rules are removed only when their bytes match the installed baseline; customized legacy files stop migration for review. Existing agent inbox/memory files are copied into the neutral state homes and their originals retained. Unknown older/customized versions are not blindly overwritten. User-edited project artifacts are never rewritten to match new examples. `doctor` flags stale legacy procedures left in the eager rule tree.
+The included v0.6 snapshot permits safe migration of unchanged legacy templates. Old eager-loaded cards/rules are removed only when their bytes match the installed baseline; customized legacy files stop migration for review. Existing agent inbox/memory files are copied into the neutral state homes and their originals retained. Recognized legacy Bash push-guard registrations migrate with the script; unfamiliar references, project-local settings registrations, or protected settings that would retain a broken reference stop sync before writes. Protect the legacy script as well if its registration must remain. Unknown older/customized versions are not blindly overwritten. User-edited project artifacts are never rewritten to match new examples. `doctor` flags stale legacy procedures left in the eager rule tree.
 
 Each file is replaced atomically; ordinary write failures roll back applied file changes. Keep the target checkout idle while syncing. This is not a crash-proof multi-file database transaction; inspect the resulting Git diff before committing.
 

@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
-import { chmod, readFile } from 'node:fs/promises'
+import { chmod, readFile, mkdir, rename, symlink, readdir } from 'node:fs/promises'
 import { inspectInvocation } from '../template/.gated-pipeline/hooks/block-push-to-main.mjs'
 import { gitHooks } from '../lib/hooks.mjs'
 import { TEMPLATE } from '../lib/scaffold.mjs'
@@ -24,4 +24,18 @@ test('shared Git guard operates on actual destination refs, including deletion',
 test('Git hook installation refuses unrelated hooks and custom hooksPath',async t=>{
  const dest=await fixture(t);spawnSync('git',['init',dest]);await put(dest,'.git/hooks/pre-push','#!/bin/sh\nexit 0\n');await assert.rejects(gitHooks(dest),/differs/);assert.equal(await readFile(join(dest,'.git/hooks/pre-push'),'utf8'),'#!/bin/sh\nexit 0\n')
  spawnSync('git',['config','core.hooksPath','custom-hooks'],{cwd:dest});await assert.rejects(gitHooks(dest),/core.hooksPath/)
+})
+
+test('hook installer refuses a symlinked hooks directory without external writes',async t=>{
+ const dest=await fixture(t);spawnSync('git',['init',dest])
+ const outside=join(dest,'shared-hooks');await mkdir(outside)
+ await rename(join(dest,'.git/hooks'),join(dest,'.git/hooks-original'))
+ await symlink(outside,join(dest,'.git/hooks'),'dir')
+ for(const check of [false,true])await assert.rejects(gitHooks(dest,{check}),/symlink/)
+ assert.deepEqual(await readdir(outside),[])
+})
+test('hook installer refuses dangling hook symlinks',async t=>{
+ const dest=await fixture(t);spawnSync('git',['init',dest])
+ await symlink(join(dest,'absent-hook'),join(dest,'.git/hooks/pre-push'))
+ for(const check of [false,true])await assert.rejects(gitHooks(dest,{check}),/symlink/)
 })

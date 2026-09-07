@@ -1,0 +1,57 @@
+{
+  "unit": "gated-pipeline-pr-1",
+  "base_commit": "6e38af5aa3601c3978cb1c1163724f6ba7c61d91",
+  "scope": "Full independent framework review plus local repairs; final committed-head reconciliation is recorded in PR1",
+  "reviewer": {
+    "actor_id": "/root/gated_final_review",
+    "kind": "agent",
+    "tool": "codex",
+    "model": null,
+    "run_id": null
+  },
+  "findings": [
+    {
+      "id": "HOOK-PATH-001",
+      "reported_by": "author",
+      "problem": "Git hook installer followed a symlinked hooks directory and replaced dangling hook symlinks",
+      "red": "2 targeted cases failed before repair; isolated probe wrote to the linked external hooks directory",
+      "repair": "Check the Git-common hook path with safePath before reading or writing",
+      "green": "Both refusal regressions passed; unrelated hooks and worktree behavior covered by the existing hook suite"
+    },
+    {
+      "id": "LEGACY-REGISTRATION-001",
+      "reported_by": "independent reviewer",
+      "problem": "v0.6 sync retired the old shell script without migrating its existing Claude hook registration",
+      "red": "Independent fixture retained the old command, which returned127 locally;4 migration assertions failed before repair",
+      "impact": "Dangling hook invocation produces an error notice; the new guard remains registered. No claim that all Bash commands are blocked",
+      "repair": "Migrate exact recognized registrations while preserving other hooks/options; abort before writes on unknown, protected or project-local references; preserve protected scripts",
+      "green": "7 migration/edge cases passed"
+    }
+  ],
+  "independent_review_rounds": [
+    {
+      "result": "request-changes",
+      "reason": "LEGACY-REGISTRATION-001"
+    },
+    {
+      "result": "approve-working-tree",
+      "evidence": "Reviewer independently reran the original migration fixture and9 targeted symlink/migration cases; no remaining blocking or important findings"
+    }
+  ],
+  "verification": {
+    "npm_test": "100 passed,0failed,0skipped",
+    "npm_run_check": "Template syntax, ownership and package contents passed;100packagedfiles",
+    "source_sha256": {
+      "lib/hooks.mjs": "42e2456efb7d991691905e577784b349dcd561ef04924492991419204b876934",
+      "lib/scaffold.mjs": "54c8e167a9ef3bb44fe59b09941727f0ce4bf3030d971d655f4a8c348a7cf4fd",
+      "test/hooks.test.mjs": "3638ead19c5664ff50984def08b7b46d3aba422b3aff726c935b1a760ffc38a1",
+      "test/scaffold.test.mjs": "cefc4e5804552254278d5bf2ee95bea65085890b6f7f3dea4252217bd1289c0c",
+      "README.md": "daf0f15839341c703205437dd4b52f0aa7cfb36d1e6ffe3f79debc8d11cf3571"
+    }
+  },
+  "limits": [
+    "Attribution is declared metadata, not authenticated proof",
+    "Actual assistant harness discovery and configured reviewer integration remain unverified",
+    "No merge or deployment; hosted CI must verify the new commit"
+  ]
+}

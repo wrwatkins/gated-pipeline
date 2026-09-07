@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFile, writeFile, stat, chmod, symlink } from 'node:fs/promises'
 import { join } from 'node:path'
-import { scaffold, defaults, ROOT, mergeSettings, mergeBlock } from '../lib/scaffold.mjs'
+import { scaffold, defaults, ROOT, mergeSettings, mergeBlock, HOOK_COMMAND } from '../lib/scaffold.mjs'
 import { doctor } from '../lib/doctor.mjs'
 import { hash, json, read, render, walk } from '../lib/files.mjs'
 import { fixture, put, readJSON } from './helpers.mjs'
@@ -79,4 +79,56 @@ test('JSON rendering escapes values and block merging rejects malformed markers'
 })
 test('merging settings preserves restrictive existing file permissions',async t=>{
  const dest=await fixture(t);await put(dest,'.claude/settings.json','{}\n');await chmod(join(dest,'.claude/settings.json'),0o600);await install(dest);assert.equal((await stat(join(dest,'.claude/settings.json'))).mode&0o777,0o600)
+})
+
+const legacyHook='.claude/hooks/block-push-to-main.sh'
+const legacyCommand='sh "$CLAUDE_PROJECT_DIR/.claude/hooks/block-push-to-main.sh"'
+test('legacy hook registrations migrate with their options and unrelated hooks intact',async t=>{
+ const dest=await fixture(t);await legacyInstall(dest)
+ const settings={permissions:{deny:['Bash(rm *)']},hooks:{PreToolUse:[{matcher:'Bash',hooks:[{type:'command',command:legacyCommand,timeout:12},{type:'command',command:'echo user-hook'}]}],SessionStart:[{hooks:[{type:'command',command:'echo hello'}]}]}}
+ await put(dest,'.claude/settings.json',json(settings));await scaffold(dest,{command:'sync'})
+ const migrated=await readJSON(join(dest,'.claude/settings.json'))
+ assert.equal(await read(join(dest,legacyHook)),null)
+ assert.deepEqual(migrated.hooks.PreToolUse[0].hooks,[{type:'command',command:HOOK_COMMAND,timeout:12},{type:'command',command:'echo user-hook'}])
+ assert.deepEqual(migrated.permissions,settings.permissions);assert.deepEqual(migrated.hooks.SessionStart,settings.hooks.SessionStart)
+})
+test('unrecognized references to retiring hooks abort before any migration writes',async t=>{
+ const dest=await fixture(t);await legacyInstall(dest)
+ await put(dest,'.claude/settings.json',json({hooks:{PreToolUse:[{matcher:'Bash',hooks:[{type:'command',command:legacyCommand+' && echo custom'}]}]}}))
+ const before=await snapshot(dest)
+ await assert.rejects(scaffold(dest,{command:'sync'}),/legacy hook/)
+ assert.deepEqual(await snapshot(dest),before)
+})
+test('protected settings cannot be left referencing a retired hook',async t=>{
+ const dest=await fixture(t);await legacyInstall(dest)
+ const config=await readJSON(join(dest,'.gated-pipeline.json'));config.protect=['.claude/settings.json'];await put(dest,'.gated-pipeline.json',json(config))
+ await put(dest,'.claude/settings.json',json({hooks:{PreToolUse:[{matcher:'Bash',hooks:[{type:'command',command:legacyCommand}]}]}}))
+ const before=await snapshot(dest);await assert.rejects(scaffold(dest,{command:'sync'}),/legacy hook/);assert.deepEqual(await snapshot(dest),before)
+})
+test('a protected legacy script retains its registration',async t=>{
+ const dest=await fixture(t);await legacyInstall(dest)
+ const config=await readJSON(join(dest,'.gated-pipeline.json'));config.protect=[legacyHook];await put(dest,'.gated-pipeline.json',json(config))
+ await put(dest,'.claude/settings.json',json({hooks:{PreToolUse:[{matcher:'Bash',hooks:[{type:'command',command:legacyCommand}]}]}}))
+ await scaffold(dest,{command:'sync'})
+ assert.ok(await read(join(dest,legacyHook)))
+ assert.equal((await readJSON(join(dest,'.claude/settings.json'))).hooks.PreToolUse[0].hooks[0].command,legacyCommand)
+})
+test('migration with Claude disabled removes only the recognized retired registration',async t=>{
+ const dest=await fixture(t);await legacyInstall(dest)
+ const config=await readJSON(join(dest,'.gated-pipeline.json'));config.adapters=['codex'];await put(dest,'.gated-pipeline.json',json(config))
+ await put(dest,'.claude/settings.json',json({hooks:{PreToolUse:[{matcher:'Bash',hooks:[{type:'command',command:legacyCommand},{type:'command',command:'echo custom'}]}]}}))
+ await scaffold(dest,{command:'sync'})
+ assert.deepEqual((await readJSON(join(dest,'.claude/settings.json'))).hooks.PreToolUse[0].hooks,[{type:'command',command:'echo custom'}])
+})
+
+test('project-local legacy hook registrations stop migration without modifying local settings',async t=>{
+ const dest=await fixture(t);await legacyInstall(dest)
+ await put(dest,'.claude/settings.local.json',json({hooks:{PreToolUse:[{matcher:'Bash',hooks:[{type:'command',command:legacyCommand}]}]}}))
+ const before=await snapshot(dest);await assert.rejects(scaffold(dest,{command:'sync'}),/settings.local.json/);assert.deepEqual(await snapshot(dest),before)
+})
+test('protected settings with no hooks do not prevent retiring an unused script',async t=>{
+ const dest=await fixture(t);await legacyInstall(dest)
+ const config=await readJSON(join(dest,'.gated-pipeline.json'));config.protect=['.claude/settings.json'];await put(dest,'.gated-pipeline.json',json(config))
+ await put(dest,'.claude/settings.json',json({permissions:{deny:['Bash(rm *)']}}))
+ await scaffold(dest,{command:'sync'});assert.equal(await read(join(dest,legacyHook)),null)
 })
