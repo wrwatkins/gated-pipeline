@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "protectedBranches": [
+    "main",
+    "master"
+  ],
+  "commands": {
+    "test": "python3 -m unittest discover -p 'test_*.py'",
+    "lint": null,
+    "typecheck": null,
+    "build": null,
+    "e2e": null,
+    "sast": null,
+    "audit": null,
+    "structure": null
+  },
+  "requiredChecks": [
+    "test"
+  ],
+  "ci": {
+    "requiredChecks": []
+  },
+  "paths": {
+    "api": [],
+    "e2e": [],
+    "infrastructure": []
+  },
+  "capabilities": {
+    "dependencies": false,
+    "performance": false,
+    "accessibility": false,
+    "seo": false
+  },
+  "documents": {
+    "architecture": null,
+    "technology": null,
+    "taskLedger": "docs/TASKS.md"
+  },
+  "independentReview": true,
+  "cadenceBaseline": 0
+}

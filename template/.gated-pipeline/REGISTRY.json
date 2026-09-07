@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "pipeline": [
+    {
+      "gate": 1,
+      "role": "business-requirements",
+      "card": ".gated-pipeline/cards/gate-1.md",
+      "next": "architect"
+    },
+    {
+      "gate": 2,
+      "role": "architect",
+      "card": ".gated-pipeline/cards/gate-2.md",
+      "next": "tech-design"
+    },
+    {
+      "gate": 3,
+      "role": "tech-design",
+      "card": ".gated-pipeline/cards/gate-3.md",
+      "next": "developer"
+    },
+    {
+      "gate": 4,
+      "role": "developer",
+      "card": ".gated-pipeline/cards/gate-4.md",
+      "next": "code-reviewer"
+    },
+    {
+      "gate": 5,
+      "role": "code-reviewer",
+      "card": ".gated-pipeline/cards/gate-5.md",
+      "next": "tester"
+    },
+    {
+      "gate": 6,
+      "role": "tester",
+      "card": ".gated-pipeline/cards/gate-6.md",
+      "next": "security-reviewer"
+    },
+    {
+      "gate": 7,
+      "role": "security-reviewer",
+      "card": ".gated-pipeline/cards/gate-7.md",
+      "next": "ops-reviewer"
+    },
+    {
+      "gate": 8,
+      "role": "ops-reviewer",
+      "card": ".gated-pipeline/cards/gate-8.md",
+      "next": "pr-approver"
+    },
+    {
+      "gate": 9,
+      "role": "pr-approver",
+      "card": ".gated-pipeline/cards/gate-9.md",
+      "next": null
+    }
+  ],
+  "cadence": [
+    {
+      "role": "tech-debt-reviewer",
+      "interval": 10,
+      "capability": null
+    },
+    {
+      "role": "process-trace-reviewer",
+      "interval": 10,
+      "capability": null
+    },
+    {
+      "role": "dependency-currency-reviewer",
+      "interval": 10,
+      "capability": "dependencies"
+    },
+    {
+      "role": "performance-reviewer",
+      "interval": 10,
+      "capability": "performance"
+    },
+    {
+      "role": "accessibility-reviewer",
+      "interval": 5,
+      "capability": "accessibility"
+    },
+    {
+      "role": "seo-reviewer",
+      "interval": 10,
+      "capability": "seo"
+    }
+  ]
+}

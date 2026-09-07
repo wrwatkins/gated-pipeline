@@ -12,4 +12,4 @@
 
 ## Consequences
 
-<What gets better, what gets worse, revisit triggers. Update docs/PADU.md if a tech tier changed.>
+<What gets better, what gets worse, revisit triggers. Update the configured technology-policy document when applicable.>

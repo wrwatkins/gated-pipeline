@@ -1,199 +1,74 @@
-# PROCESS — Gated Delivery Pipeline (CORE)
+# Delivery process — shared CORE
 
-**Normative.** Every unit of work — feature, fix, infra change, non-trivial doc — passes gates 1→9 **in order, no skipping**, under an assigned **gate profile** (§Gate profiles: full / docs / chore, recorded in the PR body). A gate must exit with the block below before the next begins — the only licensed exception is the bounded gates-6∥7 parallel rule (§Parallel rule). All artifacts live in this repo.
+This process works with Codex, Claude Code, other assistants and human contributors. The project's instructions and existing user authorization take precedence over shared defaults. Procedures never grant permission to message others, publish, merge or deploy. Keep secrets and personal data out of prompts, logs and evidence; use synthetic fixtures where appropriate.
 
-This file is the **lean shared CORE** — rules every gate reads every run. Detailed procedure for each gate lives in that gate's card at `.claude/rules/gates/gate-<N>-<name>.md`, loaded by explicit Read only (never auto-discovered). The card index is §Gates below.
+## Setup and loading
 
----
+Run `gated-pipeline doctor`. Configure machine-consumed commands, paths and capabilities in `pipeline.config.json`, and explain project invariants in `STACK.md`. Only documents named in the project configuration are prerequisites; create design/requirements artifacts when the work needs them. The installer initializes role inboxes and memory.
 
-## Gate exit block (required format)
+`AGENTS.md` is the shared entry point; Claude's `CLAUDE.md` imports it. Core procedures are outside native rule-discovery directories. Read this CORE, project context and only the current gate's card/role. The optional Claude and Codex adapters route to the same files; provider frontmatter and hook behavior are not portable permissions. Models use the harness/user's settings. Never substitute a provider model name into another provider's configuration.
 
-```
-GATE: <n> — <name>
-RESULT: PASS | FAIL | PASS (N/A — <reason>)
-ARTIFACT: <repo path(s) or PR link>
-SUMMARY: <≤5 bullets: what was checked / decided / found>
-HANDOFF: <what the next gate must know>
-```
+## Gates and profiles
 
-- `FAIL` loops back to the responsible earlier gate via its inbox, with specifics. FAIL rounds stay in the PR record unsanitized.
-- `PASS (N/A — …)` is allowed **only for gates 1–3**, for (a) mechanical changes (typo, dependency bump, comment) or (b) units where the gate has no object — §Gate profiles. The recorded reason is itself the evidence, and gate 9 audits it.
-- **Typed mirror:** append a machine-readable JSON mirror of the block per **[`.claude/rules/handoff-schema.md`](../.claude/rules/handoff-schema.md)** — required on every gate exit block. The prose above stays human-canonical; the mirror is the parseable contract (so a hook or a Workflow orchestrator can route/audit deterministically). On divergence the prose wins and the mirror is the bug.
+The canonical gate order and role/card paths are in [the registry](../.gated-pipeline/REGISTRY.json): requirements → architecture → technical design → develop → code review → test → security → operations → PR approval. Optional discovery widens alternatives before requirements when needed.
 
----
+Assign and explain a profile before implementation:
 
-## Phase 0 — Discovery (OPTIONAL, not a gate)
+- **full:** production behavior, dependencies, security, data, migrations, infrastructure or ambiguous changes.
+- **docs:** only documentation content, with no execution, policy or loader changes.
+- **chore:** tooling/test-only changes without production impact. Check the actual diff; instructions, CI and policy edits are not automatically harmless.
 
-Ahead of gate 1 sits an **optional** divergent front-end run by `analyst` (opus). It does **not** block, it is opt-in, and **most units skip it** — a well-specified ask goes straight to gate 1, exactly as before. Run it only for a genuinely new/ambiguous product feature, a vague/open-ended owner ask, or an owner-requested reframing; never for fixes, chores, docs units, or already-specified asks.
+Every gate is represented. Gates 1–3 may use `PASS_NA` with a concrete reason when no decision/artifact is needed. Later gates must complete their applicable checks and record `PASS` or `FAIL`; individual n/a checks need evidence and a reason. A missing/failed/skipped execution is never a passing execution. The generic validator does not infer whether a profile is honest from the diff; the reviewer and approver audit that decision.
 
-Phase 0 **diverges** (reframe the problem, brainstorm ≥3 distinct approaches, scan the field, argue the do-not-build case, recommend a requirement shape); gate 1 **converges** (commit testable ACs and challenge them). The output is a discovery brief at `docs/discovery/DISCOVERY-###-<slug>.md` that is an **input to** gate 1, never a substitute — gate 1 still challenges and can FAIL. The analyst writes no ACs (gate 1) and no architecture (gate 2), and MAY decline (`RESULT: SKIP`) when the ask has no discovery object. It emits a `PHASE: 0 — discovery` block (not `GATE: N`) to the business-requirements inbox. Card: [phase-0-discovery](../.claude/rules/gates/phase-0-discovery.md).
+Follow gate order. On rework, record a new attempt and revalidate downstream gates. Gates 5, 6 and 7 may each fan out into independent read-only dimensions internally; all dimensions must return before that one gate completes. The optional `.gated-pipeline/workflows/review-gate.mjs` accepts a caller-provided reviewer function and returns supporting reports. It is not a model runtime or an alternate route around gate prerequisites. Gate 8 remains sequential.
 
-## Gates
+## Evidence and attribution
 
-| # | Gate | Agent | Exit criteria | Artifact | Card |
-|---|---|---|---|---|---|
-| 1 | Business requirements | `business-requirements` | BR with **numbered Given/When/Then ACs (mandatory — gate 2 bounces BRs without them)**, out-of-scope, KPI impact; consistent with BUSINESS-PLAN + trust guardrails | `docs/requirements/BR-###.md` | [gate-1](../.claude/rules/gates/gate-1-business-requirements.md) |
-| 2 | Architecture | `architect` | Fit verdict after reviewing prior architecture/designs/PADU; DESIGN.md/ADR deltas for boundary, data-model, integration, or infra changes; may revise prior decisions with documented reasoning (superseding ADR); PADU classification of new tech; explicit constraints for tech-design | DESIGN.md deltas + ADRs, or "fits — constraints: …" | [gate-2](../.claude/rules/gates/gate-2-architecture.md) |
-| 3 | Technical design | `tech-design` | TDS: approach + alternatives, schema/API deltas, placement, per-tier test plan with named cases, security + ops notes, PADU check | `docs/design/TDS-###.md` (+ ADRs) | [gate-3](../.claude/rules/gates/gate-3-tech-design.md) |
-| 4 | Develop | `developer` | Implementation + tests; `lint`/`typecheck`/`test` green locally (recorded verbatim); docs updated | Feature branch / diff | [gate-4](../.claude/rules/gates/gate-4-developer.md) |
-| 5 | Code review | `code-reviewer` | Verdict recorded; zero unresolved BLOCKING findings | Review block → PR | [gate-5](../.claude/rules/gates/gate-5-code-reviewer.md) |
-| 6 | Test | `tester` | Every AC traced to an automated test; all tiers green; core coverage ≥90% lines | Evidence block → PR | [gate-6](../.claude/rules/gates/gate-6-tester.md) |
-| 7 | Security | `security-reviewer` | your SAST tool clean (no unresolved high/critical), your dependency audit clean at high, checklist reviewed | Evidence block → PR | [gate-7](../.claude/rules/gates/gate-7-security-reviewer.md) |
-| 8 | Ops | `ops-reviewer` | CI green; new paths instrumented; alerting story; rollback stated; migrations backward-compatible | Evidence block → PR | [gate-8](../.claude/rules/gates/gate-8-ops-reviewer.md) |
-| 9 | PR approval | `pr-approver` | Template fully evidenced; process-complete audit passes | PR approval / merge | [gate-9](../.claude/rules/gates/gate-9-pr-approver.md) |
+The [evidence JSON schema](../.gated-pipeline/schemas/evidence.schema.json) is the canonical record; prose is its readable view. The file identifies the unit, profile and full reviewed SHA, with an ordered list of attempts. Each attempt records gate, attempt number, result, reason, artifacts, findings and check evidence.
 
-The table above defines the **full** profile. §Gate profiles assigns reduced profiles (docs / chore) by diff class; every gate still runs and exits under every profile. Each gate card (column "Card") carries its detailed procedure, profile-specific behaviour, fan-out eligibility, and perf-budget pointer.
+Every attempt names its actual actor:
 
----
-
-## Gate profiles
-
-### Assignment
-
-- Every PR body records **`Gate profile: <full | docs | chore> — <one-line eligibility reasoning>`**. Gate 9 audits the assignment; a wrong profile is a bounce.
-- **full** (default) — mandatory for any diff with **prod-runtime surface**: prod dependencies, schema/migrations, routes/handlers/UI, auth/token/email surfaces, seed data affecting the domain-critical verification, infra/IaC. When in doubt, full.
-- **docs** — units whose deliverable *is* a docs artifact (cadence/review reports, BR/ADR/TDS-only units, requirements PRs, regulatory/reference captures with no loader changes).
-- **chore** — zero-prod-runtime-surface diffs: devDep/test-tier version bumps, docs batches riding tooling edits, CI pins/workflow hygiene, reference/data files that don't feed the domain-critical verification.
-- **Upgrades are one-way and recorded:** ambiguity resolves upward; if mid-flight the diff is found to touch an excluded surface, all remaining gates run full and the PR body records the upgrade. Until reviewed, the excluded-surface list may only grow.
-
-Profile detail per gate (what full/docs/chore means for *that* gate — chore depth, disposition form, scan tier, CI-only) lives in each gate's card. Items 1–4 and 6 of the docs profile also apply *within* any profile whenever a gate lacks an object:
-
-1. **Gates 1–3 `PASS (N/A — gate has no object)`** — allowed when the unit carries nothing for that gate to decide: gate 1 on a PROCESS-mandated review artifact, gate 1/3 on a unit whose deliverable *is* the gate-1/2 artifact, gates 1–3 on owner-directed tooling changes. The recorded reason is audited at gate 9. A combined `GATE: 1–3` block is sanctioned when all three share one reason.
-2. **Block carriers** — gates 1–3 exit blocks may be delivered inside inbox handoff messages or the PR body when that gate's artifact *is* the BR/DESIGN/TDS delta itself. Gates 4–9 blocks are always literal in the PR body.
-3. **Gate-4 disposition form** — on artifact-is-the-deliverable PRs, gate 4 still exits with a discrete literal `GATE: 4` block. (Detail in [gate-4 card](../.claude/rules/gates/gate-4-developer.md).)
-4. **Handoff-in-lieu** — when a gate has no upstream artifact author, the orchestrator writes the handoff. **Precedence: durable constraints additionally land in the owning document (DESIGN/BR/TDS/PROCESS) — never inbox-only.** Inboxes resolve and scroll away; owning docs are re-read fresh every run.
-5. **Rework rounds** — non-BLOCKING findings from gates 5–8 are fixed in-branch by the owning earlier-gate agent; `FAIL` + loop-back is reserved for BLOCKING or wrong-direction findings. **FAIL rounds are recorded unsanitized.**
-6. **Gates 4–9 never exit N/A.** On docs-only diffs, their checks record per-item n/a-with-evidence — a PASS with reasoning, not a skip.
-
-Chore profile per-gate depth summary (detail in each gate's card):
-- **Gates 1–3** — per the docs-profile rules above.
-- **Gate 4** — unchanged (disposition form applies on artifact-is-the-deliverable diffs). (Detail in [gate-4 card](../.claude/rules/gates/gate-4-developer.md).)
-- **Gates 5+6** — **one review-and-verify agent run**; exits a combined `GATE: 5–6` block. Findings still loop back. (Detail in [gate-5](../.claude/rules/gates/gate-5-code-reviewer.md) and [gate-6](../.claude/rules/gates/gate-6-tester.md) cards.)
-- **Gate 7** — scans + diff-hygiene only UNLESS deps or security surface. (Detail in [gate-7 card](../.claude/rules/gates/gate-7-security-reviewer.md).)
-- **Gate 8** — exact-head CI verification + rollback statement only. (Detail in [gate-8 card](../.claude/rules/gates/gate-8-ops-reviewer.md).)
-- **Gate 9** — unchanged; additionally audits the profile assignment. (Detail in [gate-9 card](../.claude/rules/gates/gate-9-pr-approver.md).)
-
-### Single-evidence rule (all profiles)
-
-The test pyramid runs **at most once per head SHA locally**. Whichever gate runs it first owns the evidence; later gates cite the owning run + head SHA instead of re-running. CI on the final head is the final proof. Force-fresh re-runs happen only on suspicion (staleness, tampering, a surprising diff), and the re-run + reason is recorded in that gate's block.
-
-### Parallel rule (gates 6 ∥ 7)
-
-Gates 6 and 7 (in the chore profile: the combined 5–6 run and gate 7) MAY run concurrently when the diff has **no overlap between test-evidence surfaces and security surfaces**. Both must exit before gate 8 starts; the order of record in the PR body stays 6-then-7. If both runs write pipeline files (inboxes/memories), use worktree isolation (`.claude/rules/working-discipline.md` —) or sequence the commits.
-
-### Within-gate fan-out (bounded, per-unit judgment, never mandatory)
-
-A review gate MAY spawn concurrent dimension-checkers (e.g. correctness / security-smell / performance) whose outputs are synthesized by the gate agent into **one** verdict and **one** exit block. Bounds: (a) **eligible gates are 5 (code-review), 6 (tester), and 7 (security)** — the gates whose work is decomposable into independent read-only dimensions; **gate 8 (ops) is NOT eligible** (its checks are a short sequential checklist, not parallel dimensions, and it is sonnet-tier verification where fan-out buys nothing); gates 1–4/9 are single-author by nature. (b) **Surface non-collision**: dimension-checkers must not write overlapping files; if any writes pipeline files, use worktree isolation or sequence the commits. (c) **Both/all exit before synthesis**: a dimension FAIL is a gate FAIL. (d) **Finding attribution recorded**: the synthesized block notes which dimension raised each material finding. (e) **Judgment, not mandate**: a small diff does not fan out; fan-out is an internal implementation detail of one gate's run and never changes the single-exit-block format.
-
-### Trial status (owner decision)
-
-The profile system is a trial — "we will see how that goes." The **#30 cadence trip** evaluates catch-rate per profile (defects caught at each gate vs escaped to later gates / CI / post-merge, chore vs full) and recommends **keep / adjust / revert**; revert is a named outcome (TASKS row 63 §Trial clause).
-
-### Model tiers
-
-Gates are tiered by the work they do, not their position. Judgment gates (1 business-requirements, 2 architect, 5 code-review, 7 security) default **opus**; verification gates (3 tech-design, 4 developer, 6 tester, 8 ops, 9 pr-approver) default **sonnet**. The default lives in each agent's `.claude/agents/<name>.md` frontmatter `model:` field; the Agent/Workflow `model` parameter overrides per run. **Recorded overrides:** developer → opus for feature sprints; security → sonnet for the chore scan tier; any gate → opus on a FAIL round needing re-reasoning. Each gate block records its tier + any override with reason. Ad-hoc research/Explore agents default sonnet unless the task is synthesis (orchestrator sets model at call time). This is the "model-tier only" tuning — it changes what resources each gate uses, not which gates run (§Decision).
-
----
-
-## Messaging & memory (AIPass-inspired)
-
-Concepts adapted from [AIPass](https://github.com/AIOSAI/AIPass): per-agent homes bundling identity + memory + mailbox, @-addressed subject/body messages, read-memory-on-startup, tiered archiving, and a project registry — implemented here as plain committed files (no runtime dependency).
-
-**Layout** (roster: `.claude/pipeline/REGISTRY.json`):
-
-```
-.claude/pipeline/agents/<name>/
-├── inbox.md # mailbox — append-only; resolve by editing STATUS, never delete
-├── inbox-archive.md # archive tier — resolved threads older than 3 merged PRs MOVE here
-├── memory.md # identity + working state + lessons (newest first)
-└── memory-archive.md # archive tier — overflow Lessons + superseded working state MOVE here at >25 KB
+```json
+{
+  "id": "codex-session-or-local-run-id",
+  "kind": "agent",
+  "tool": "codex",
+  "model": null,
+  "runId": null
+}
 ```
 
-**Archive tier (ENACTED — owner decision;; lineage: TASKS #43 never-delete mandate/N2, ARCH AD-21):**
+Use `claude-code`, `codex`, or another real tool identifier for agents. For a human, use `kind: "human"`, `tool: "none"` and `model: null`; absence is not human attribution. Actor IDs identify the real participant/run and must remain stable. Models and run links are nullable when the harness does not expose them; never guess. Keep private session links out of public PRs. If multiple people/tools collaborate in a role, record separate actual attempts so all contributions survive.
 
-- **Inbox:** a resolved thread whose last `STATUS` edit predates the **3 most recent merged PRs** (gate-9-derived count) moves — the whole message, envelope intact — to `inbox-archive.md` in the same agent home.
-- **Memory:** the trigger is **byte-based** — when `memory.md` exceeds **25 KB**, Lessons beyond the newest ~10 and superseded working-state paragraphs move to `memory-archive.md`.
-- **Move mechanics (the security condition on the never-delete mandate):** archival is **MOVE-never-delete, byte-verified** — hash the extracted text (`shasum -a 256`), append it to the archive, verify the archived copy hashes identical, and only then edit the source; source edit + archive append land in the **same commit**. An archival that alters bytes is a deletion and violates the 2026-07-04 mandate.
-- **Read discipline:** agents do NOT read archives on startup; an archive is read only when a live thread or memory entry references it. Archival is performed as an explicit recorded step on a pipeline-touching PR (ride-along class), never a silent side edit.
+The PR body records author (gate 4), reviewer (5), verifier (6), security reviewer (7), operations verifier (8) and approver (9), along with planning roles. By default the author cannot also supply gates 5, 7 or 9 under the same actor/run. A different label on self-review is not independence; do not fabricate an identity to pass validation. Independent review remains pending when unavailable. Commit `Assistant:`/`Co-Authored-By` conventions may supplement this record, but do not prove who reviewed a PR. Attribution is auditable declaration, not cryptographic attestation.
 
-**Durable homes (item 4 class):** binding acceptance conditions, procedures, standing rules, and deferrals live in durable documents — PROCESS, DESIGN, ADRs, BRs/TDSs, TASKS, README — never only in an agent's memory or inbox. Memory carries work-in-flight between runs; it is not a rule's home.
+Each check includes status (`pass`, `fail`, `na`), source (`command`, `ci`, `manual`), a durable result reference, command and exit code when executed, and a reason for n/a. Record expected suite completion, skips, environment and limitations in the referenced evidence. A command exit code alone does not establish that tests completed. Keep failed attempts and findings; resolve findings explicitly after repair.
 
-**Every agent, every run:**
-1. **Fresh context first:** re-read the docs named in **your scoped read-manifest** (PADU, DESIGN named §numbers, the BR/TDS, the PROCESS CORE, your gate card, inbox, memory) — every time, no exceptions, no working from stale memory.
-2. **Read your `memory.md`** — pick up where you left off (working state, lessons).
-3. **Read your `inbox.md` before starting.** Open messages are handled before new work; mark them `STATUS: resolved — <note>`.
-4. **Prereq check:** each agent's prereqs are in its agent file and gate card. Missing prereqs ⇒ **do not start**: write a `prereq-missing` message to the responsible agent's inbox and exit `RESULT: FAIL` naming what's missing.
-5. **On completion:** append a `handoff` message (containing your gate exit block) to the **next** agent's inbox, and update your `memory.md` (working state + prepend lessons).
-6. **Any agent → any agent:** found a bug, an unresolved question, or incomplete prereqs in someone else's territory? Write a `bug` / `question` / `prereq-missing` message to that agent's inbox — regardless of pipeline position.
+Run checks once per relevant code revision and reuse their evidence. The validator requires completed gates on the independently supplied full SHA. When code changes, rerun affected checks and reconfirm other gates for that revision. Do not embed the final SHA into a committed evidence file on that same SHA: keep in-flight records under ignored `.gated-pipeline/evidence/`, then retain the JSON in the PR body/attachment or a durable CI artifact. Later trace records reference the completed revision.
 
-**Message envelope (append to the target inbox):**
-
-```
-## MSG <yyyy-mm-dd> @<sender> → @<recipient>
-TYPE: handoff | prereq-missing | bug | question
-SUBJECT: <one line>
-RE: <BR-### or topic>
-BODY: <what the receiver needs to know/do>
-STATUS: open
+```sh
+gated-pipeline check .gated-pipeline/evidence/unit.json --head=<reviewed-full-SHA> --through=8
+gated-pipeline pr-body .gated-pipeline/evidence/unit.json --head=<reviewed-full-SHA> --through=8 > pr-body.md
 ```
 
-Receiver resolves by editing to `STATUS: resolved — <by, one-line note>`.
+`check` defaults to gates 1–9; `pr-body` defaults to 1–8 because approval follows review. After gate 9, rerender with `--through=9` to preserve approver attribution. Commands validate declared records; they do not execute project checks or independently authenticate a CI run. Real CI must run the project's checks, and an independent reviewer must assess evidence quality.
 
-**Typed mirror:** a `handoff`-type message appends the machine-readable JSON mirror below the envelope, per [`.claude/rules/handoff-schema.md`](../.claude/rules/handoff-schema.md). `question`/`bug`/`nit` notes need not. The mirror records the handoff as sent; resolving the thread edits only the prose `STATUS:` line.
+## Branch and merge
 
----
+Use separate branches/worktrees for concurrent writers. Land changes via reviewed PRs. Install the optional shared Git guard with `gated-pipeline hooks`; it works for both assistants and humans, including linked worktrees, and refuses unrelated existing hooks/custom hooksPath. Claude also has an early Bash guard installed through project settings. Codex does not execute Claude hooks. Local hooks are bypassable and cannot block remote API merges; never claim otherwise.
 
-## Test tiers (all required) — one-line pointer
+Use server-side branch protection and required checks when available. Verify exact configured CI check names, conclusions and the reviewed SHA. On GitHub, bind an authorized merge with `gh pr merge <number> --squash --match-head-commit <reviewed-full-SHA>`. An approval posted by a transport bot is not evidence of an independent review. No direct main-branch bookkeeping commits.
 
-Detail in [gate-3 card](../.claude/rules/gates/gate-3-tech-design.md) (which the developer reads) and [gate-6 card](../.claude/rules/gates/gate-6-tester.md). Summary: **Unit** (your unit runner, colocated, ≥90% core lines) · **Integration** (your unit runner + actual your framework's route handlers + an in-memory test DB, active S1+) · **E2E** (your e2e runner, serial, pinned alphabetical spec order, your e2e test dir).
+## Handoffs and durable knowledge
 
-## Scans (all required, blocking) — one-line pointer
+Role homes are `.gated-pipeline/state/<role>/`. Read current inbox/memory before work, append a dated handoff with unit, sender, recipient and evidence reference on completion, and update working state. Resolve a message without deleting its history. Move archived material with verified byte preservation; retain the original evidence. Durable constraints live in project documents rather than only an inbox.
 
-Detail in [gate-7 card](../.claude/rules/gates/gate-7-security-reviewer.md). Summary: **SAST** your SAST scan · **Code quality** ESLint+tsc · **Structural** architectural-boundary lint (§Structural lint) · **Dependencies** your dependency audit.
+At planning, read the solution index and relevant lessons. At completion, capture a reusable lesson only when the work taught one. `docs/solutions/README.md` is project-owned. No filler entries are required.
 
-## Structural lint (blocking) — one-line pointer
+Record post-merge events and lessons on the next bookkeeping/delivery PR as explicit obligations; never push directly to the protected branch to close the loop. Mark any gap pending until the record lands. Local-only units keep their evidence but do not invent a PR number or advance a merged-PR cadence.
 
-A distinct dimension from style (ESLint) and types (tsc): **architectural boundaries** — a project's layer/purity/import invariants enforced by a structural linter (e.g. dependency-cruiser, eslint-plugin-boundaries, Nx boundaries). Declare the rules + tool + command in `STACK.md` (e.g. "the pure-core package must not import I/O; no cross-layer imports; no cycles"). Green before any PR; a boundary violation is **blocking** (gate 4 keeps it green, gate 5 reviews structure, DoD lists it). This automates the architectural invariants that gate 5 otherwise only human-reviews.
+## Cadence and measurement
 
-## Knowledge compounding — one-line pointer
+The registry defines intervals; project capabilities enable optional dependency, performance, accessibility and SEO reviews. `gated-pipeline cadence` reads GitHub's exact merged-PR count, or accepts an explicitly supplied count. `cadenceBaseline` is the observed count when adopting the process; it does not certify earlier compliance. Completion events must reference real reports. Missing earlier boundaries stay due until recorded as completed.
 
-The forward self-improvement loop: each unit distills its **reusable lesson** into `docs/solutions/` so the next unit is easier. **Written** at merge by the `compound` skill (gate 9 invokes it — only on a genuine lesson, never filler); **read** at planning by the `recall-solutions` skill (Phase 0 / gate 1). Distinct from ADRs (decisions), memory (agent state), and reviews (periodic). Index: `docs/solutions/README.md`.
-
-## Tracing & process-trace review — one-line pointer
-
-The backward self-improvement loop. Gate 9 appends one structured line per merged unit to **`docs/traces/pipeline-log.jsonl`** (distilled from the typed gate mirrors: result/tier/findings/rework per gate + escapes). The `process-trace-reviewer` cadence agent (every 10 PRs) computes metrics — catch distribution, rework rate, **escape rate**, profile/tier calibration, cost — and recommends evidence-based pipeline changes (graduated as ADRs). Spec + metric definitions: `docs/traces/README.md`. This is the pipeline improving itself with data, and the standing form of the profile/tier trial.
-
-## Cadence reviews — one-line pointer
-
-Detail in [gate-9 card](../.claude/rules/gates/gate-9-pr-approver.md) (enforces trigger) and [gate-7 card](../.claude/rules/gates/gate-7-security-reviewer.md) (owns security re-diff + pin-freshness). Count derived at gate 9 from `gh pr list --state merged`. All report-only — findings graduate into BRs through gate 1; reviews identify and prioritize, they don't auto-fix. Interval scheme + precedence:.
-
-- **Every 10 merged PRs** (combined obligation): **tech-debt** (three pillars → `docs/reviews/DEBT-<date>.md`) · **SEO** (`SEO-<date>.md`) · **performance** · **dependency-currency/CVE** · **process-trace** (`process-trace-reviewer`; pipeline metrics from `docs/traces/` → `TRACE-<date>.md`; §Tracing).
-- **Every 5 merged PRs**: **accessibility**. Runs **alone** at a multiple-of-5-not-10 trip; **joins** the 10-PR set at multiples of 10 (one combined obligation, no double-count). Lean at 5-only trips (axe-with-excluded-regions + changed-surface manual audit), full-surface sweep at the 10-coincidence or first round.
-
-**Rationalization / arch-decisions review** (detail in [gate-2 card](../.claude/rules/gates/gate-2-architecture.md)) — a third review type, owner-triggered, owned by @architect.
-
-## PR evidence (required on every PR) — one-line pointer
-
-Detail in [gate-9 card](../.claude/rules/gates/gate-9-pr-approver.md). Paste (links don't substitute): (1) unit tail + core coverage % · (2) integration/functional results or recorded n/a · (3) E2E tail · (4) your SAST tool summary · (5) lint + typecheck · (6) gate 5, 7, 8 blocks.
-
----
-
-## Docs format
-
-Plain Markdown — the standard for agentic engineering. Mermaid fences are fine; GitHub renders them natively.
-
----
-
-## Branch & merge
-
-- **No server-side branch protection — owner decision: staying on GitHub Free.** Enforcement is local, per `.claude/rules/pr-workflow.md`: the `block-push-to-main` PreToolUse hook at `.claude/hooks/` (blocks any push resolving to `main` and `gh pr merge --admin`), PR review by a separate agent via `.claude/skills/pr-review/`, and gate 9. All work on `feat/…`, `fix/…`, `chore/…`, `docs/…` branches; squash merge; every PR body carries `README updated: yes|no — <justification>`.
-- Conventional commits ending `Co-Authored-By: {{AI_COAUTHOR}}`.
-- **Merge procedure** (detail in [gate-9 card](../.claude/rules/gates/gate-9-pr-approver.md)): never merge until `check-runs` polls to full count; `gh pr checks <n> --watch` completes; explicit pass-count check. Re-verify if head moved after gate 8.
-- **Ride-along convention:** bookkeeping that goes stale *at* merge (TASKS row pending-merge → merged flip; a prior run's merge confirmation in agent memory) rides the next PR's touch of that file as an explicit recorded obligation — never a direct commit to `main`.
-- **Parallel PRs:** when two units are in flight, work in git worktrees (normative rule: `.claude/rules/working-discipline.md` —); local E2E runs parameterize the port via `E2E_PORT` to avoid collisions.
-
----
-
-## Honest-status rule
-
-Gate results are reported as observed: failing is FAIL, skipped is recorded as skipped, nothing is marked green to keep momentum. (Owner requirement: critical, grounded review — no rubber stamps.)
+Trace events are described in [docs/traces/README.md](traces/README.md). Preserve unknown historical results. Compare merge coverage before interpreting catch/rework rates; a small or incomplete sample cannot establish model superiority or zero defects. Pipeline improvements follow the same review process.

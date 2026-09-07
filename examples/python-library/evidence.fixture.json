@@ -1,0 +1,251 @@
+{
+  "schemaVersion": 1,
+  "unit": "SYNTHETIC example fixture",
+  "profile": "full",
+  "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "attempts": [
+    {
+      "gate": 1,
+      "attempt": 1,
+      "result": "PASS",
+      "reason": null,
+      "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "actor": {
+        "id": "synthetic-review-session-0",
+        "kind": "agent",
+        "tool": "claude-code",
+        "model": null,
+        "runId": null
+      },
+      "artifacts": [],
+      "evidence": [
+        {
+          "check": "review",
+          "status": "pass",
+          "source": "manual",
+          "command": null,
+          "exitCode": null,
+          "reference": "SYNTHETIC schema fixture; replace with actual logs",
+          "reason": null
+        }
+      ],
+      "findings": []
+    },
+    {
+      "gate": 2,
+      "attempt": 1,
+      "result": "PASS",
+      "reason": null,
+      "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "actor": {
+        "id": "synthetic-review-session-1",
+        "kind": "agent",
+        "tool": "claude-code",
+        "model": null,
+        "runId": null
+      },
+      "artifacts": [],
+      "evidence": [
+        {
+          "check": "review",
+          "status": "pass",
+          "source": "manual",
+          "command": null,
+          "exitCode": null,
+          "reference": "SYNTHETIC schema fixture; replace with actual logs",
+          "reason": null
+        }
+      ],
+      "findings": []
+    },
+    {
+      "gate": 3,
+      "attempt": 1,
+      "result": "PASS",
+      "reason": null,
+      "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "actor": {
+        "id": "synthetic-review-session-2",
+        "kind": "agent",
+        "tool": "claude-code",
+        "model": null,
+        "runId": null
+      },
+      "artifacts": [],
+      "evidence": [
+        {
+          "check": "review",
+          "status": "pass",
+          "source": "manual",
+          "command": null,
+          "exitCode": null,
+          "reference": "SYNTHETIC schema fixture; replace with actual logs",
+          "reason": null
+        }
+      ],
+      "findings": []
+    },
+    {
+      "gate": 4,
+      "attempt": 1,
+      "result": "PASS",
+      "reason": null,
+      "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "actor": {
+        "id": "synthetic-author-session",
+        "kind": "agent",
+        "tool": "codex",
+        "model": null,
+        "runId": null
+      },
+      "artifacts": [],
+      "evidence": [
+        {
+          "check": "test",
+          "status": "pass",
+          "source": "command",
+          "command": "python3 -m unittest discover -p 'test_*.py'",
+          "exitCode": 0,
+          "reference": "SYNTHETIC schema fixture; replace with actual logs",
+          "reason": null
+        }
+      ],
+      "findings": []
+    },
+    {
+      "gate": 5,
+      "attempt": 1,
+      "result": "PASS",
+      "reason": null,
+      "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "actor": {
+        "id": "synthetic-review-session-4",
+        "kind": "agent",
+        "tool": "claude-code",
+        "model": null,
+        "runId": null
+      },
+      "artifacts": [],
+      "evidence": [
+        {
+          "check": "review",
+          "status": "pass",
+          "source": "manual",
+          "command": null,
+          "exitCode": null,
+          "reference": "SYNTHETIC schema fixture; replace with actual logs",
+          "reason": null
+        }
+      ],
+      "findings": []
+    },
+    {
+      "gate": 6,
+      "attempt": 1,
+      "result": "PASS",
+      "reason": null,
+      "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "actor": {
+        "id": "synthetic-review-session-5",
+        "kind": "agent",
+        "tool": "claude-code",
+        "model": null,
+        "runId": null
+      },
+      "artifacts": [],
+      "evidence": [
+        {
+          "check": "test",
+          "status": "pass",
+          "source": "command",
+          "command": "python3 -m unittest discover -p 'test_*.py'",
+          "exitCode": 0,
+          "reference": "SYNTHETIC schema fixture; replace with actual logs",
+          "reason": null
+        }
+      ],
+      "findings": []
+    },
+    {
+      "gate": 7,
+      "attempt": 1,
+      "result": "PASS",
+      "reason": null,
+      "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "actor": {
+        "id": "synthetic-review-session-6",
+        "kind": "agent",
+        "tool": "claude-code",
+        "model": null,
+        "runId": null
+      },
+      "artifacts": [],
+      "evidence": [
+        {
+          "check": "review",
+          "status": "pass",
+          "source": "manual",
+          "command": null,
+          "exitCode": null,
+          "reference": "SYNTHETIC schema fixture; replace with actual logs",
+          "reason": null
+        }
+      ],
+      "findings": []
+    },
+    {
+      "gate": 8,
+      "attempt": 1,
+      "result": "PASS",
+      "reason": null,
+      "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "actor": {
+        "id": "synthetic-review-session-7",
+        "kind": "agent",
+        "tool": "claude-code",
+        "model": null,
+        "runId": null
+      },
+      "artifacts": [],
+      "evidence": [
+        {
+          "check": "rollback",
+          "status": "pass",
+          "source": "manual",
+          "command": null,
+          "exitCode": null,
+          "reference": "SYNTHETIC schema fixture; replace with actual logs",
+          "reason": null
+        }
+      ],
+      "findings": []
+    },
+    {
+      "gate": 9,
+      "attempt": 1,
+      "result": "PASS",
+      "reason": null,
+      "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "actor": {
+        "id": "synthetic-review-session-8",
+        "kind": "agent",
+        "tool": "claude-code",
+        "model": null,
+        "runId": null
+      },
+      "artifacts": [],
+      "evidence": [
+        {
+          "check": "review",
+          "status": "pass",
+          "source": "manual",
+          "command": null,
+          "exitCode": null,
+          "reference": "SYNTHETIC schema fixture; replace with actual logs",
+          "reason": null
+        }
+      ],
+      "findings": []
+    }
+  ]
+}
