@@ -72,6 +72,20 @@ test('context rejects malformed snapshots and snapshots from another checkout', 
     assert.equal(result.status, 1)
   }
 })
+test('malformed manifest and snapshot JSON never leak their bodies in parser diagnostics', async t => {
+  const root = await setup(t)
+  await put(root, '.gated-pipeline/context.json', 'TOP_SECRET_MANIFEST_BODY')
+  let result = plan(root)
+  assert.equal(result.status, 1)
+  assert.doesNotMatch(result.stdout + result.stderr, /TOP_SECRET_MANIFEST_BODY/)
+  assert.match(result.stderr, /Invalid context manifest JSON/)
+  await put(root, '.gated-pipeline/context.json', JSON.stringify(config))
+  await put(root, 'snapshot.json', 'TOP_SECRET_SNAPSHOT_BODY')
+  result = run(['context', '--gate=4', '--previous=snapshot.json', '--json'], root)
+  assert.equal(result.status, 1)
+  assert.doesNotMatch(result.stdout + result.stderr, /TOP_SECRET_SNAPSHOT_BODY/)
+  assert.match(result.stderr, /Invalid context snapshot JSON/)
+})
 test('context input validation rejects unsupported gates, budgets and missing gate', async t => {
   const root = await setup(t)
   for (const flags of [[], ['--gate=0'], ['--gate=10'], ['--gate=4', '--budget-bytes=NaN'], ['--gate=4', '--budget-bytes=0'], ['--gate=4', '--budget-bytes=1.5']]) {

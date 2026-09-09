@@ -4,6 +4,10 @@ import { createHash } from 'node:crypto'
 
 const digest = value => createHash('sha256').update(value).digest('hex')
 const object = value => value !== null && typeof value === 'object' && !Array.isArray(value)
+function parseJSON(bytes, label) {
+  try { return JSON.parse(bytes.toString('utf8')) }
+  catch { throw new Error(`Invalid context ${label} JSON`) }
+}
 const pathOK = value => typeof value === 'string' && value.length > 0 &&
   !/[\\\x00-\x1f\x7f]/.test(value) && !value.startsWith('/') &&
   !value.split('/').some(part => !part || part === '.' || part === '..')
@@ -48,7 +52,7 @@ export async function contextPlan(directory, {
   if (!Number.isInteger(gate) || gate < 1 || gate > 9) throw new Error('Context requires --gate=1..9')
   if (!Number.isSafeInteger(budgetBytes) || budgetBytes < 1) throw new Error('Context budget must be a positive integer byte count')
   const root = resolve(directory)
-  const config = JSON.parse((await file(root, manifest)).toString('utf8'))
+  const config = parseJSON(await file(root, manifest), 'manifest')
   keys(config, ['schemaVersion', 'shared', 'gates'], 'context manifest')
   if (config.schemaVersion !== 1 || !object(config.gates)) throw new Error('Unsupported context manifest')
   paths(config.shared)
@@ -62,7 +66,7 @@ export async function contextPlan(directory, {
   if (!group) throw new Error(`No context manifest entry for gate ${gate}`)
   const rootId = digest(await realpath(root)), before = new Map()
   if (previous !== null) {
-    const snapshot = JSON.parse((await file(root, previous)).toString('utf8'))
+    const snapshot = parseJSON(await file(root, previous), 'snapshot')
     if (!object(snapshot) || snapshot.schemaVersion !== 1 || snapshot.rootId !== rootId || !Array.isArray(snapshot.files)) {
       throw new Error('Invalid context snapshot or different checkout')
     }
