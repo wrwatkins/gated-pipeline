@@ -87,6 +87,22 @@ single-run evidence reuse and measuring acceptance cost including rework.
 It makes no model calls, changes no personal settings and claims no measured
 subscription savings from document sizes alone.
 
+## Local review and team coordination
+
+The `merge-readiness` skill routes both agents to one local procedure. Its
+portable helper rejects stale/self-review receipts and missing named checks,
+wrong publishers, incomplete results and undocumented skips. `merge-policy.json`
+starts unconfigured and is project-owned; fill it with the exact expected job
+names. The skill binds authorized merges to the reviewed commit. No approval bot,
+hosted AI reviewer or new Actions job is installed.
+
+The `team-coordination` skill supports multiple leads in isolated worktrees.
+Task/path/resource claims live in the shared Git common directory, with atomic
+updates and collision checks. Reserve a single merge/deployment coordinator and
+use distinct document identifiers. Claims are advisory, local to linked worktrees,
+and require adoption by each writer; they do not authenticate agents or imply
+that an unregistered worktree is idle. No background agent or watcher is started.
+
 ## Attributed PR evidence
 
 Every gate attempt records its actual actor, tool, model when exposed, run reference when available, reviewed commit, findings and check evidence. The schema accepts any real agent tool identifier. Human work explicitly uses `kind: "human"`, `tool: "none"`; missing fields do not silently become human attribution. Model/run metadata is explicitly `null` when unavailable.

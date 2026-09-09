@@ -7,5 +7,7 @@ Use `gated-pipeline context --gate=N` to index files before reading. Reuse alrea
 
 For project policies and specialized context, use docs/AI_REPOSITORY.md as an index; read only applicable area guidance before acting.
 
+With concurrent writers, use the team-coordination skill before editing shared paths or integrating changes. Use merge-readiness before an authorized merge.
+
 Record the actual author, reviewer and verifier in PR evidence. Tool names are separate from models; unknown model/run fields are explicitly null. Never claim self-review as independent.
 <!-- gated-pipeline:end -->

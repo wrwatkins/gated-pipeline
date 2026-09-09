@@ -42,7 +42,8 @@
     "docs/metrics/",
     "docs/cost/",
     "prompts/",
-    ".gated-pipeline/audit/"
+    ".gated-pipeline/audit/",
+    "merge-policy.json"
   ],
   "merged": [
     "AGENTS.md",
