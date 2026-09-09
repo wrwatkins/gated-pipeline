@@ -28,7 +28,21 @@
     "docs/design/",
     "docs/decisions/",
     "docs/discovery/",
-    "docs/spikes/"
+    "docs/spikes/",
+    "ai-repository.json",
+    "cost-policy.json",
+    "docs/AI_REPOSITORY.md",
+    "docs/standards/",
+    "docs/context/",
+    "docs/prompts/",
+    "docs/orchestration/",
+    "docs/audit/",
+    "docs/security/",
+    "docs/governance/",
+    "docs/metrics/",
+    "docs/cost/",
+    "prompts/",
+    ".gated-pipeline/audit/"
   ],
   "merged": [
     "AGENTS.md",

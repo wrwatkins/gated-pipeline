@@ -6,6 +6,7 @@ import { pathToFileURL } from 'node:url'
 import { scaffold, defaults, readProject, validateTokens } from '../lib/scaffold.mjs'
 import { read, safePath } from '../lib/files.mjs'
 import { doctor } from '../lib/doctor.mjs'
+import { governance, costCheck } from '../lib/governance.mjs'
 import { checkEvidence, prBody } from '../lib/evidence.mjs'
 import { gitHooks } from '../lib/hooks.mjs'
 import { mergedCount, parseEvents, cadenceDue } from '../lib/cadence.mjs'
@@ -17,6 +18,8 @@ const usage=`gated-pipeline — agent-neutral delivery gates
                       [--agents=both|codex|claude|none] [--dry-run]
   sync [directory] [--dry-run]
   doctor [directory] [--json]
+  governance [directory] [--json]
+  cost-check <usage.json> [--dir=project] [--json]
   context [directory] --gate=1..9 [--manifest=path] [--previous=path]
                       [--budget-bytes=N] [--json]
   hooks [directory] [--check]
@@ -31,10 +34,12 @@ check validates recorded evidence; it does not run tests or contact a model.
 pr-body renders validated gate results and author/reviewer/verifier attribution.
 cadence reads GitHub's exact merged count unless --count is supplied explicitly.
 context lists only shared/current-gate file metadata; it never calls a model.
+governance validates structure, prompt fingerprints and declared audit records.
+cost-check compares recorded usage with configured budgets; it does not meter usage.
 `
 const booleans=new Set(['yes','dry-run','json','check','help'])
 const values=new Set(['slug','name','domain','coauthor','agents','head','through','dir','count','events','gate','manifest','previous','budget-bytes'])
-const allowed={install:['yes','dry-run','slug','name','domain','coauthor','agents'],sync:['dry-run'],doctor:['json'],context:['gate','manifest','previous','budget-bytes','json'],hooks:['check'],check:['head','through','dir','json'],'pr-body':['head','through','dir'],cadence:['count','events','json']}
+const allowed={install:['yes','dry-run','slug','name','domain','coauthor','agents'],sync:['dry-run'],doctor:['json'],governance:['json'],'cost-check':['dir','json'],context:['gate','manifest','previous','budget-bytes','json'],hooks:['check'],check:['head','through','dir','json'],'pr-body':['head','through','dir'],cadence:['count','events','json']}
 export function parseArgs(argv) {
   const flags=new Map(),positionals=[]
   for(let i=0;i<argv.length;i++) {
@@ -76,7 +81,7 @@ export async function main(argv=process.argv.slice(2)) {
   if(args.help){console.log(usage);return}
   const {command,argument,flags}=args
   const evidenceCommand=['check','pr-body'].includes(command)
-  const dest=resolve(evidenceCommand?flags.get('dir')||process.cwd():argument||process.cwd())
+  const dest=resolve(evidenceCommand||command==='cost-check'?flags.get('dir')||process.cwd():argument||process.cwd())
   if(command==='install'||command==='sync') {
     const existing=await read(await safePath(dest,'.gated-pipeline.json'))
     if(command==='install'&&existing!==null&&['slug','name','domain','coauthor','agents'].some(flag=>flags.has(flag)))throw new Error('Already installed; edit existing configuration explicitly, then sync')
@@ -91,6 +96,19 @@ export async function main(argv=process.argv.slice(2)) {
     const result=await doctor(dest)
     console.log(flags.has('json')?JSON.stringify(result,null,2):[...result.checks,...result.errors.map(e=>'ERROR: '+e),...result.warnings.map(w=>'NOTE: '+w)].join('\n'))
     if(result.errors.length)process.exitCode=1
+    return
+  }
+  if(command==='governance') {
+    const result=await governance(dest)
+    console.log(flags.has('json')?JSON.stringify(result,null,2):[result.valid?'PASS: nine repository areas and declared records validated':'FAIL: repository governance',...result.errors,...result.warnings.map(w=>'NOTE: '+w)].join('\n'))
+    if(!result.valid)process.exitCode=1
+    return
+  }
+  if(command==='cost-check') {
+    if(!argument)throw new Error('Supply a project-relative usage JSON file')
+    const result=await costCheck(dest,argument)
+    console.log(flags.has('json')?JSON.stringify(result,null,2):[result.status,...result.checks.map(c=>`${c.metric}: ${c.actual??'unknown'} / ${c.limit} (${c.status})`),result.note].join('\n'))
+    if(result.status!=='within_budget')process.exitCode=1
     return
   }
   if(command==='hooks'){console.log(await gitHooks(dest,{check:flags.has('check')}));return}

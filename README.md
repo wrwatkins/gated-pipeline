@@ -37,6 +37,32 @@ Provider-neutral cards, roles, guides, schemas and orchestration live in `.gated
 
 The optional [review fan-out module](template/.gated-pipeline/workflows/review-gate.mjs) runs dimensions *within* gates 5, 6 or 7 using a caller-supplied reviewer function. Missing, failed, stale, malformed or timed-out results fail the aggregate. It does not invoke a paid service or substitute a performance inspection for the testing gate.
 
+## AI-first repository contract
+
+The scaffold gives nine areas a project-owned home: standards, business/context stores,
+versioned specialized prompts, orchestration, audit, PII/security, human RACI,
+adoption/ROI metrics and cost governance. [The repository map](template/docs/AI_REPOSITORY.md)
+routes to each policy without loading them all into every task. Existing gate and
+PR evidence contracts remain authoritative.
+
+```sh
+npx gated-pipeline governance --json
+npx gated-pipeline cost-check usage.json --json
+```
+
+`ai-repository.json` declares the area homes and accountable owners. The governance
+command checks the map, pinned prompt bytes, structured audit events and cost
+policy. Project policy/docs, prompt registry and audit data survive sync; schema
+updates remain framework-managed. Assign owners and complete project decisions
+before claiming adoption. The validator does not certify compliance or authenticate
+records. Privacy guidance covers PII, secrets, access, retention and agent boundaries.
+
+`cost-policy.json` defines optional model routes and per-unit budgets. `cost-check`
+compares recorded usage with configured limits; unknown required measurements and
+exceeded budgets exit nonzero. It never calls models, meters a session, modifies
+personal settings or caps live spending. CI/harness integration makes these checks
+blocking. [Cost policy details](template/docs/cost/README.md) explain units and limits.
+
 ## Model and context costs
 
 ```sh
@@ -52,6 +78,8 @@ and a budget warning never removes required instructions. Edit the project-owned
 `.gated-pipeline/context.json` to route local procedures; sync preserves it.
 Snapshots compare disk content, not what an agent actually read or retained.
 Fresh sessions and compaction still require reacquiring applicable instructions.
+The generated shared CORE and both adapters use these same freshness rules;
+installation tests keep the managed bootstrap small and all nine plans scoped.
 
 [Execution guidance](template/.gated-pipeline/guides/execution-cost.md) covers
 model/effort selection by task risk, bounded independent-review context,
@@ -117,6 +145,6 @@ npm test
 npm run check
 ```
 
-Tests cover destructive-update regressions, v0.6 migration, hook refusal/allow cases, CLI behavior, attribution, evidence failure modes, cadence and workflow errors. Package checks verify that hidden adapter directories and executable assets ship. No live model calls, production services or paid reviews are needed to run this suite.
+Tests cover the nine-area contract, prompt fingerprints, audit privacy boundaries, unknown/exceeded cost checks, destructive-update regressions, v0.6 migration, hook refusal/allow cases, CLI behavior, attribution, evidence failure modes, cadence and workflow errors. Package checks verify that hidden adapter directories and executable assets ship. No live model calls, production services or paid reviews are needed to run this suite.
 
 MIT license. [Migration notes](GENERALIZATION-NOTES.md).

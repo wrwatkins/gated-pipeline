@@ -1,0 +1,11 @@
+# Audit trail
+
+Use the existing `.gated-pipeline/evidence/` gate records and PR attribution for reviewed delivery evidence, `docs/decisions/` for durable decisions and `docs/traces/events.jsonl` for cadence/outcome observations. `.gated-pipeline/audit/actions.jsonl` adds a compact, project-owned record of material agent/human/automation actions without copying transcripts.
+
+Each JSONL event follows `.gated-pipeline/schemas/audit-event.schema.json`: schema version, unique id, UTC timestamp, action/result, exact head SHA (or null when unavailable), actor id/kind/tool/model/runId, and evidence/decision/usage references (explicit null when unavailable). Use the actual tool/model when exposed; never infer a model from a provider or role. Human actors use tool `none` and model null. Reference prompt versions and check receipts through evidence links. References must contain safe identifiers/paths, never access tokens or personal payloads.
+
+Append events when material decisions, changes, checks, approvals, merges or deployments occur. Preserve failures and corrections; add a correcting decision event pointing to the prior event instead of rewriting history. Capture both the actual action and the authorization source where relevant. Passing a verifier is not human approval.
+
+`gated-pipeline governance` validates the configured active JSONL file (maximum 4 MiB), rejects malformed rows, duplicate ids and extra fields, and checks explicit attribution. Other governance inputs are capped at 1 MiB each. Archive completed logs through reviewed, byte-preserving moves and retain an index before rotating the active file; this command validates only the configured active log. It does not authenticate identities, prove events occurred, automatically capture actions, inspect referenced receipts or enforce append-only storage. Use Git review, CI provenance and access controls for those assurances.
+
+Do not log raw prompts, tool output, PII or secrets. The schema prevents arbitrary fields, but cannot detect sensitive text embedded in allowed strings. Configure repository access, retention and deletion/incident handling in the security policy; a committed secret needs incident response, not just a later deletion.

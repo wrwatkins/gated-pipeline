@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "models": {
+    "routine": {
+      "provider": null,
+      "model": null,
+      "effort": null
+    },
+    "standard": {
+      "provider": null,
+      "model": null,
+      "effort": null
+    },
+    "sensitive": {
+      "provider": null,
+      "model": null,
+      "effort": null
+    }
+  },
+  "budgets": {
+    "inputTokens": null,
+    "outputTokens": null,
+    "totalTokens": null,
+    "costUsd": null,
+    "peakAgents": 1
+  }
+}
