@@ -33,13 +33,13 @@ test('missing area homes and unknown configuration fields fail', async t => {
 })
 test('versioned prompt hash catches edits and duplicate versions', async t => {
   const root = await installed(t), text = '# Synthetic prompt\nDo a bounded test task.\n'
-  await put(root, 'prompts/sample/SKILL.md', text)
-  const row = { id: 'sample', version: '1.0.0', path: 'prompts/sample/SKILL.md', sha256: createHash('sha256').update(text).digest('hex'), owner: 'test-owner', evaluationRef: 'synthetic fixture' }
+  await put(root, 'prompts/sample/1.0.0/SKILL.md', text)
+  const row = { id: 'sample', version: '1.0.0', path: 'prompts/sample/1.0.0/SKILL.md', sha256: createHash('sha256').update(text).digest('hex'), owner: 'test-owner', evaluationRef: 'synthetic fixture' }
   await put(root, 'prompts/registry.json', JSON.stringify({ schemaVersion: 1, prompts: [row] }))
   assert.equal(run(['governance'], root).status, 0)
-  await put(root, 'prompts/sample/SKILL.md', text + 'Changed without version review.\n')
+  await put(root, 'prompts/sample/1.0.0/SKILL.md', text + 'Changed without version review.\n')
   assert.equal(run(['governance'], root).status, 1)
-  await put(root, 'prompts/sample/SKILL.md', text)
+  await put(root, 'prompts/sample/1.0.0/SKILL.md', text)
   await put(root, 'prompts/registry.json', JSON.stringify({ schemaVersion: 1, prompts: [row, row] }))
   assert.equal(run(['governance'], root).status, 1)
 })
@@ -149,4 +149,19 @@ test('unconfigured budgets, zero ceilings, partial counters and invalid numbers 
   }
   await put(root, 'usage.json', JSON.stringify(usage).replace('"costUsd":null', '"costUsd":1e999'))
   assert.equal(run(['cost-check', 'usage.json'], root).status, 1)
+})
+
+test('prompt versions have separate canonical paths rather than labels on shared mutable content', async t => {
+  const root = await installed(t), text = '# Synthetic versioned prompt\n'
+  const row = { id: 'sample', version: '1.0.0', path: 'prompts/sample/1.0.0/SKILL.md', sha256: createHash('sha256').update(text).digest('hex'), owner: 'fixture', evaluationRef: 'synthetic fixture' }
+  await put(root, row.path, text)
+  await put(root, 'prompts/sample/SKILL.md', text)
+  for (const prompts of [[{ ...row, path: 'prompts/sample/SKILL.md' }], [row, { ...row, version: '2.0.0' }]]) {
+    await put(root, 'prompts/registry.json', JSON.stringify({ schemaVersion: 1, prompts }))
+    assert.equal(run(['governance'], root).status, 1)
+  }
+  const second = { ...row, version: '2.0.0', path: 'prompts/sample/2.0.0/SKILL.md' }
+  await put(root, second.path, text)
+  await put(root, 'prompts/registry.json', JSON.stringify({ schemaVersion: 1, prompts: [row, second] }))
+  assert.equal(run(['governance'], root).status, 0)
 })
