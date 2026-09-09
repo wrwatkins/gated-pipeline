@@ -37,6 +37,28 @@ Provider-neutral cards, roles, guides, schemas and orchestration live in `.gated
 
 The optional [review fan-out module](template/.gated-pipeline/workflows/review-gate.mjs) runs dimensions *within* gates 5, 6 or 7 using a caller-supplied reviewer function. Missing, failed, stale, malformed or timed-out results fail the aggregate. It does not invoke a paid service or substitute a performance inspection for the testing gate.
 
+## Model and context costs
+
+```sh
+npx gated-pipeline context --gate=4
+npx gated-pipeline context --gate=4 --json > context-snapshot.json
+npx gated-pipeline context --gate=5 --previous=context-snapshot.json --budget-bytes=65536
+```
+
+The metadata-only index lists shared instructions and the selected gate's files,
+with byte counts and hashes. Other gates' procedures stay deferred; file bodies
+are never printed. Missing required files fail, optional absences are explicit,
+and a budget warning never removes required instructions. Edit the project-owned
+`.gated-pipeline/context.json` to route local procedures; sync preserves it.
+Snapshots compare disk content, not what an agent actually read or retained.
+Fresh sessions and compaction still require reacquiring applicable instructions.
+
+[Execution guidance](template/.gated-pipeline/guides/execution-cost.md) covers
+model/effort selection by task risk, bounded independent-review context,
+single-run evidence reuse and measuring acceptance cost including rework.
+It makes no model calls, changes no personal settings and claims no measured
+subscription savings from document sizes alone.
+
 ## Attributed PR evidence
 
 Every gate attempt records its actual actor, tool, model when exposed, run reference when available, reviewed commit, findings and check evidence. The schema accepts any real agent tool identifier. Human work explicitly uses `kind: "human"`, `tool: "none"`; missing fields do not silently become human attribution. Model/run metadata is explicitly `null` when unavailable.

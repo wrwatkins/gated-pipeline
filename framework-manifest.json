@@ -18,6 +18,7 @@
     "docs/solutions/SOLUTION-000-template.md"
   ],
   "projectOnce": [
+    ".gated-pipeline/context.json",
     "pipeline.config.json",
     "STACK.md",
     "docs/solutions/README.md",
