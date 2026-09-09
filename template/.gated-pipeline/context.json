@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "shared": [
+    "AGENTS.md",
+    "docs/PROCESS.md",
+    "pipeline.config.json",
+    "STACK.md"
+  ],
+  "gates": {
+    "1": {
+      "required": [
+        ".gated-pipeline/cards/gate-1.md",
+        ".gated-pipeline/roles/business-requirements.md"
+      ],
+      "optional": [
+        ".gated-pipeline/state/business-requirements/inbox.md",
+        ".gated-pipeline/state/business-requirements/memory.md"
+      ]
+    },
+    "2": {
+      "required": [
+        ".gated-pipeline/cards/gate-2.md",
+        ".gated-pipeline/roles/architect.md"
+      ],
+      "optional": [
+        ".gated-pipeline/state/architect/inbox.md",
+        ".gated-pipeline/state/architect/memory.md"
+      ]
+    },
+    "3": {
+      "required": [
+        ".gated-pipeline/cards/gate-3.md",
+        ".gated-pipeline/roles/tech-design.md"
+      ],
+      "optional": [
+        ".gated-pipeline/state/tech-design/inbox.md",
+        ".gated-pipeline/state/tech-design/memory.md"
+      ]
+    },
+    "4": {
+      "required": [
+        ".gated-pipeline/cards/gate-4.md",
+        ".gated-pipeline/roles/developer.md"
+      ],
+      "optional": [
+        ".gated-pipeline/state/developer/inbox.md",
+        ".gated-pipeline/state/developer/memory.md"
+      ]
+    },
+    "5": {
+      "required": [
+        ".gated-pipeline/cards/gate-5.md",
+        ".gated-pipeline/roles/code-reviewer.md"
+      ],
+      "optional": [
+        ".gated-pipeline/state/code-reviewer/inbox.md",
+        ".gated-pipeline/state/code-reviewer/memory.md"
+      ]
+    },
+    "6": {
+      "required": [
+        ".gated-pipeline/cards/gate-6.md",
+        ".gated-pipeline/roles/tester.md"
+      ],
+      "optional": [
+        ".gated-pipeline/state/tester/inbox.md",
+        ".gated-pipeline/state/tester/memory.md"
+      ]
+    },
+    "7": {
+      "required": [
+        ".gated-pipeline/cards/gate-7.md",
+        ".gated-pipeline/roles/security-reviewer.md"
+      ],
+      "optional": [
+        ".gated-pipeline/state/security-reviewer/inbox.md",
+        ".gated-pipeline/state/security-reviewer/memory.md"
+      ]
+    },
+    "8": {
+      "required": [
+        ".gated-pipeline/cards/gate-8.md",
+        ".gated-pipeline/roles/ops-reviewer.md"
+      ],
+      "optional": [
+        ".gated-pipeline/state/ops-reviewer/inbox.md",
+        ".gated-pipeline/state/ops-reviewer/memory.md"
+      ]
+    },
+    "9": {
+      "required": [
+        ".gated-pipeline/cards/gate-9.md",
+        ".gated-pipeline/roles/pr-approver.md"
+      ],
+      "optional": [
+        ".gated-pipeline/state/pr-approver/inbox.md",
+        ".gated-pipeline/state/pr-approver/memory.md"
+      ]
+    }
+  }
+}

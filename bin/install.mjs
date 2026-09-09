@@ -9,6 +9,7 @@ import { doctor } from '../lib/doctor.mjs'
 import { checkEvidence, prBody } from '../lib/evidence.mjs'
 import { gitHooks } from '../lib/hooks.mjs'
 import { mergedCount, parseEvents, cadenceDue } from '../lib/cadence.mjs'
+import { contextPlan, formatContext } from '../template/.gated-pipeline/workflows/context-plan.mjs'
 
 const usage=`gated-pipeline — agent-neutral delivery gates
 
@@ -16,6 +17,8 @@ const usage=`gated-pipeline — agent-neutral delivery gates
                       [--agents=both|codex|claude|none] [--dry-run]
   sync [directory] [--dry-run]
   doctor [directory] [--json]
+  context [directory] --gate=1..9 [--manifest=path] [--previous=path]
+                      [--budget-bytes=N] [--json]
   hooks [directory] [--check]
   check <evidence.json> --head=<full-SHA> [--through=1..9] [--dir=project] [--json]
   pr-body <evidence.json> --head=<full-SHA> [--through=1..9] [--dir=project]
@@ -27,10 +30,11 @@ Hooks installs a shared Git pre-push guard and refuses unrelated existing hooks.
 check validates recorded evidence; it does not run tests or contact a model.
 pr-body renders validated gate results and author/reviewer/verifier attribution.
 cadence reads GitHub's exact merged count unless --count is supplied explicitly.
+context lists only shared/current-gate file metadata; it never calls a model.
 `
 const booleans=new Set(['yes','dry-run','json','check','help'])
-const values=new Set(['slug','name','domain','coauthor','agents','head','through','dir','count','events'])
-const allowed={install:['yes','dry-run','slug','name','domain','coauthor','agents'],sync:['dry-run'],doctor:['json'],hooks:['check'],check:['head','through','dir','json'],'pr-body':['head','through','dir'],cadence:['count','events','json']}
+const values=new Set(['slug','name','domain','coauthor','agents','head','through','dir','count','events','gate','manifest','previous','budget-bytes'])
+const allowed={install:['yes','dry-run','slug','name','domain','coauthor','agents'],sync:['dry-run'],doctor:['json'],context:['gate','manifest','previous','budget-bytes','json'],hooks:['check'],check:['head','through','dir','json'],'pr-body':['head','through','dir'],cadence:['count','events','json']}
 export function parseArgs(argv) {
   const flags=new Map(),positionals=[]
   for(let i=0;i<argv.length;i++) {
@@ -90,6 +94,14 @@ export async function main(argv=process.argv.slice(2)) {
     return
   }
   if(command==='hooks'){console.log(await gitHooks(dest,{check:flags.has('check')}));return}
+  if(command==='context') {
+    const options={gate:Number(flags.get('gate'))}
+    for(const [flag,key] of [['manifest','manifest'],['previous','previous']])if(flags.has(flag))options[key]=flags.get(flag)
+    if(flags.has('budget-bytes'))options.budgetBytes=Number(flags.get('budget-bytes'))
+    const result=await contextPlan(dest,options)
+    console.log(flags.has('json')?JSON.stringify(result,null,2):formatContext(result))
+    return
+  }
   if(evidenceCommand) {
     if(!argument)throw new Error('Supply an evidence JSON file')
     const record=JSON.parse(await readFile(resolve(argument),'utf8')),project=await readProject(dest)
