@@ -11,7 +11,7 @@ function validateRequest(value) {
   for (const path of value.paths) {
     if (!string(path) || /[\\*?\[\]{}]/.test(path) || path.startsWith('/') || path.replace(/\/$/, '').split('/').some(part => !part || part === '.' || part === '..')) throw new Error('Invalid claim path; use relative files or directory prefixes')
   }
-  for (const resource of value.resources) if (!string(resource)) throw new Error('Invalid shared resource')
+  for (const resource of value.resources) if (!string(resource) || resource !== resource.trim()) throw new Error('Invalid shared resource')
   if (new Set(value.paths).size !== value.paths.length || new Set(value.resources).size !== value.resources.length) throw new Error('Invalid duplicate claim scope')
 }
 function location(root) {

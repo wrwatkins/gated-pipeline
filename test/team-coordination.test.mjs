@@ -24,6 +24,11 @@ test('only the recorded owner, run and worktree can release a claim',async t=>{
  await assert.rejects(teamRelease(root,'alpha','agent-b','agent-b'),/owner/i)
  await teamRelease(root,'alpha','agent-a','agent-a');assert.deepEqual((await teamStatus(second)).claims,[])
 })
+test('shared resources reject whitespace aliases before creating claims',async t=>{
+ const {root,second}=await repo(t);await teamClaim(root,request('alpha','agent-a',[],['merge']))
+ for(const resource of ['merge ', ' merge', '\u00a0merge', 'merge\u00a0'])await assert.rejects(teamClaim(second,request('beta','agent-b',[],[resource])),/invalid shared resource/i)
+ assert.equal((await teamStatus(root)).claims.length,1)
+})
 test('directory and single-file claims do not confuse similar prefixes',async t=>{
  const {root,second}=await repo(t);await teamClaim(root,request('alpha','agent-a',['src/app.js']))
  await teamClaim(second,request('beta','agent-b',['src/app.js.map','src-other/']))
