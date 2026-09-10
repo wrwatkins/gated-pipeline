@@ -108,3 +108,22 @@ test('check and pr-body derive docs-lite eligibility from committed Git', async 
   await put(root, 'evidence.json', JSON.stringify(r))
   assert.equal(run(['check', 'evidence.json', '--head=' + changed, '--base=' + base], root).status, 1)
 })
+
+test('nested working directory and diff.relative cannot hide runtime changes', async t => {
+  const { root } = await repo(t)
+  await put(root, 'docs/docs-policy.json', JSON.stringify({ schemaVersion: 1, paths: ['README.md'] }))
+  await put(root, 'docs/README.md', 'Nested prose.\n')
+  await put(root, 'runtime.js', 'original()\n')
+  const base = commit(root)
+  await put(root, 'runtime.js', 'changed()\n')
+  await put(root, 'docs/README.md', 'Updated nested prose.\n')
+  const head = commit(root)
+  git(root, 'config', 'diff.relative', 'true')
+  for (const directory of [root, join(root, 'docs')]) {
+    const scope = inspectDocsDiff(directory, { base, head })
+    assert.equal(scope.eligible, false)
+    assert.ok(scope.paths.some(p => p.path === 'runtime.js'))
+    assert.ok(scope.paths.some(p => p.path === 'docs/README.md'))
+    assert.equal(run(['docs-scope', '--base=' + base, '--head=' + head], directory).status, 1)
+  }
+})
