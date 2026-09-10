@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { symlink, chmod, rename, unlink } from 'node:fs/promises'
+import { symlink, chmod, rename, unlink, access } from 'node:fs/promises'
 import { join } from 'node:path'
 import { inspectDocsDiff } from '../template/.gated-pipeline/workflows/docs-scope.mjs'
 import { checkEvidence, prBody } from '../lib/evidence.mjs'
@@ -143,4 +143,80 @@ test('Git submodule ignore settings cannot hide committed instruction changes', 
   assert.equal(scope.eligible, false)
   assert.ok(scope.paths.some(p => p.path === 'vendor'))
   assert.equal(run(['docs-scope', '--base=' + base, '--head=' + head], root).status, 1)
+})
+
+
+test('scope inspection never runs textconv for prose or rejected gitlink commits', async t => {
+  const { root } = await repo(t)
+  const marker = join(root, 'textconv-ran')
+  const quote = value => "'" + value.replaceAll("'", "'\\''") + "'"
+  await put(root, '.gitattributes', '*.md diff=probe\n')
+  await put(root, 'probe.sh', `#!/bin/sh\ntouch ${quote(marker)}\ncat "$1"\n`)
+  git(root, 'config', 'diff.probe.textconv', `sh ${quote(join(root, 'probe.sh'))}`)
+  const first = commit(root)
+  await put(root, 'README.md', 'Changed prose.\n')
+  const second = commit(root)
+  assert.equal(inspectDocsDiff(root, { base: first, head: second }).eligible, true)
+  await assert.rejects(access(marker), { code: 'ENOENT' })
+  const commitIndex = () => { git(root, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.test', 'commit', '-qm', 'Fixture'); return git(root, 'rev-parse', 'HEAD') }
+  git(root, 'update-index', '--add', '--cacheinfo', `160000,${first},vendor`)
+  const base = commitIndex()
+  git(root, 'update-index', '--cacheinfo', `160000,${second},vendor`)
+  const head = commitIndex()
+  const scope = inspectDocsDiff(root, { base, head })
+  assert.equal(scope.eligible, false)
+  assert.ok(scope.reasons.includes('vendor: non-prose file mode'))
+  await assert.rejects(access(marker), { code: 'ENOENT' })
+})
+
+test('replacement commits cannot hide runtime changes under the original head SHA', async t => {
+  const { root, base } = await repo(t)
+  await put(root, 'README.md', 'Changed prose.\n')
+  await put(root, 'runtime.js', 'changed()\n')
+  const head = commit(root)
+  git(root, 'checkout', '--detach', base)
+  await put(root, 'README.md', 'Changed prose.\n')
+  const replacement = commit(root)
+  git(root, 'replace', head, replacement)
+  const scope = inspectDocsDiff(root, { base, head })
+  assert.equal(scope.eligible, false)
+  assert.ok(scope.paths.some(p => p.path === 'runtime.js'))
+})
+
+test('replacement policy blobs cannot expand the trusted base allowlist', async t => {
+  const { root, base } = await repo(t, { schemaVersion: 1, paths: ['README.md'] })
+  await put(root, 'docs/guides/start.md', 'Outside original policy.\n')
+  const head = commit(root)
+  const policyBlob = git(root, 'rev-parse', `${base}:docs-policy.json`)
+  await put(root, 'replacement.json', JSON.stringify({ schemaVersion: 1, paths: ['docs/'] }))
+  const replacement = git(root, 'hash-object', '-w', 'replacement.json')
+  git(root, 'replace', policyBlob, replacement)
+  const scope = inspectDocsDiff(root, { base, head })
+  assert.equal(scope.eligible, false)
+  assert.ok(scope.reasons.includes('docs/guides/start.md: outside base policy'))
+})
+
+test('submodule diff formatting cannot invoke a populated submodule textconv driver', async t => {
+  const source = await repo(t)
+  await put(source.root, '.gitattributes', '*.md diff=probe\n')
+  const first = commit(source.root)
+  await put(source.root, 'README.md', 'Changed submodule prose.\n')
+  const second = commit(source.root)
+  const { root } = await repo(t)
+  git(root, '-c', 'protocol.file.allow=always', 'submodule', 'add', '-q', source.root, 'vendor')
+  const vendor = join(root, 'vendor')
+  git(vendor, 'checkout', '--detach', first)
+  const base = commit(root)
+  git(vendor, 'checkout', '--detach', second)
+  const head = commit(root)
+  const marker = join(root, 'submodule-textconv-ran')
+  const quote = value => "'" + value.replaceAll("'", "'\\''") + "'"
+  await put(root, 'probe.sh', `#!/bin/sh\ntouch ${quote(marker)}\ncat "$1"\n`)
+  git(vendor, 'config', 'diff.probe.textconv', `sh ${quote(join(root, 'probe.sh'))}`)
+  git(root, 'config', 'diff.submodule', 'diff')
+  await assert.rejects(access(marker), { code: 'ENOENT' })
+  const scope = inspectDocsDiff(root, { base, head })
+  assert.equal(scope.eligible, false)
+  assert.ok(scope.paths.some(p => p.path === 'vendor'))
+  await assert.rejects(access(marker), { code: 'ENOENT' })
 })
