@@ -11,6 +11,7 @@
     "bin/",
     "template/",
     "README.md",
+    "CLI.md",
     "GENERALIZATION-NOTES.md",
     "LICENSE",
     "lib/",
