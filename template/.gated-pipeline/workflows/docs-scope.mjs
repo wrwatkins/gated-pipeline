@@ -21,7 +21,7 @@ export function inspectDocsDiff(directory, { base, head } = {}) {
   const policyPath = 'docs-policy.json'
   if (!git(['ls-tree', base, '--', policyPath]).startsWith('100644 blob ')) throw new Error('Base must contain a regular docs-policy.json')
   let policy
-  try { policy = JSON.parse(git(['show', `${base}:${policyPath}`])) }
+  try { policy = JSON.parse(git(['cat-file', 'blob', `${base}:${policyPath}`])) }
   catch { throw new Error('Cannot read the trusted base docs policy') }
   if (!policy || Object.keys(policy).sort().join(',') !== 'paths,schemaVersion' || policy.schemaVersion !== 1 ||
       !Array.isArray(policy.paths) || !policy.paths.length || policy.paths.some(p => !safe(p)) || new Set(policy.paths).size !== policy.paths.length) {
@@ -39,7 +39,7 @@ export function inspectDocsDiff(directory, { base, head } = {}) {
     if (!path.endsWith('.md') || path.split('/').some(p => p.startsWith('.')) || sensitive.test(path)) reasons.push(`${path}: excluded file or policy/evidence path`)
     if (!policy.paths.some(p => p.endsWith('/') ? path.startsWith(p) : path === p)) reasons.push(`${path}: outside base policy`)
     for (const [revision, mode] of [[base, before], [head, after]]) {
-      if (mode !== '000000' && git(['show', `${revision}:${path}`]).includes('\0')) reasons.push(`${path}: binary content`)
+      if (mode === '100644' && git(['cat-file', 'blob', `${revision}:${path}`]).includes('\0')) reasons.push(`${path}: binary content`)
     }
   }
   if (!paths.length) reasons.push('Empty committed diff')

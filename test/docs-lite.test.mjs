@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { symlink, chmod, rename, unlink } from 'node:fs/promises'
+import { symlink, chmod, rename, unlink, access } from 'node:fs/promises'
 import { join } from 'node:path'
 import { inspectDocsDiff } from '../template/.gated-pipeline/workflows/docs-scope.mjs'
 import { checkEvidence, prBody } from '../lib/evidence.mjs'
@@ -143,4 +143,28 @@ test('Git submodule ignore settings cannot hide committed instruction changes', 
   assert.equal(scope.eligible, false)
   assert.ok(scope.paths.some(p => p.path === 'vendor'))
   assert.equal(run(['docs-scope', '--base=' + base, '--head=' + head], root).status, 1)
+})
+
+
+test('scope inspection never runs textconv for prose or rejected gitlink commits', async t => {
+  const { root } = await repo(t)
+  const marker = join(root, 'textconv-ran')
+  const quote = value => "'" + value.replaceAll("'", "'\\''") + "'"
+  await put(root, '.gitattributes', '*.md diff=probe\n')
+  await put(root, 'probe.sh', `#!/bin/sh\ntouch ${quote(marker)}\ncat "$1"\n`)
+  git(root, 'config', 'diff.probe.textconv', `sh ${quote(join(root, 'probe.sh'))}`)
+  const first = commit(root)
+  await put(root, 'README.md', 'Changed prose.\n')
+  const second = commit(root)
+  assert.equal(inspectDocsDiff(root, { base: first, head: second }).eligible, true)
+  await assert.rejects(access(marker), { code: 'ENOENT' })
+  const commitIndex = () => { git(root, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.test', 'commit', '-qm', 'Fixture'); return git(root, 'rev-parse', 'HEAD') }
+  git(root, 'update-index', '--add', '--cacheinfo', `160000,${first},vendor`)
+  const base = commitIndex()
+  git(root, 'update-index', '--cacheinfo', `160000,${second},vendor`)
+  const head = commitIndex()
+  const scope = inspectDocsDiff(root, { base, head })
+  assert.equal(scope.eligible, false)
+  assert.ok(scope.reasons.includes('vendor: non-prose file mode'))
+  await assert.rejects(access(marker), { code: 'ENOENT' })
 })
