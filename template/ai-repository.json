@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "areas": {
+    "standards": "docs/standards/README.md",
+    "context": "docs/context/PROJECT.md",
+    "prompts": "docs/prompts/README.md",
+    "orchestration": "docs/orchestration/README.md",
+    "audit": "docs/audit/README.md",
+    "security": "docs/security/README.md",
+    "responsibilities": "docs/governance/RACI.md",
+    "metrics": "docs/metrics/README.md",
+    "cost": "docs/cost/README.md"
+  },
+  "dataClasses": [
+    "public",
+    "internal",
+    "pii",
+    "secrets"
+  ],
+  "promptRegistry": "prompts/registry.json",
+  "auditLog": ".gated-pipeline/audit/actions.jsonl",
+  "costPolicy": "cost-policy.json",
+  "accountableOwners": {
+    "standards": null,
+    "context": null,
+    "prompts": null,
+    "orchestration": null,
+    "audit": null,
+    "security": null,
+    "responsibilities": null,
+    "metrics": null,
+    "cost": null
+  }
+}

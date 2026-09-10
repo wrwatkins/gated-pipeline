@@ -47,6 +47,11 @@ unknown; file size and API prices cannot predict subscription deductions.
 required path. It calls for narrower task context or smaller durable documents,
 not silently discarding constraints. The default 64KiB is a document-size warning,
 not a model context limit, token cap, currency budget or measured cache saving.
+Keep the model's context capacity accurate. Reducing `model_context_window` or
+an instruction-size cap can force earlier compaction or truncate requirements;
+use selective loading to reduce input and measure the result before changing
+provider limits. Cached tokens and compacted history still have provider-specific
+costs. A smaller visible conversation is not proof of lower total usage.
 
 ## Avoid repeated work
 

@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "areas": {
+      "type": "object",
+      "properties": {
+        "standards": {
+          "type": "string",
+          "minLength": 1
+        },
+        "context": {
+          "type": "string",
+          "minLength": 1
+        },
+        "prompts": {
+          "type": "string",
+          "minLength": 1
+        },
+        "orchestration": {
+          "type": "string",
+          "minLength": 1
+        },
+        "audit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "security": {
+          "type": "string",
+          "minLength": 1
+        },
+        "responsibilities": {
+          "type": "string",
+          "minLength": 1
+        },
+        "metrics": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cost": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "standards",
+        "context",
+        "prompts",
+        "orchestration",
+        "audit",
+        "security",
+        "responsibilities",
+        "metrics",
+        "cost"
+      ],
+      "additionalProperties": false
+    },
+    "dataClasses": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "public",
+          "internal",
+          "pii",
+          "secrets"
+        ]
+      },
+      "minItems": 4,
+      "uniqueItems": true
+    },
+    "promptRegistry": {
+      "type": "string",
+      "minLength": 1
+    },
+    "auditLog": {
+      "type": "string",
+      "minLength": 1
+    },
+    "costPolicy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "accountableOwners": {
+      "type": "object",
+      "properties": {
+        "standards": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "context": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prompts": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "orchestration": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "audit": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "security": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "responsibilities": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "metrics": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cost": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "standards",
+        "context",
+        "prompts",
+        "orchestration",
+        "audit",
+        "security",
+        "responsibilities",
+        "metrics",
+        "cost"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "areas",
+    "dataClasses",
+    "promptRegistry",
+    "auditLog",
+    "costPolicy",
+    "accountableOwners"
+  ],
+  "additionalProperties": false
+}

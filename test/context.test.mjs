@@ -102,3 +102,21 @@ test('installed context manifest works and survives project overrides during syn
   assert.equal(run(['sync'], root).status, 0)
   assert.equal(JSON.parse(await readFile(join(root, path), 'utf8')).gates['4'].optional.at(-1), 'local-notes.md')
 })
+test('generated adapters keep bootstrap small and each real gate plan scoped', async t => {
+  const root = await fixture(t)
+  assert.equal(run(['install', '--yes'], root).status, 0)
+  const entry = await readFile(join(root, 'AGENTS.md'), 'utf8')
+  assert.ok(Buffer.byteLength(entry) < 2048, 'managed bootstrap must remain a pointer, not the full process')
+  assert.match(entry, /fresh session or compaction/)
+  const core = await readFile(join(root, 'docs/PROCESS.md'), 'utf8')
+  assert.match(core, /reuse already-read unchanged instructions/)
+  for (let gate = 1; gate <= 9; gate++) {
+    const result = run(['context', `--gate=${gate}`, '--json'], root)
+    assert.equal(result.status, 0, result.stderr)
+    const cards = JSON.parse(result.stdout).files.filter(f => f.path.includes('/cards/'))
+    assert.deepEqual(cards.map(f => f.path), [`.gated-pipeline/cards/gate-${gate}.md`])
+  }
+  await assert.rejects(readFile(join(root, '.claude/rules/gates/gate-1.md')), { code: 'ENOENT' })
+  const adapter = await readFile(join(root, '.claude/agents/developer.md'), 'utf8')
+  assert.doesNotMatch(adapter, /^model:/m, 'portable adapters must honor the configured user model')
+})

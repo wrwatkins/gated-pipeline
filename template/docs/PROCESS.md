@@ -8,6 +8,24 @@ Run `gated-pipeline doctor`. Configure machine-consumed commands, paths and capa
 
 `AGENTS.md` is the shared entry point; Claude's `CLAUDE.md` imports it. Core procedures are outside native rule-discovery directories. Read this CORE, project context and only the current gate's card/role. The optional Claude and Codex adapters route to the same files; provider frontmatter and hook behavior are not portable permissions. Models use the harness/user's settings. Never substitute a provider model name into another provider's configuration.
 
+### Context freshness and size
+
+Run `gated-pipeline context --gate=N` for the shared/current-role reading index.
+Add applicable nested instructions, source and upstream task artifacts. Read
+required instructions on a fresh agent/session, after compaction, when bytes
+change or when the content is no longer available in the current context.
+Within one uninterrupted context, reuse already-read unchanged instructions
+across gates. A prior snapshot measures disk freshness; it cannot certify that
+an agent read or retained a file. Never omit a prerequisite to meet a size budget.
+
+Keep full procedures outside automatic rule-discovery directories and current
+status separate from historical detail. Give independent reviewers the current
+SHA, scope, diff/base, relevant rules, BR/TDS, test evidence and unresolved
+findings; avoid a full conversation fork for a bounded review. They still inspect
+source and may request missing context. Gate order, reviewer independence and
+evidence requirements are unchanged. Load the [execution-cost guide](../.gated-pipeline/guides/execution-cost.md)
+when tuning a run, not at every gate.
+
 ## Gates and profiles
 
 The canonical gate order and role/card paths are in [the registry](../.gated-pipeline/REGISTRY.json): requirements → architecture → technical design → develop → code review → test → security → operations → PR approval. Optional discovery widens alternatives before requirements when needed.
