@@ -1,6 +1,6 @@
 # Local merge readiness
 
-Framework skill version: 1.0.0; delivered and fingerprinted by the installed framework release.
+Framework skill version: 1.1.0; delivered and fingerprinted by the installed framework release.
 
 Use immediately before an authorized merge. Run locally in the current Codex,
 Claude or other agent workflow. No bot approval, hosted AI review or additional
@@ -11,10 +11,12 @@ or an authorized independent agent, never a renamed author session.
 1. Read current project merge policy, applicable gate evidence and the actual
    independent review. Preserve user authorization already given for this scope.
    `gated-pipeline check <evidence.json> --head=<current-head> --through=9`
-   validates the framework gate contract. For a project with its own evidence
+   validates the framework gate contract. For opted-in ordinary prose, follow
+   [docs-lite](../guides/docs-lite.md) and also supply `--base=<trusted-base>`;
+   its final validation covers gates 4 and 5. For a project with its own evidence
    schema, run its declared checker and audit its gate blocks instead.
 2. Obtain the PR's current full head from GitHub. Confirm the intended repository,
-   target branch, open/non-draft state, real review result and no unresolved
+   target branch, full base SHA, open/non-draft state, real review result and no unresolved
    changes requests. Never change the SHA on old evidence to make it match. If
    only docs changed, the reviewer must inspect that delta and explicitly rebind
    the result. Record actual author/reviewer tool, model and run in PR attribution.
@@ -50,3 +52,16 @@ For a legitimately conditional job, add `skipped` and a concrete skipReason;
 verify that condition for this diff. Required check names can refer to existing
 hosted or self-hosted runner jobs. This skill adds no Actions job, runner or model
 API call; changing where existing CI runs is a separate project decision.
+
+## Complete committed diff
+
+Before review, capture the base/head and enumerate all changed files with
+`git diff --name-status --no-renames <base> <head> --`. Inspect deletions and
+renamed sources as well as new destinations. Run
+`git diff --check <base> <head> --`; a clean `git diff --check` alone sees only
+unstaged tracked edits and says nothing about already committed whitespace.
+Before committing, also inspect `git diff --cached --check`, the staged file list
+and `git ls-files --others --exclude-standard` so newly added evidence is included.
+After the commit, rerun the complete committed-diff check at the actual head.
+Record exact scope, command and result. Re-read source/target movement before
+merge and refresh affected review/check evidence; preserve earlier failed rounds.

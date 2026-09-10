@@ -1,6 +1,6 @@
 # Coordinate a local agent team
 
-Framework skill version: 1.0.0; delivered and fingerprinted by the installed framework release.
+Framework skill version: 1.1.0; delivered and fingerprinted by the installed framework release.
 
 Use when multiple top-level agents or humans work in the same repository. Keep
 one lead per delivery unit, one isolated worktree per writer, and independent
@@ -55,3 +55,26 @@ Keep separate-clone or separate-machine teams on an explicitly chosen shared
 coordination record; do not claim that local Git metadata reaches those agents.
 Measure conflicts, duplicate runs and total accepted-work cost before adding more
 workers. This skill launches no agents, paid services, watchers or GitHub jobs.
+
+## Inspect before and after cleanup
+
+Clean up only authorized, inspected, completed work. Before deleting any branch
+or worktree, capture live worktrees, claims/owners, open PRs, branch/object IDs,
+upstreams, unpublished commits, dirty/untracked/ignored files and `refs/stash`
+with every stash commit ID. Check both ancestry and the actual diff: a squash
+merge may not appear as an ancestor. A merged label or clean tree alone is
+insufficient. Recheck owners immediately before deletion; a new task may have
+started after the initial inventory. Never delete another live claim or tree.
+
+Preserve authorized recovery outside the paths being removed, including unique
+objects and files that Git bundles omit. Verify the bundle/object IDs and a
+recovery clone or restore before deleting their live copies. Keep recovery private;
+ignored files may contain secrets. Unpublished or uncertain work stays put unless
+its owner explicitly authorizes disposal. Do not force-delete to simplify cleanup.
+
+Afterward, compare live worktrees, branches, stash ref/IDs and claims with the
+expected retained set and record actual removed/retained IDs and backup location.
+If a live ref disappeared, report it as missing even when its objects survive in
+a verified backup. “Recoverable” and “still in the live stash list” are different
+facts. Stop further cleanup on an unexpected change and preserve recovery; do
+not silently recreate/drop/prune refs or rewrite the historical receipt.

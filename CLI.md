@@ -88,6 +88,25 @@ The generated PR section identifies the author, code reviewer, test verifier, se
 The [complete examples](examples/README.md) show a Node CLI and a Python library, including mixed-agent evidence fixtures. Fixture attribution is labeled synthetic; it is not a claim that agents actually reviewed the examples.
 
 
+## Ordinary prose fast path
+
+`docs-lite` is opt-in through project-owned `docs-policy.json` (disabled by the
+empty installed default). It uses gate 4 preparation and one independent gate 5
+review/verification/approval with named fast CI. Full/docs/chore are unchanged.
+
+```sh
+npx gated-pipeline docs-scope --base=<trusted-base-SHA> --head=<current-head-SHA> --json
+npx gated-pipeline check <record.json> --base=<trusted-base-SHA> --head=<current-head-SHA>
+npx gated-pipeline pr-body <record.json> --base=<trusted-base-SHA> --head=<current-head-SHA>
+```
+
+The CLI inspects the complete committed Git diff and the policy at the supplied
+base. Obtain that base independently from the current PR; the helper makes no
+GitHub call. It cannot determine semantic eligibility from names. Follow the
+[docs-lite guide](template/.gated-pipeline/guides/docs-lite.md) for scope exclusions,
+actual review, two-record evidence and upgrade rules. This profile never removes
+existing GitHub checks or grants merge/deployment authority.
+
 ## What is enforced
 
 - Installer/sync: local edits and project state are preserved; conflicting framework updates stop before any files change.

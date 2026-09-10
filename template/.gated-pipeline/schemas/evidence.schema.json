@@ -15,7 +15,8 @@
       "enum": [
         "full",
         "docs",
-        "chore"
+        "chore",
+        "docs-lite"
       ]
     },
     "headSha": {

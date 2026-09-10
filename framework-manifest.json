@@ -43,7 +43,8 @@
     "docs/cost/",
     "prompts/",
     ".gated-pipeline/audit/",
-    "merge-policy.json"
+    "merge-policy.json",
+    "docs-policy.json"
   ],
   "merged": [
     "AGENTS.md",

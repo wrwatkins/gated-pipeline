@@ -1,6 +1,6 @@
 # Card to deployed change
 
-The existing nine gates are the delivery state machine. This map connects product work to them without adding another competing pipeline.
+The existing nine gates are the default delivery state machine. Projects may opt ordinary prose into the two-record [docs-lite profile](../../.gated-pipeline/guides/docs-lite.md). This map connects product work to them without adding another competing pipeline.
 
 | Work stage | Gates and artifact | Exit evidence |
 | --- | --- | --- |

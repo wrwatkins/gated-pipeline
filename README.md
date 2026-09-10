@@ -32,7 +32,7 @@ A fresh scaffold deliberately reports an unconfigured test command until you sup
 
 ## One process across agents
 
-The nine roles are requirements → architecture → technical design → develop → code review → test → security → operations → approval. An optional discovery role precedes requirements. Profiles (`full`, `docs`, `chore`) vary applicable work; all nine gates remain represented and each no-op needs a reason. See [PROCESS](template/docs/PROCESS.md).
+The nine roles are requirements → architecture → technical design → develop → code review → test → security → operations → approval. An optional discovery role precedes requirements. Profiles (`full`, `docs`, `chore`) vary applicable work; all nine gates remain represented and each no-op needs a reason. The opt-in `docs-lite` profile uses author preparation and one independent review for ordinary prose, with fast named CI and complete committed-diff verification. Policy, instructions and release/audit evidence stay on the normal path. See [PROCESS](template/docs/PROCESS.md).
 
 Provider-neutral cards, roles, guides, schemas and orchestration live in `.gated-pipeline/`. Only applicable path-scoped Claude rules are generated under `.claude/rules/`. Codex uses `AGENTS.md` routing. Neither provider inherits the other's models, tool names or hook permissions. Models follow the current user/harness settings.
 
@@ -52,6 +52,8 @@ framework installs no approval bot, hosted reviewer or background agent.
 | Configure ownership, prompts, audit and budget policy | [AI-first contract](CLI.md#ai-first-repository-contract) |
 | Select models, scope context and compare snapshots | [Model and context costs](CLI.md#model-and-context-costs) |
 | Coordinate leads and check current-commit reviews | [Local review and team coordination](CLI.md#local-review-and-team-coordination) |
+| Adopt the ordinary prose fast path | [Docs-lite eligibility and evidence](template/.gated-pipeline/guides/docs-lite.md) |
+| Reuse tests/audits or clean up finished work | [Evidence reuse](template/.gated-pipeline/guides/evidence-reuse.md), [team cleanup](template/.gated-pipeline/skills/team-coordination.md#inspect-before-and-after-cleanup) |
 | Validate evidence and generate PR attribution | [Attributed PR evidence](CLI.md#attributed-pr-evidence) |
 | Understand checks and their limits | [What is enforced](CLI.md#what-is-enforced) |
 | Upgrade an existing scaffold safely | [Updates and migration](CLI.md#safe-updates-and-migration) |
