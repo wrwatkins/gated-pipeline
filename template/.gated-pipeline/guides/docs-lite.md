@@ -26,7 +26,8 @@ gated-pipeline docs-scope --base=<trusted-base-SHA> --head=<current-head-SHA> --
 ```
 
 The helper inspects the complete committed diff, including additions, deletions
-and both sides of renames. Only regular, non-executable Markdown in the base
+and both sides of renames. It overrides relative-diff and submodule-ignore
+settings so neither can hide committed changes. Only regular, non-executable Markdown in the base
 allowlist is eligible. It rejects hidden files, symlinks, binary content,
 whitespace errors and named policy/security/release/audit/evidence/instruction
 paths. Head cannot authorize its own policy expansion. It reports paths and a

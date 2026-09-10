@@ -32,7 +32,7 @@ A fresh scaffold deliberately reports an unconfigured test command until you sup
 
 ## One process across agents
 
-The nine roles are requirements → architecture → technical design → develop → code review → test → security → operations → approval. An optional discovery role precedes requirements. Profiles (`full`, `docs`, `chore`) vary applicable work; all nine gates remain represented and each no-op needs a reason. The opt-in `docs-lite` profile uses author preparation and one independent review for ordinary prose, with fast named CI and complete committed-diff verification. Policy, instructions and release/audit evidence stay on the normal path. See [PROCESS](template/docs/PROCESS.md).
+The nine roles are requirements → architecture → technical design → develop → code review → test → security → operations → approval. An optional discovery role precedes requirements. Profiles (`full`, `docs`, `chore`) vary applicable work; all nine gates remain represented and each no-op needs a reason. The opt-in `docs-lite` profile uses author preparation and one independent review for ordinary prose, with fast named CI and complete committed-diff verification, including submodule changes regardless of Git ignore settings. Policy, instructions and release/audit evidence stay on the normal path. See [PROCESS](template/docs/PROCESS.md).
 
 Provider-neutral cards, roles, guides, schemas and orchestration live in `.gated-pipeline/`. Only applicable path-scoped Claude rules are generated under `.claude/rules/`. Codex uses `AGENTS.md` routing. Neither provider inherits the other's models, tool names or hook permissions. Models follow the current user/harness settings.
 

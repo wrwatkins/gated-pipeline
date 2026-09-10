@@ -127,3 +127,20 @@ test('nested working directory and diff.relative cannot hide runtime changes', a
     assert.equal(run(['docs-scope', '--base=' + base, '--head=' + head], directory).status, 1)
   }
 })
+
+test('Git submodule ignore settings cannot hide committed instruction changes', async t => {
+  const { root, base: first } = await repo(t)
+  const second = commit(root)
+  const commitIndex = () => { git(root, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.test', 'commit', '-qm', 'Fixture'); return git(root, 'rev-parse', 'HEAD') }
+  git(root, 'update-index', '--add', '--cacheinfo', `160000,${first},vendor`)
+  const base = commitIndex()
+  git(root, 'update-index', '--cacheinfo', `160000,${second},vendor`)
+  await put(root, 'README.md', 'Changed prose.\n')
+  git(root, 'add', 'README.md')
+  const head = commitIndex()
+  git(root, 'config', 'diff.ignoreSubmodules', 'all')
+  const scope = inspectDocsDiff(root, { base, head })
+  assert.equal(scope.eligible, false)
+  assert.ok(scope.paths.some(p => p.path === 'vendor'))
+  assert.equal(run(['docs-scope', '--base=' + base, '--head=' + head], root).status, 1)
+})
