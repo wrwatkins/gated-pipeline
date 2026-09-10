@@ -35,8 +35,9 @@ Assign and explain a profile before implementation:
 - **full:** production behavior, dependencies, security, data, migrations, infrastructure or ambiguous changes.
 - **docs:** only documentation content, with no execution, policy or loader changes.
 - **chore:** tooling/test-only changes without production impact. Check the actual diff; instructions, CI and policy edits are not automatically harmless.
+- **docs-lite:** project-opted-in ordinary prose only; two actual records (4 author, 5 independent review/verification/approval). Follow the [eligibility and evidence guide](../.gated-pipeline/guides/docs-lite.md). Policy, instructions and release/audit evidence are excluded.
 
-Every gate is represented. Gates 1–3 may use `PASS_NA` with a concrete reason when no decision/artifact is needed. Later gates must complete their applicable checks and record `PASS` or `FAIL`; individual n/a checks need evidence and a reason. A missing/failed/skipped execution is never a passing execution. The generic validator does not infer whether a profile is honest from the diff; the reviewer and approver audit that decision.
+For full/docs/chore, every gate is represented. Gates 1–3 may use `PASS_NA` with a concrete reason when no decision/artifact is needed. Later gates must complete their applicable checks and record `PASS` or `FAIL`; individual n/a checks need evidence and a reason. A missing/failed/skipped execution is never a passing execution. The generic validator does not infer whether a profile is honest from the diff; the reviewer and approver audit that decision.
 
 Follow gate order. On rework, record a new attempt and revalidate downstream gates. Gates 5, 6 and 7 may each fan out into independent read-only dimensions internally; all dimensions must return before that one gate completes. The optional `.gated-pipeline/workflows/review-gate.mjs` accepts a caller-provided reviewer function and returns supporting reports. It is not a model runtime or an alternate route around gate prerequisites. Gate 8 remains sequential.
 
@@ -58,18 +59,18 @@ Every attempt names its actual actor:
 
 Use `claude-code`, `codex`, or another real tool identifier for agents. For a human, use `kind: "human"`, `tool: "none"` and `model: null`; absence is not human attribution. Actor IDs identify the real participant/run and must remain stable. Models and run links are nullable when the harness does not expose them; never guess. Keep private session links out of public PRs. If multiple people/tools collaborate in a role, record separate actual attempts so all contributions survive.
 
-The PR body records author (gate 4), reviewer (5), verifier (6), security reviewer (7), operations verifier (8) and approver (9), along with planning roles. By default the author cannot also supply gates 5, 7 or 9 under the same actor/run. A different label on self-review is not independence; do not fabricate an identity to pass validation. Independent review remains pending when unavailable. Commit `Assistant:`/`Co-Authored-By` conventions may supplement this record, but do not prove who reviewed a PR. Attribution is auditable declaration, not cryptographic attestation.
+For full/docs/chore, the PR body records author (gate 4), reviewer (5), verifier (6), security reviewer (7), operations verifier (8) and approver (9), along with planning roles. By default the author cannot also supply gates 5, 7 or 9 under the same actor/run. A different label on self-review is not independence; do not fabricate an identity to pass validation. Independent review remains pending when unavailable. Commit `Assistant:`/`Co-Authored-By` conventions may supplement this record, but do not prove who reviewed a PR. Attribution is auditable declaration, not cryptographic attestation.
 
 Each check includes status (`pass`, `fail`, `na`), source (`command`, `ci`, `manual`), a durable result reference, command and exit code when executed, and a reason for n/a. Record expected suite completion, skips, environment and limitations in the referenced evidence. A command exit code alone does not establish that tests completed. Keep failed attempts and findings; resolve findings explicitly after repair.
 
-Run checks once per relevant code revision and reuse their evidence. The validator requires completed gates on the independently supplied full SHA. When code changes, rerun affected checks and reconfirm other gates for that revision. Do not embed the final SHA into a committed evidence file on that same SHA: keep in-flight records under ignored `.gated-pipeline/evidence/`, then retain the JSON in the PR body/attachment or a durable CI artifact. Later trace records reference the completed revision.
+Run checks once per relevant code revision and reuse their evidence under the [source, inventory, environment and freshness rules](../.gated-pipeline/guides/evidence-reuse.md). The validator requires completed gates on the independently supplied full SHA. When code changes, rerun affected checks and reconfirm other gates for that revision. Do not embed the final SHA into a committed evidence file on that same SHA: keep in-flight records under ignored `.gated-pipeline/evidence/`, then retain the JSON in the PR body/attachment or a durable CI artifact. Later trace records reference the completed revision.
 
 ```sh
 gated-pipeline check .gated-pipeline/evidence/unit.json --head=<reviewed-full-SHA> --through=8
 gated-pipeline pr-body .gated-pipeline/evidence/unit.json --head=<reviewed-full-SHA> --through=8 > pr-body.md
 ```
 
-`check` defaults to gates 1–9; `pr-body` defaults to 1–8 because approval follows review. After gate 9, rerender with `--through=9` to preserve approver attribution. Commands validate declared records; they do not execute project checks or independently authenticate a CI run. Real CI must run the project's checks, and an independent reviewer must assess evidence quality.
+For full/docs/chore, `check` defaults to gates 1–9; `pr-body` defaults to 1–8 because approval follows review. After gate 9, rerender with `--through=9` to preserve approver attribution. Commands validate declared records; they do not execute project checks or independently authenticate a CI run. Real CI must run the project's checks, and an independent reviewer must assess evidence quality.
 
 ## Branch and merge
 

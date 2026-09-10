@@ -10,6 +10,7 @@ import { governance, costCheck } from '../lib/governance.mjs'
 import { checkEvidence, prBody } from '../lib/evidence.mjs'
 import { gitHooks } from '../lib/hooks.mjs'
 import { mergedCount, parseEvents, cadenceDue } from '../lib/cadence.mjs'
+import { inspectDocsDiff } from '../template/.gated-pipeline/workflows/docs-scope.mjs'
 import { contextPlan, formatContext } from '../template/.gated-pipeline/workflows/context-plan.mjs'
 
 const usage=`gated-pipeline — agent-neutral delivery gates
@@ -22,9 +23,10 @@ const usage=`gated-pipeline — agent-neutral delivery gates
   cost-check <usage.json> [--dir=project] [--json]
   context [directory] --gate=1..9 [--manifest=path] [--previous=path]
                       [--budget-bytes=N] [--json]
+  docs-scope [directory] --base=<full-SHA> --head=<full-SHA> [--json]
   hooks [directory] [--check]
-  check <evidence.json> --head=<full-SHA> [--through=1..9] [--dir=project] [--json]
-  pr-body <evidence.json> --head=<full-SHA> [--through=1..9] [--dir=project]
+  check <evidence.json> --head=<full-SHA> [--through=1..9] [--dir=project] [--base=<full-SHA>] [--json]
+  pr-body <evidence.json> --head=<full-SHA> [--through=1..9] [--dir=project] [--base=<full-SHA>]
   cadence [directory] [--count=N] [--events=path] [--json]
 
 Install defaults to both Codex and Claude Code adapters. --yes supplies identity
@@ -38,8 +40,8 @@ governance validates structure, prompt fingerprints and declared audit records.
 cost-check compares recorded usage with configured budgets; it does not meter usage.
 `
 const booleans=new Set(['yes','dry-run','json','check','help'])
-const values=new Set(['slug','name','domain','coauthor','agents','head','through','dir','count','events','gate','manifest','previous','budget-bytes'])
-const allowed={install:['yes','dry-run','slug','name','domain','coauthor','agents'],sync:['dry-run'],doctor:['json'],governance:['json'],'cost-check':['dir','json'],context:['gate','manifest','previous','budget-bytes','json'],hooks:['check'],check:['head','through','dir','json'],'pr-body':['head','through','dir'],cadence:['count','events','json']}
+const values=new Set(['slug','name','domain','coauthor','agents','head','through','dir','count','events','gate','manifest','previous','budget-bytes','base'])
+const allowed={install:['yes','dry-run','slug','name','domain','coauthor','agents'],sync:['dry-run'],doctor:['json'],governance:['json'],'cost-check':['dir','json'],context:['gate','manifest','previous','budget-bytes','json'],'docs-scope':['base','head','json'],hooks:['check'],check:['head','through','dir','json','base'],'pr-body':['head','through','dir','base'],cadence:['count','events','json']}
 export function parseArgs(argv) {
   const flags=new Map(),positionals=[]
   for(let i=0;i<argv.length;i++) {
@@ -111,6 +113,12 @@ export async function main(argv=process.argv.slice(2)) {
     if(result.status!=='within_budget')process.exitCode=1
     return
   }
+  if(command==='docs-scope') {
+    const result=inspectDocsDiff(dest,{base:flags.get('base'),head:flags.get('head')})
+    console.log(JSON.stringify(result,null,2))
+    if(!result.eligible)process.exitCode=1
+    return
+  }
   if(command==='hooks'){console.log(await gitHooks(dest,{check:flags.has('check')}));return}
   if(command==='context') {
     const options={gate:Number(flags.get('gate'))}
@@ -124,9 +132,10 @@ export async function main(argv=process.argv.slice(2)) {
     if(!argument)throw new Error('Supply an evidence JSON file')
     const record=JSON.parse(await readFile(resolve(argument),'utf8')),project=await readProject(dest)
     const through=flags.has('through')?Number(flags.get('through')):command==='pr-body'?8:9
-    const result=checkEvidence(record,project,{head:flags.get('head'),through})
+    const docsScope=record.profile==='docs-lite'?inspectDocsDiff(dest,{base:flags.get('base'),head:flags.get('head')}):null
+    const result=checkEvidence(record,project,{head:flags.get('head'),through,docsScope})
     if(result.errors.length){if(flags.has('json'))console.log(JSON.stringify({valid:false,errors:result.errors},null,2));else console.error(result.errors.join('\n'));process.exitCode=1;return}
-    console.log(command==='pr-body'?prBody(record,result.latest):flags.has('json')?JSON.stringify({valid:true,head:record.headSha,through}):`PASS: attributed gates 1–${through} at ${record.headSha}`)
+    console.log(command==='pr-body'?prBody(record,result.latest):flags.has('json')?JSON.stringify({valid:true,head:record.headSha,through}):`PASS: ${record.profile} attributed gates ${result.latest.map(e=>e.gate).join(',')} at ${record.headSha}`)
     return
   }
   if(command==='cadence') {
