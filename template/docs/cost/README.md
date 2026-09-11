@@ -17,3 +17,13 @@ A project-relative usage file follows `.gated-pipeline/schemas/usage.schema.json
 The command reports each configured limit, measured value and within_budget/exceeded/unknown status. Exceeded or missing measurements for a configured limit exit nonzero; no configured limits also returns unknown. Unconfigured dimensions are listed and are outside the verdict. The result is a check on declared, already-recorded usage; it cannot stop a running agent, validate a receipt's truth, aggregate concurrent workers automatically or guarantee future spending. A runner must provide complete unit-level totals and wire the check into its handoff/CI flow to make it a gate.
 
 [Execution guidance](../../.gated-pipeline/guides/execution-cost.md) covers progressive context disclosure, bounded reviewer packets, evidence reuse and escalation. Save compact handoffs before context loss. Measure actual usage before claiming savings from shorter files.
+
+Use `gated-pipeline calibrate samples.json --json` to summarize several recorded
+delivery units before tuning. The shipped calibration schema includes attempts,
+failures, actual model metadata, context packet bytes and checks run/reused.
+Preserve unknown counters and incomplete histories; use distinct non-overlapping
+usage receipts. All attempts and rejected units contribute to acceptance costs.
+Only complete settled populations with measured metrics produce a per-accepted
+figure. No API-price conversion estimates subscription deductions. See the
+[execution guide](../../.gated-pipeline/guides/execution-cost.md#calibrate-on-real-delivery-units)
+for the collection workflow. Calibration reports are advisory and change no gates.

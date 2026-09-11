@@ -1,0 +1,245 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "units": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/@+\\-]{0,127}$"
+          },
+          "kind": {
+            "enum": [
+              "code",
+              "docs",
+              "policy",
+              "security",
+              "mixed"
+            ]
+          },
+          "risk": {
+            "enum": [
+              "low",
+              "standard",
+              "high"
+            ]
+          },
+          "route": {
+            "enum": [
+              "routine",
+              "standard",
+              "sensitive",
+              "mixed",
+              "unknown"
+            ]
+          },
+          "billing": {
+            "enum": [
+              "subscription",
+              "api",
+              "mixed",
+              "unknown"
+            ]
+          },
+          "outcome": {
+            "enum": [
+              "accepted",
+              "rejected",
+              "pending",
+              "unknown"
+            ]
+          },
+          "attemptsComplete": {
+            "type": "boolean"
+          },
+          "reference": {
+            "type": "string",
+            "minLength": 1
+          },
+          "attempts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/@+\\-]{0,127}$"
+                },
+                "headSha": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{40}$"
+                },
+                "stage": {
+                  "enum": [
+                    "implementation",
+                    "review",
+                    "verification",
+                    "other"
+                  ]
+                },
+                "outcome": {
+                  "enum": [
+                    "pass",
+                    "fail",
+                    "unknown"
+                  ]
+                },
+                "tool": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/@+\\-]{0,127}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "model": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/@+\\-]{0,127}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "effort": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/@+\\-]{0,127}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "reference": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "usage": {
+                  "type": "object",
+                  "properties": {
+                    "reference": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "minLength": 1
+                    },
+                    "inputTokens": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "outputTokens": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "cachedInputTokens": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "costUsd": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "reference",
+                    "inputTokens",
+                    "outputTokens",
+                    "cachedInputTokens",
+                    "costUsd"
+                  ],
+                  "additionalProperties": false
+                },
+                "contextBytes": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "checksRun": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "checksReused": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "id",
+                "headSha",
+                "stage",
+                "outcome",
+                "tool",
+                "model",
+                "effort",
+                "reference",
+                "usage",
+                "contextBytes",
+                "checksRun",
+                "checksReused"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "risk",
+          "route",
+          "billing",
+          "outcome",
+          "attemptsComplete",
+          "reference",
+          "attempts"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "units"
+  ],
+  "additionalProperties": false
+}

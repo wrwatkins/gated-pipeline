@@ -80,3 +80,28 @@ Official references checked September9,2026:
 Check actual installed versions and available models before applying settings.
 These are routing/context controls; no model training or paid fine-tuning is
 needed to adopt them. Measure actual plan usage separately from API billing.
+
+## Calibrate on real delivery units
+
+Before changing routes, collect three to five real units with the same acceptance
+boundary, task/risk mix and a stated quality observation window. Use the shipped
+`.gated-pipeline/schemas/calibration.schema.json` and run
+`gated-pipeline calibrate samples.json --json` locally. Keep actual evidence in an
+existing private ignored location. This is advisory, not a new gate or service.
+
+Record one execution ID per implementation/review/verification attempt, actual
+head/tool/model/effort, and a safe evidence reference. Include failed attempts,
+abandoned work and every independent worker. Null means unavailable. Mark the
+inventory complete only after reconciling it at the acceptance boundary. Usage
+references must identify disjoint execution deltas; never sum repeated cumulative
+session counters or charge a reused test receipt again. Record checks run/reused
+and selected context packet bytes when known. Context bytes do not prove reading,
+cache hits or token savings. A fresh reviewer still loads applicable instructions.
+
+Inspect coverage before comparing costs: partial sums are labelled, missing totals
+stay unknown, and incomplete/open populations cannot report cost per accepted
+unit. Compare like cohorts and quality evidence, not raw model-count rankings.
+Capture real counters on future work if the retrospective evidence is incomplete;
+do not re-run completed work just to manufacture a cheaper comparison. Neither
+this command nor shorter files measure subscription deductions, and calibration
+does not override configured model choices, security review or evidence freshness.
