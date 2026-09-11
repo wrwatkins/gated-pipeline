@@ -50,6 +50,7 @@ framework installs no approval bot, hosted reviewer or background agent.
 | Task | Read on demand |
 |---|---|
 | Configure ownership, prompts, audit and budget policy | [AI-first contract](CLI.md#ai-first-repository-contract) |
+| Measure attempts, rework and missing usage before tuning | [Cost calibration](CLI.md#cost-calibration) |
 | Select models, scope context and compare snapshots | [Model and context costs](CLI.md#model-and-context-costs) |
 | Coordinate leads and check current-commit reviews | [Local review and team coordination](CLI.md#local-review-and-team-coordination) |
 | Adopt the ordinary prose fast path | [Docs-lite eligibility and evidence](template/.gated-pipeline/guides/docs-lite.md) |
@@ -72,6 +73,6 @@ npm test
 npm run check
 ```
 
-Tests cover the nine-area contract, prompt fingerprints, audit privacy boundaries, unknown/exceeded cost checks, destructive-update regressions, v0.6 migration, hook refusal/allow cases, CLI behavior, attribution, evidence failure modes, cadence and workflow errors. Package checks verify that hidden adapter directories and executable assets ship. No live model calls, production services or paid reviews are needed to run this suite.
+Tests cover the nine-area contract, prompt fingerprints, audit privacy boundaries, unknown/exceeded cost checks, calibration completeness and duplicate-receipt protection, destructive-update regressions, v0.6 migration, hook refusal/allow cases, CLI behavior, attribution, evidence failure modes, cadence and workflow errors. Package checks verify that hidden adapter directories and executable assets ship. No live model calls, production services or paid reviews are needed to run this suite.
 
 MIT license. [Migration notes](GENERALIZATION-NOTES.md).

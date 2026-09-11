@@ -17,6 +17,6 @@ const scratch=await mkdtemp(join(tmpdir(),'gated-pack-check-'))
 try{
  const pack=JSON.parse(execFileSync('npm',['pack','--dry-run','--json','--ignore-scripts','--cache',scratch],{cwd:ROOT,encoding:'utf8'}))[0]
  const files=new Set(pack.files.map(file=>file.path))
- for(const path of ['CLI.md','bin/install.mjs','lib/evidence.mjs','migrations/0.6.0.json','template/.agents/skills/compound/SKILL.md','template/.claude/agents/developer.md','template/.gated-pipeline/schemas/evidence.schema.json'])if(!files.has(path))throw new Error(`Package omits ${path}`)
+ for(const path of ['CLI.md','bin/install.mjs','lib/evidence.mjs','lib/calibration.mjs','examples/calibration.fixture.json','template/.gated-pipeline/schemas/calibration.schema.json','migrations/0.6.0.json','template/.agents/skills/compound/SKILL.md','template/.claude/agents/developer.md','template/.gated-pipeline/schemas/evidence.schema.json'])if(!files.has(path))throw new Error(`Package omits ${path}`)
  console.log(`Template syntax, ownership and package contents passed (${files.size} packaged files)`)
 }finally{await rm(scratch,{recursive:true,force:true})}

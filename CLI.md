@@ -30,6 +30,59 @@ personal settings or caps live spending. CI/harness integration makes these chec
 blocking. [Cost policy details](template/docs/cost/README.md) explain units and limits.
 
 
+## Cost calibration
+
+```sh
+npx gated-pipeline calibrate samples.json --dir=. --json
+```
+
+This read-only, local command summarizes recorded delivery units without a
+scaffold, account access, model calls or a telemetry service. Start with the
+[synthetic fixture](examples/calibration.fixture.json) and the shipped
+[calibration schema](template/.gated-pipeline/schemas/calibration.schema.json).
+Keep actual receipts and reports in an existing private, ignored evidence
+location. The command reads only the supplied project-relative file; it does
+not follow evidence references. Malformed, oversized or linked input fails with
+a fixed diagnostic. Valid partial data exits zero: calibration is descriptive,
+not an additional delivery gate. `cost-check` remains the budget check.
+
+For the next three to five delivery units, record each implementation, independent
+review and verification execution, including failures and abandoned work. Record
+actual tool/model/effort when exposed, otherwise null. Give each execution a
+unique ID and its actual source SHA. A usage reference must identify a
+non-overlapping counter delta for that execution, not repeated cumulative session
+snapshots. A reused test or review receipt is not another execution: cite its
+original evidence and record `checksReused` without charging its original usage
+again. References and arbitrary payloads are not echoed in the report; keep even
+allowed IDs/model labels free of personal or secret information.
+
+Set `attemptsComplete` only after reconciling all workers, retries and reviews
+through the unit's declared acceptance/rejection boundary. Merge acceptance is
+not production deployment or incident-free operation; keep that definition and
+a later quality observation window in the referenced evidence. For retrospective
+partial histories, use false. Unknown counters are null, never zero. `contextBytes`
+records the selected reading packet's document bytes, such as a `context` snapshot;
+it does not prove those bytes were read or cached. `checksRun` and `checksReused`
+count actual executions/reuses under the existing evidence-freshness policy.
+
+The report includes task/risk/route/billing cohorts, actual model counts, failed
+and review attempts, and measured/missing counts for every metric. `knownSubtotal`
+is a partial sum; `total` and `perAcceptedUnit` remain null when any required
+measurement or attempt coverage is missing, or a unit is still open. Each metric
+is assessed independently. `status: recorded` means the declared attempt inventory
+is complete and units are settled; it does not mean all usage is measured.
+Numerators include failed attempts and rejected units; denominators use accepted
+units, so a cheap unsuccessful run cannot disappear from acceptance costs. Zero
+accepted units never produce a ratio. Grouping is descriptive and does not prove
+one model caused better outcomes. Examine comparable tasks, quality and rework
+before changing a route or budget.
+
+Use actual allocated USD amounts only. Subscription deductions remain unknown
+without attributable provider evidence; API prices are not a substitute. OpenAI's
+[current usage guidance](https://learn.chatgpt.com/docs/pricing), checked September
+11, 2026, describes model, context, reasoning, tool use and caching as usage factors.
+The command contains no rate table and changes no provider configuration.
+
 ## Model and context costs
 
 ```sh

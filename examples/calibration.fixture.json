@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "units": [
+    {
+      "id": "synthetic-pr-1",
+      "kind": "code",
+      "risk": "standard",
+      "route": "unknown",
+      "billing": "subscription",
+      "outcome": "accepted",
+      "attemptsComplete": false,
+      "reference": "synthetic:example-only",
+      "attempts": [
+        {
+          "id": "synthetic-first-review",
+          "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "stage": "review",
+          "outcome": "fail",
+          "tool": "synthetic-agent",
+          "model": null,
+          "effort": null,
+          "reference": "synthetic:synthetic-first-review",
+          "usage": {
+            "reference": null,
+            "inputTokens": null,
+            "outputTokens": null,
+            "cachedInputTokens": null,
+            "costUsd": null
+          },
+          "contextBytes": null,
+          "checksRun": null,
+          "checksReused": null
+        },
+        {
+          "id": "synthetic-repaired-review",
+          "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "stage": "review",
+          "outcome": "pass",
+          "tool": "synthetic-agent",
+          "model": null,
+          "effort": null,
+          "reference": "synthetic:synthetic-repaired-review",
+          "usage": {
+            "reference": null,
+            "inputTokens": null,
+            "outputTokens": null,
+            "cachedInputTokens": null,
+            "costUsd": null
+          },
+          "contextBytes": null,
+          "checksRun": null,
+          "checksReused": null
+        }
+      ]
+    }
+  ]
+}
