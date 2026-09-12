@@ -69,7 +69,7 @@ independent review. Document byte counts are not measured token or cost savings.
 ## Development
 
 The [contributor task ledger](docs/TASKS.md) records queued framework work.
-Next implementation handoff: [synthetic non-production data policy and scale testing](docs/plans/synthetic-data-policy-2026-09-11.md), paired with the Woods application plan. Implementation is pending.
+Synthetic-data disposition: the [synthetic non-production data policy and scale-testing plan](docs/plans/synthetic-data-policy-2026-09-11.md) is merged; its framework policy/receipt contract is in independent review, while Woods application generators remain sequenced behind that repository's plan integration.
 
 ```sh
 npm test

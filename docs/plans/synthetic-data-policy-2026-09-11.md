@@ -6,6 +6,7 @@ Owner: next implementation agent; planning author Codex task 01a0904b-9ab3-73c3-
 Repository: gated-pipeline. Inspected base: 9d19525d20f06cb368fd16478b00afb13ebf45c4 (0.10.0).
 Plan ID: GP-SYNTH-20260911.
 Companion: woodsofindianrun, `docs/plans/synthetic-data-and-scale-testing-2026-09-11.md`, plan ID WIR-SYNTH-20260911.
+Current disposition: the framework contract and misuse tests are implemented in draft PR #10 and remain subject to independent review and coordinator Gate 9; Woods generator adoption remains sequenced behind its plan integration.
 
 This agent-readable plan records requested future work. It changes no installed
 policy, validator, application, test fixture or workflow by itself. Implementation
