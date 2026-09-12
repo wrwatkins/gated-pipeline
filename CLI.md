@@ -14,6 +14,7 @@ PR evidence contracts remain authoritative.
 ```sh
 npx gated-pipeline governance --json
 npx gated-pipeline cost-check usage.json --json
+npx gated-pipeline test-data receipt.json --json
 ```
 
 `ai-repository.json` declares the area homes and accountable owners. The governance
@@ -28,6 +29,14 @@ compares recorded usage with configured limits; unknown required measurements an
 exceeded budgets exit nonzero. It never calls models, meters a session, modifies
 personal settings or caps live spending. CI/harness integration makes these checks
 blocking. [Cost policy details](template/docs/cost/README.md) explain units and limits.
+
+`test-data-policy.json` forbids production PII and pseudonymized production PII in
+non-production data, declares deterministic scale tiers and names project-owned
+generation, validation and CI commands. `test-data` validates that policy and an
+optional bounded synthetic receipt. A receipt binds to the policy bytes, requires
+the configured tier counts and keeps outputs beneath the policy-owned generated
+data root. It never reads payloads or accesses production. The [security guidance](template/docs/security/README.md)
+explains approval-limited aggregate profiling and narrowly scoped exceptions.
 
 
 ## Cost calibration
@@ -197,4 +206,3 @@ npx gated-pipeline cadence --count=41 --json
 ```
 
 Set `cadenceBaseline` to the observed merged count when adopting the process. The registry owns review intervals; configuration enables optional web/dependency dimensions. Completed boundaries need report-backed events. Missing historical records stay unknown; no compliance or improvement is inferred from absent evidence.
-
