@@ -44,7 +44,8 @@
     "prompts/",
     ".gated-pipeline/audit/",
     "merge-policy.json",
-    "docs-policy.json"
+    "docs-policy.json",
+    "test-data-policy.json"
   ],
   "merged": [
     "AGENTS.md",

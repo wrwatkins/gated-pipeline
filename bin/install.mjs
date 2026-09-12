@@ -8,6 +8,7 @@ import { read, safePath } from '../lib/files.mjs'
 import { doctor } from '../lib/doctor.mjs'
 import { calibrate, formatCalibration } from '../lib/calibration.mjs'
 import { governance, costCheck } from '../lib/governance.mjs'
+import { testDataCheck } from '../lib/test-data.mjs'
 import { checkEvidence, prBody } from '../lib/evidence.mjs'
 import { gitHooks } from '../lib/hooks.mjs'
 import { mergedCount, parseEvents, cadenceDue } from '../lib/cadence.mjs'
@@ -22,6 +23,7 @@ const usage=`gated-pipeline — agent-neutral delivery gates
   doctor [directory] [--json]
   governance [directory] [--json]
   cost-check <usage.json> [--dir=project] [--json]
+  test-data [receipt.json] [--dir=project] [--json]
   calibrate <samples.json> [--dir=project] [--json]
   context [directory] --gate=1..9 [--manifest=path] [--previous=path]
                       [--budget-bytes=N] [--json]
@@ -40,11 +42,12 @@ cadence reads GitHub's exact merged count unless --count is supplied explicitly.
 context lists only shared/current-gate file metadata; it never calls a model.
 governance validates structure, prompt fingerprints and declared audit records.
 cost-check compares recorded usage with configured budgets; it does not meter usage.
+test-data validates a project-owned synthetic-data policy and optional receipt; it never reads generated payloads.
 calibrate summarizes recorded attempts and missing measurements without calling models.
 `
 const booleans=new Set(['yes','dry-run','json','check','help'])
 const values=new Set(['slug','name','domain','coauthor','agents','head','through','dir','count','events','gate','manifest','previous','budget-bytes','base'])
-const allowed={install:['yes','dry-run','slug','name','domain','coauthor','agents'],sync:['dry-run'],doctor:['json'],governance:['json'],'cost-check':['dir','json'],calibrate:['dir','json'],context:['gate','manifest','previous','budget-bytes','json'],'docs-scope':['base','head','json'],hooks:['check'],check:['head','through','dir','json','base'],'pr-body':['head','through','dir','base'],cadence:['count','events','json']}
+const allowed={install:['yes','dry-run','slug','name','domain','coauthor','agents'],sync:['dry-run'],doctor:['json'],governance:['json'],'cost-check':['dir','json'],'test-data':['dir','json'],calibrate:['dir','json'],context:['gate','manifest','previous','budget-bytes','json'],'docs-scope':['base','head','json'],hooks:['check'],check:['head','through','dir','json','base'],'pr-body':['head','through','dir','base'],cadence:['count','events','json']}
 export function parseArgs(argv) {
   const flags=new Map(),positionals=[]
   for(let i=0;i<argv.length;i++) {
@@ -86,7 +89,7 @@ export async function main(argv=process.argv.slice(2)) {
   if(args.help){console.log(usage);return}
   const {command,argument,flags}=args
   const evidenceCommand=['check','pr-body'].includes(command)
-  const dest=resolve(evidenceCommand||['cost-check','calibrate'].includes(command)?flags.get('dir')||process.cwd():argument||process.cwd())
+  const dest=resolve(evidenceCommand||['cost-check','test-data','calibrate'].includes(command)?flags.get('dir')||process.cwd():argument||process.cwd())
   if(command==='install'||command==='sync') {
     const existing=await read(await safePath(dest,'.gated-pipeline.json'))
     if(command==='install'&&existing!==null&&['slug','name','domain','coauthor','agents'].some(flag=>flags.has(flag)))throw new Error('Already installed; edit existing configuration explicitly, then sync')
@@ -120,6 +123,11 @@ export async function main(argv=process.argv.slice(2)) {
     const result=await costCheck(dest,argument)
     console.log(flags.has('json')?JSON.stringify(result,null,2):[result.status,...result.checks.map(c=>`${c.metric}: ${c.actual??'unknown'} / ${c.limit} (${c.status})`),result.note].join('\n'))
     if(result.status!=='within_budget')process.exitCode=1
+    return
+  }
+  if(command==='test-data') {
+    const result=await testDataCheck(dest,argument||null)
+    console.log(flags.has('json')?JSON.stringify(result,null,2):`PASS: synthetic test-data ${result.receipt ? `receipt (${result.receipt})` : 'policy'}\nNOTE: ${result.note}`)
     return
   }
   if(command==='docs-scope') {
