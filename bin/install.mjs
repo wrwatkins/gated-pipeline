@@ -13,6 +13,7 @@ import { gitHooks } from '../lib/hooks.mjs'
 import { mergedCount, parseEvents, cadenceDue } from '../lib/cadence.mjs'
 import { inspectDocsDiff } from '../template/.gated-pipeline/workflows/docs-scope.mjs'
 import { contextPlan, formatContext } from '../template/.gated-pipeline/workflows/context-plan.mjs'
+import { inspectTestFirst } from '../template/.gated-pipeline/workflows/test-first.mjs'
 
 const usage=`gated-pipeline — agent-neutral delivery gates
 
@@ -26,6 +27,7 @@ const usage=`gated-pipeline — agent-neutral delivery gates
   context [directory] --gate=1..9 [--manifest=path] [--previous=path]
                       [--budget-bytes=N] [--json]
   docs-scope [directory] --base=<full-SHA> --head=<full-SHA> [--json]
+  test-first [--dir=project] --base=<full-SHA> --head=<full-SHA> [--json]
   hooks [directory] [--check]
   check <evidence.json> --head=<full-SHA> [--through=1..9] [--dir=project] [--base=<full-SHA>] [--json]
   pr-body <evidence.json> --head=<full-SHA> [--through=1..9] [--dir=project] [--base=<full-SHA>]
@@ -35,6 +37,8 @@ Install defaults to both Codex and Claude Code adapters. --yes supplies identity
  defaults without prompting. Existing installations are preserved; use sync.
 Hooks installs a shared Git pre-push guard and refuses unrelated existing hooks.
 check validates recorded evidence; it does not run tests or contact a model.
+ With --base it also binds recorded red receipts to the branch history.
+test-first reads Git alone: tests before production code, no red test weakened.
 pr-body renders validated gate results and author/reviewer/verifier attribution.
 cadence reads GitHub's exact merged count unless --count is supplied explicitly.
 context lists only shared/current-gate file metadata; it never calls a model.
@@ -44,7 +48,7 @@ calibrate summarizes recorded attempts and missing measurements without calling 
 `
 const booleans=new Set(['yes','dry-run','json','check','help'])
 const values=new Set(['slug','name','domain','coauthor','agents','head','through','dir','count','events','gate','manifest','previous','budget-bytes','base'])
-const allowed={install:['yes','dry-run','slug','name','domain','coauthor','agents'],sync:['dry-run'],doctor:['json'],governance:['json'],'cost-check':['dir','json'],calibrate:['dir','json'],context:['gate','manifest','previous','budget-bytes','json'],'docs-scope':['base','head','json'],hooks:['check'],check:['head','through','dir','json','base'],'pr-body':['head','through','dir','base'],cadence:['count','events','json']}
+const allowed={install:['yes','dry-run','slug','name','domain','coauthor','agents'],sync:['dry-run'],doctor:['json'],governance:['json'],'cost-check':['dir','json'],calibrate:['dir','json'],context:['gate','manifest','previous','budget-bytes','json'],'docs-scope':['base','head','json'],'test-first':['base','head','dir','json'],hooks:['check'],check:['head','through','dir','json','base'],'pr-body':['head','through','dir','base'],cadence:['count','events','json']}
 export function parseArgs(argv) {
   const flags=new Map(),positionals=[]
   for(let i=0;i<argv.length;i++) {
@@ -86,7 +90,7 @@ export async function main(argv=process.argv.slice(2)) {
   if(args.help){console.log(usage);return}
   const {command,argument,flags}=args
   const evidenceCommand=['check','pr-body'].includes(command)
-  const dest=resolve(evidenceCommand||['cost-check','calibrate'].includes(command)?flags.get('dir')||process.cwd():argument||process.cwd())
+  const dest=resolve(evidenceCommand||['cost-check','calibrate','test-first'].includes(command)?flags.get('dir')||process.cwd():argument||process.cwd())
   if(command==='install'||command==='sync') {
     const existing=await read(await safePath(dest,'.gated-pipeline.json'))
     if(command==='install'&&existing!==null&&['slug','name','domain','coauthor','agents'].some(flag=>flags.has(flag)))throw new Error('Already installed; edit existing configuration explicitly, then sync')
@@ -128,6 +132,14 @@ export async function main(argv=process.argv.slice(2)) {
     if(!result.eligible)process.exitCode=1
     return
   }
+  if(command==='test-first') {
+    const project=await readProject(dest)
+    const result=inspectTestFirst(dest,{base:flags.get('base'),head:flags.get('head'),tests:[...(project.paths.tests||[]),...project.paths.e2e]})
+    if(flags.has('json'))console.log(JSON.stringify(result,null,2))
+    else console.log(result.ok?`Test-first check passed for ${result.headSha.slice(0,12)}: ${result.commits} commit(s); tests precede production code and no declared test path was weakened.\nDeterministic only; the tester and approver still judge what the tests prove.`:`Test-first check found ${result.errors.length} problem(s) at ${result.headSha.slice(0,12)}:\n${result.errors.map(e=>'  - '+e).join('\n')}`)
+    if(!result.ok)process.exitCode=1
+    return
+  }
   if(command==='hooks'){console.log(await gitHooks(dest,{check:flags.has('check')}));return}
   if(command==='context') {
     const options={gate:Number(flags.get('gate'))}
@@ -142,7 +154,8 @@ export async function main(argv=process.argv.slice(2)) {
     const record=JSON.parse(await readFile(resolve(argument),'utf8')),project=await readProject(dest)
     const through=flags.has('through')?Number(flags.get('through')):command==='pr-body'?8:9
     const docsScope=record.profile==='docs-lite'?inspectDocsDiff(dest,{base:flags.get('base'),head:flags.get('head')}):null
-    const result=checkEvidence(record,project,{head:flags.get('head'),through,docsScope})
+    const testFirst=record.profile!=='docs-lite'&&flags.has('base')?inspectTestFirst(dest,{base:flags.get('base'),head:flags.get('head'),tests:[...(project.paths.tests||[]),...project.paths.e2e],receipts:(Array.isArray(record.attempts)?record.attempts:[]).flatMap(a=>a?.gate===4&&Array.isArray(a.redReceipts)?a.redReceipts:[])}):null
+    const result=checkEvidence(record,project,{head:flags.get('head'),through,docsScope,testFirst})
     if(result.errors.length){if(flags.has('json'))console.log(JSON.stringify({valid:false,errors:result.errors},null,2));else console.error(result.errors.join('\n'));process.exitCode=1;return}
     console.log(command==='pr-body'?prBody(record,result.latest):flags.has('json')?JSON.stringify({valid:true,head:record.headSha,through}):`PASS: ${record.profile} attributed gates ${result.latest.map(e=>e.gate).join(',')} at ${record.headSha}`)
     return

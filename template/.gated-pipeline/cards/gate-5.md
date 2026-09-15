@@ -4,7 +4,7 @@ For opted-in `docs-lite`, follow [.gated-pipeline/guides/docs-lite.md](../guides
 
 Role: code-reviewer. Read docs/PROCESS.md, pipeline.config.json, STACK.md and the applicable upstream artifacts.
 
-Review the diff and upstream requirements/design using .gated-pipeline/checklists/code-review.md. Review actual inputs, authority boundaries, failure paths, test assertions and unnecessary complexity. Give each finding a stable ID, severity, file/line and a concrete fix. Keep original FAIL attempts. Do not edit production code during review. A separate role name in the same authoring run is not independent review.
+Review the diff and upstream requirements/design using .gated-pipeline/checklists/code-review.md. Review actual inputs, authority boundaries, failure paths, test assertions and unnecessary complexity. Confirm the gate-4 attempt carries a red receipt for the profile and that no red test lost assertions, gained a skip marker, or was deleted between its red commit and the head (`gated-pipeline test-first`); a missing receipt or a weakened red test is BLOCKING. Give each finding a stable ID, severity, file/line and a concrete fix. Keep original FAIL attempts. Do not edit production code during review. A separate role name in the same authoring run is not independent review.
 
 This gate must produce PASS or FAIL. Individual checks may be n/a only with an applicable, recorded reason.
 

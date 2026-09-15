@@ -211,6 +211,88 @@
                 "resolved"
               ]
             }
+          },
+          "redReceipts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "actor": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "kind": {
+                      "enum": [
+                        "human",
+                        "agent"
+                      ]
+                    },
+                    "tool": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "model": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "minLength": 1
+                    },
+                    "runId": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "tool",
+                    "model",
+                    "runId"
+                  ]
+                },
+                "commit": {
+                  "type": "string",
+                  "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"
+                },
+                "command": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "exitCode": {
+                  "type": "integer"
+                },
+                "reference": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "tests": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 1,
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "actor",
+                "commit",
+                "command",
+                "exitCode",
+                "reference",
+                "tests"
+              ]
+            }
           }
         },
         "required": [

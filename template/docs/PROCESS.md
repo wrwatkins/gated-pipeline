@@ -15,7 +15,8 @@ Add applicable nested instructions, source and upstream task artifacts. Read
 required instructions on a fresh agent/session, after compaction, when bytes
 change or when the content is no longer available in the current context.
 Within one uninterrupted context, reuse already-read unchanged instructions
-across gates. A prior snapshot measures disk freshness; it cannot certify that
+across gates; that allowance covers one role's repeated work in its own context,
+never running two gates in one shared context (see Agent isolation). A prior snapshot measures disk freshness; it cannot certify that
 an agent read or retained a file. Never omit a prerequisite to meet a size budget.
 
 Keep full procedures outside automatic rule-discovery directories and current
@@ -39,7 +40,19 @@ Assign and explain a profile before implementation:
 
 For full/docs/chore, every gate is represented. Gates 1–3 may use `PASS_NA` with a concrete reason when no decision/artifact is needed. Later gates must complete their applicable checks and record `PASS` or `FAIL`; individual n/a checks need evidence and a reason. A missing/failed/skipped execution is never a passing execution. The generic validator does not infer whether a profile is honest from the diff; the reviewer and approver audit that decision.
 
-Follow gate order. On rework, record a new attempt and revalidate downstream gates. Gates 5, 6 and 7 may each fan out into independent read-only dimensions internally; all dimensions must return before that one gate completes. The optional `.gated-pipeline/workflows/review-gate.mjs` accepts a caller-provided reviewer function and returns supporting reports. It is not a model runtime or an alternate route around gate prerequisites. Gate 8 remains sequential.
+Follow gate order of record. On rework, record a new attempt and revalidate downstream gates. Gates 5, 6 and 7 may each fan out into independent read-only dimensions internally; all dimensions must return before that one gate completes. The optional `.gated-pipeline/workflows/review-gate.mjs` accepts a caller-provided reviewer function and returns supporting reports. It is not a model runtime or an alternate route around gate prerequisites.
+
+### Test-first
+
+Tests come from the acceptance criteria before any production code, and they must fail first. At gate 4 the developer's first act is a red phase: write the unit-tier cases the design names, run them on the unchanged branch, commit them before the first production-code commit, and record a **red receipt** (commit, command, nonzero exit, durable output reference, test paths) on the gate-4 attempt. Before gate 4 completes, the tester authors the browser-tier or integration specs for user-visible contracts from the same criteria, runs them red, commits them, and hands the developer a red receipt attributed to the tester's own actor. Gate 3 hands off to both roles at once and the two red phases run concurrently. Gate 4 cannot complete until every red test from both authors passes on the reviewed revision. Removing an assertion from, skipping, or deleting a red test to reach green is a blocking review finding; a deliberate change needs a recorded reason confirmed by the tester. The `full` profile requires at least one red receipt; `docs` and `chore` validate one when present. Detail: [test-first guide](../.gated-pipeline/guides/tests.md).
+
+### Concurrent gates
+
+Running roles concurrently costs the same tokens as running them in sequence — each role reads its own context either way — so concurrency is preferred wherever surfaces do not overlap, and the saving is wall-clock. After gate 5, gates 6, 7 and 8 may run concurrently on non-overlapping test, security and operations surfaces. The order of record is unchanged: attempts are still recorded 6, then 7, then 8, and each attempt's prerequisites must already hold on the same revision when it is recorded. A concurrent gate 8 starts with the checks that need no test evidence (instrumentation, alerting, rollback, migration compatibility, infrastructure) and holds its completion for exact-head CI and gate 6's evidence; a gate-6 or gate-7 FAIL voids a concurrent gate-8 pass. Concurrent roles write separate handoffs; when more than one writes pipeline files, isolate with worktrees or sequence the commits.
+
+### Agent isolation
+
+Every gate runs as its own role with its own context, and the mailbox is the only channel that may carry a gate decision. Separate context is structural: invoke each role through its own adapter or subagent; never through a context-inheriting fork, which would let a reviewer see the author's reasoning instead of the artifact. Mailbox-only communication is a discipline the runtime cannot enforce: a harness passes a prompt into a role and returns its report, and the review fan-out hands its reviewer callback a target directly. That channel may carry the fact that a gate finished, never a summary of one gate's findings in place of the next gate's inbox entry. Role memory is private to its owner; anything another role must know goes in the handoff or a durable document. A handoff that exists only in a returned report did not happen: a role starts on the entry in its own inbox, and a missing entry is a failed prerequisite. This isolation is what makes independent review independent; audit it after the fact from the committed inboxes and evidence.
 
 ## Evidence and attribution
 
@@ -66,11 +79,12 @@ Each check includes status (`pass`, `fail`, `na`), source (`command`, `ci`, `man
 Run checks once per relevant code revision and reuse their evidence under the [source, inventory, environment and freshness rules](../.gated-pipeline/guides/evidence-reuse.md). The validator requires completed gates on the independently supplied full SHA. When code changes, rerun affected checks and reconfirm other gates for that revision. Do not embed the final SHA into a committed evidence file on that same SHA: keep in-flight records under ignored `.gated-pipeline/evidence/`, then retain the JSON in the PR body/attachment or a durable CI artifact. Later trace records reference the completed revision.
 
 ```sh
-gated-pipeline check .gated-pipeline/evidence/unit.json --head=<reviewed-full-SHA> --through=8
+gated-pipeline test-first --base=<base-full-SHA> --head=<reviewed-full-SHA>
+gated-pipeline check .gated-pipeline/evidence/unit.json --head=<reviewed-full-SHA> --base=<base-full-SHA> --through=8
 gated-pipeline pr-body .gated-pipeline/evidence/unit.json --head=<reviewed-full-SHA> --through=8 > pr-body.md
 ```
 
-For full/docs/chore, `check` defaults to gates 1–9; `pr-body` defaults to 1–8 because approval follows review. After gate 9, rerender with `--through=9` to preserve approver attribution. Commands validate declared records; they do not execute project checks or independently authenticate a CI run. Real CI must run the project's checks, and an independent reviewer must assess evidence quality.
+For full/docs/chore, `check` defaults to gates 1–9; `pr-body` defaults to 1–8 because approval follows review. After gate 9, rerender with `--through=9` to preserve approver attribution. `test-first` reads Git alone (tests precede production code; no red test lost an assertion, gained a skip marker or was deleted), so CI can run it on every branch without an evidence file; `check --base` additionally binds each recorded red receipt to the branch. Commands validate declared records and commit history; they do not execute project checks, judge whether a test proves its criterion, or independently authenticate a CI run. Real CI must run the project's checks, and an independent reviewer must assess evidence quality.
 
 ## Branch and merge
 

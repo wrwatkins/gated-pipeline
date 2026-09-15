@@ -110,7 +110,25 @@
           "reason": null
         }
       ],
-      "findings": []
+      "findings": [],
+      "redReceipts": [
+        {
+          "actor": {
+            "id": "synthetic-author-session",
+            "kind": "agent",
+            "tool": "codex",
+            "model": null,
+            "runId": null
+          },
+          "commit": "cccccccccccccccccccccccccccccccccccccccc",
+          "command": "node --test sum.test.mjs",
+          "exitCode": 1,
+          "reference": "SYNTHETIC schema fixture; replace with the actual failing run",
+          "tests": [
+            "sum.test.mjs"
+          ]
+        }
+      ]
     },
     {
       "gate": 5,

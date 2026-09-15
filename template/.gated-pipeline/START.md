@@ -8,4 +8,6 @@ Before reading procedure files, run `gated-pipeline context --gate=N` for a smal
 
 Use docs/AI_REPOSITORY.md to find applicable project standards, business context, prompt versions, PII/access rules, responsibilities, metrics and cost policies. The map is not a preload list.
 
-Commands: gated-pipeline doctor, governance, cost-check, context, check, pr-body, cadence. Use --help for arguments. Checks validate records; they do not prove an agent told the truth or replace real CI.
+Tests come before code: the developer commits red tests first and records a red receipt; the tester writes browser-tier specs red concurrently (.gated-pipeline/guides/tests.md). Each role runs in its own context and passes decisions only through inboxes and evidence; gates 6, 7 and 8 may run concurrently, recorded in order.
+
+Commands: gated-pipeline doctor, governance, cost-check, context, test-first, check, pr-body, cadence. Use --help for arguments. Checks validate records; they do not prove an agent told the truth or replace real CI.

@@ -17,7 +17,10 @@
       "gate": 3,
       "role": "tech-design",
       "card": ".gated-pipeline/cards/gate-3.md",
-      "next": "developer"
+      "next": "developer",
+      "alsoHandoff": [
+        "tester"
+      ]
     },
     {
       "gate": 4,
@@ -87,5 +90,20 @@
       "interval": 10,
       "capability": "seo"
     }
-  ]
+  ],
+  "concurrency": {
+    "orderOfRecordOnly": true,
+    "concurrentSets": [
+      [
+        "tester red pass",
+        "developer red phase"
+      ],
+      [
+        6,
+        7,
+        8
+      ]
+    ],
+    "note": "next is the order of record, not a serialization requirement; PROCESS Concurrent gates governs"
+  }
 }
