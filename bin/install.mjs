@@ -14,6 +14,7 @@ import { mergedCount, parseEvents, cadenceDue } from '../lib/cadence.mjs'
 import { inspectDocsDiff } from '../template/.gated-pipeline/workflows/docs-scope.mjs'
 import { contextPlan, formatContext } from '../template/.gated-pipeline/workflows/context-plan.mjs'
 import { inspectTestFirst } from '../template/.gated-pipeline/workflows/test-first.mjs'
+import { inspectMergeRegression } from '../template/.gated-pipeline/workflows/merge-regression.mjs'
 
 const usage=`gated-pipeline — agent-neutral delivery gates
 
@@ -28,6 +29,8 @@ const usage=`gated-pipeline — agent-neutral delivery gates
                       [--budget-bytes=N] [--json]
   docs-scope [directory] --base=<full-SHA> --head=<full-SHA> [--json]
   test-first [--dir=project] --base=<full-SHA> --head=<full-SHA> [--json]
+  merge-regression [--dir=project] --verified-head=<full-SHA> --head=<full-SHA>
+                      --unit-paths=<a,b/> [--json]
   hooks [directory] [--check]
   check <evidence.json> --head=<full-SHA> [--through=1..9] [--dir=project] [--base=<full-SHA>] [--json]
   pr-body <evidence.json> --head=<full-SHA> [--through=1..9] [--dir=project] [--base=<full-SHA>]
@@ -39,6 +42,8 @@ Hooks installs a shared Git pre-push guard and refuses unrelated existing hooks.
 check validates recorded evidence; it does not run tests or contact a model.
  With --base it also binds recorded red receipts to the branch history.
 test-first reads Git alone: tests before production code, no red test weakened.
+merge-regression reads Git alone: only clean merges and records-only commits since
+ the fully gated head, unit paths untouched, so gates 1-5 may stay bound to it.
 pr-body renders validated gate results and author/reviewer/verifier attribution.
 cadence reads GitHub's exact merged count unless --count is supplied explicitly.
 context lists only shared/current-gate file metadata; it never calls a model.
@@ -47,8 +52,8 @@ cost-check compares recorded usage with configured budgets; it does not meter us
 calibrate summarizes recorded attempts and missing measurements without calling models.
 `
 const booleans=new Set(['yes','dry-run','json','check','help'])
-const values=new Set(['slug','name','domain','coauthor','agents','head','through','dir','count','events','gate','manifest','previous','budget-bytes','base'])
-const allowed={install:['yes','dry-run','slug','name','domain','coauthor','agents'],sync:['dry-run'],doctor:['json'],governance:['json'],'cost-check':['dir','json'],calibrate:['dir','json'],context:['gate','manifest','previous','budget-bytes','json'],'docs-scope':['base','head','json'],'test-first':['base','head','dir','json'],hooks:['check'],check:['head','through','dir','json','base'],'pr-body':['head','through','dir','base'],cadence:['count','events','json']}
+const values=new Set(['slug','name','domain','coauthor','agents','head','through','dir','count','events','gate','manifest','previous','budget-bytes','base','verified-head','unit-paths'])
+const allowed={install:['yes','dry-run','slug','name','domain','coauthor','agents'],sync:['dry-run'],doctor:['json'],governance:['json'],'cost-check':['dir','json'],calibrate:['dir','json'],context:['gate','manifest','previous','budget-bytes','json'],'docs-scope':['base','head','json'],'test-first':['base','head','dir','json'],'merge-regression':['verified-head','head','unit-paths','dir','json'],hooks:['check'],check:['head','through','dir','json','base'],'pr-body':['head','through','dir','base'],cadence:['count','events','json']}
 export function parseArgs(argv) {
   const flags=new Map(),positionals=[]
   for(let i=0;i<argv.length;i++) {
@@ -90,7 +95,7 @@ export async function main(argv=process.argv.slice(2)) {
   if(args.help){console.log(usage);return}
   const {command,argument,flags}=args
   const evidenceCommand=['check','pr-body'].includes(command)
-  const dest=resolve(evidenceCommand||['cost-check','calibrate','test-first'].includes(command)?flags.get('dir')||process.cwd():argument||process.cwd())
+  const dest=resolve(evidenceCommand||['cost-check','calibrate','test-first','merge-regression'].includes(command)?flags.get('dir')||process.cwd():argument||process.cwd())
   if(command==='install'||command==='sync') {
     const existing=await read(await safePath(dest,'.gated-pipeline.json'))
     if(command==='install'&&existing!==null&&['slug','name','domain','coauthor','agents'].some(flag=>flags.has(flag)))throw new Error('Already installed; edit existing configuration explicitly, then sync')
@@ -140,6 +145,13 @@ export async function main(argv=process.argv.slice(2)) {
     if(!result.ok)process.exitCode=1
     return
   }
+  if(command==='merge-regression') {
+    const result=inspectMergeRegression(dest,{verifiedHead:flags.get('verified-head'),head:flags.get('head'),unitPaths:(flags.get('unit-paths')||'').split(',').filter(Boolean)})
+    if(flags.has('json'))console.log(JSON.stringify(result,null,2))
+    else console.log(result.ok?`Merge-regression check passed: ${result.kind} movement from ${result.verifiedHead.slice(0,12)} to ${result.head.slice(0,12)} (${result.merges} clean merge(s), ${result.recordsOnly} records-only commit(s)); gates ${result.kind==='records-only'?'1-9':'1-5'} may stay bound to the verified head.\nDeterministic only; verification, security, operations and approval still run on the head.`:`Merge-regression check found ${result.errors.length} problem(s):\n${result.errors.map(e=>'  - '+e).join('\n')}\nThe normal gates apply.`)
+    if(!result.ok)process.exitCode=1
+    return
+  }
   if(command==='hooks'){console.log(await gitHooks(dest,{check:flags.has('check')}));return}
   if(command==='context') {
     const options={gate:Number(flags.get('gate'))}
@@ -155,7 +167,8 @@ export async function main(argv=process.argv.slice(2)) {
     const through=flags.has('through')?Number(flags.get('through')):command==='pr-body'?8:9
     const docsScope=record.profile==='docs-lite'?inspectDocsDiff(dest,{base:flags.get('base'),head:flags.get('head')}):null
     const testFirst=record.profile!=='docs-lite'&&flags.has('base')?inspectTestFirst(dest,{base:flags.get('base'),head:flags.get('head'),tests:[...(project.paths.tests||[]),...project.paths.e2e],receipts:(Array.isArray(record.attempts)?record.attempts:[]).flatMap(a=>a?.gate===4&&Array.isArray(a.redReceipts)?a.redReceipts:[])}):null
-    const result=checkEvidence(record,project,{head:flags.get('head'),through,docsScope,testFirst})
+    const mergeRegression=record.carriedHead&&Array.isArray(record.unitPaths)?(()=>{try{return inspectMergeRegression(dest,{verifiedHead:record.carriedHead,head:flags.get('head'),unitPaths:record.unitPaths})}catch(error){return {ok:false,errors:[error.message]}}})():null
+    const result=checkEvidence(record,project,{head:flags.get('head'),through,docsScope,testFirst,mergeRegression})
     if(result.errors.length){if(flags.has('json'))console.log(JSON.stringify({valid:false,errors:result.errors},null,2));else console.error(result.errors.join('\n'));process.exitCode=1;return}
     console.log(command==='pr-body'?prBody(record,result.latest):flags.has('json')?JSON.stringify({valid:true,head:record.headSha,through}):`PASS: ${record.profile} attributed gates ${result.latest.map(e=>e.gate).join(',')} at ${record.headSha}`)
     return

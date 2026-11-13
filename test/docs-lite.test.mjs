@@ -85,7 +85,7 @@ for (const [name, mutate] of [
 test('unresolved historical blocker must be explicitly resolved', async () => {
   const { p, r, options } = await lite(); const fail = structuredClone(r.attempts[1]); fail.result = 'FAIL'
   fail.findings = [{ id: 'D1', severity: 'BLOCKING', what: 'Changed policy', file: 'README.md', line: 1, resolved: false }]
-  r.attempts.splice(1, 0, fail); r.attempts[2].attempt = 2
+  r.attempts.splice(1, 0, fail); r.attempts[2].attempt = 2; r.attempts[2].supersedes = { gate: 5, attempt: 1 }
   assert.match(checkEvidence(r, p, options).errors.join('\n'), /historical blocker/)
   r.attempts[2].findings = [{ ...fail.findings[0], resolved: true }]; assert.deepEqual(checkEvidence(r, p, options).errors, [])
 })
