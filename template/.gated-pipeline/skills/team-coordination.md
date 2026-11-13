@@ -1,6 +1,6 @@
 # Coordinate a local agent team
 
-Framework skill version: 1.1.0; delivered and fingerprinted by the installed framework release.
+Framework skill version: 1.2.0; delivered and fingerprinted by the installed framework release.
 
 Use when multiple top-level agents or humans work in the same repository. Keep
 one lead per delivery unit, one isolated worktree per writer, and independent
@@ -31,8 +31,11 @@ Before editing or reserving a shared operation:
    secret storage, distributed locks across separate clones or authentication.
    All participating leads must adopt the protocol. Inspect unregistered work
    before assuming a path is free; notify others only within user authorization.
-5. Reserve the `merge` resource for one coordinator while verifying the final
-   integration revision, named checks, review evidence and actual merge. Reserve
+5. Reserve the `merge` resource for one coordinator only for the window in which
+   it verifies the final integration revision, named checks, review evidence and
+   performs the merge; release it as soon as the merge lands or stops, because
+   every other lead is blocked meanwhile. Never run two committing agents in one
+   worktree; sequence them or give each its own checkout. Reserve
    `deployment` independently when a release is authorized. Recheck current main
    and interactions with other accepted changes. A green isolated branch does
    not establish a green combined release. Use the local merge-readiness skill.
@@ -57,6 +60,10 @@ Measure conflicts, duplicate runs and total accepted-work cost before adding mor
 workers. This skill launches no agents, paid services, watchers or GitHub jobs.
 
 ## Inspect before and after cleanup
+
+Release is bound to the claim's worktree path, so a removed worktree strands its
+claim. Run `node .gated-pipeline/workflows/team-coordination.mjs guard <path>`
+before `git worktree remove`; exit 3 names the live claim and its release command.
 
 Clean up only authorized, inspected, completed work. Before deleting any branch
 or worktree, capture live worktrees, claims/owners, open PRs, branch/object IDs,

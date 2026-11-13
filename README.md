@@ -43,8 +43,9 @@ A fresh install reports an unconfigured test command until you supply one. That 
 1. **Requirements, architecture, design.** Numbered acceptance criteria, an architecture verdict, and a design that names the tests each criterion needs.
 2. **Tests before code.** The developer writes the unit tests red and commits them before any production code. The tester writes the browser or integration specs red at the same time. Both record a red receipt.
 3. **Development.** The developer makes every red test green.
-4. **Review, test, security, operations.** Independent roles, each with its own context. They can run at the same time when their surfaces do not overlap.
-5. **Approval.** The validator checks the record and the branch history, then a person with authority merges the reviewed commit.
+4. **Review, test, security, operations.** Independent roles, each in a fresh context. They can run at the same time when their surfaces do not overlap. A failed round stays in the record; its correction names it and runs fresh. Security includes an adversarial pass scaled to what the diff touches.
+5. **Approval.** The validator checks the record and the branch history, then a person with authority merges the reviewed commit with a merge commit, never a squash, once every required check has completed on that exact head.
+6. **After the target moves.** If the only change since the last gated head is a clean merge of the target, only test, security and operations re-run; the inspector, not the author, decides.
 
 The order of record never changes, and no role can approve its own work under a different name.
 
@@ -54,7 +55,8 @@ The order of record never changes, and no role can approve its own work under a 
 |---|---|
 | `doctor` | Checks local setup |
 | `context --gate=N` | Lists the files a role should read for gate N |
-| `test-first --base --head` | Verifies tests came before code and were not weakened |
+| `test-first --base --head` | Verifies tests came before code and were not weakened, merge-aware |
+| `merge-regression --verified-head --head --unit-paths` | Verifies that movement since the last gated head was clean merges and records only, so gates 1–5 stay bound |
 | `check <evidence.json> --head` | Validates a gate evidence record; add `--base` to bind red receipts to the branch |
 | `pr-body <evidence.json> --head` | Renders the validated record for a pull request |
 | `cadence` | Reports which periodic reviews are due |
