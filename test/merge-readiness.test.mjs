@@ -37,6 +37,13 @@ test('malformed metadata fails closed without reflecting provider payloads',()=>
  const p=fixture();p.checks=[{PRIVATE_KEY:'PRIVATE_BODY'}]
  const result=verifyMerge(p);assert.equal(result.ready,false);assert.doesNotMatch(JSON.stringify(result),/PRIVATE_/)
 })
+test('an overdue cadence boundary blocks every merge except the one carrying the report',()=>{
+ const p=fixture();p.cadence={due:[{role:'process-trace-reviewer',boundary:50}],reportIncluded:false}
+ const result=verifyMerge(p);assert.equal(result.ready,false);assert.match(result.errors.join('\n'),/overdue at boundary 50 \(process-trace-reviewer\)/)
+ p.cadence.reportIncluded=true;assert.equal(verifyMerge(p).ready,true)
+ p.cadence={due:[],reportIncluded:false};assert.equal(verifyMerge(p).ready,true)
+ p.cadence={due:'soon'};assert.equal(verifyMerge(p).ready,false)
+})
 test('repository policy pins the three supported Node CI jobs', async()=>{
  const policy=JSON.parse(await readFile(join(ROOT,'merge-policy.json'),'utf8'))
  const expected=[

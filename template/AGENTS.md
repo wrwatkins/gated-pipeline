@@ -7,7 +7,7 @@ Use `gated-pipeline context --gate=N` to index files before reading. Reuse alrea
 
 For project policies and specialized context, use docs/AI_REPOSITORY.md as an index; read only applicable area guidance before acting.
 
-Write failing tests from the acceptance criteria before any production code and record the red receipt; the tester authors browser-tier specs red concurrently. Run each gate as its own role in its own context; decisions travel only through inboxes and evidence.
+Write failing tests from the acceptance criteria before any production code and record the red receipt; the tester authors browser-tier specs red concurrently. Run each gate as its own role in its own fresh context; decisions travel only through inboxes and evidence, a FAIL stays in the record, and a correcting round is a new run.
 
 With concurrent writers, use the team-coordination skill before editing shared paths or integrating changes. Use merge-readiness before an authorized merge.
 

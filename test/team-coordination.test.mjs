@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process'
 import { join } from 'node:path'
 import { mkdir, readFile, symlink } from 'node:fs/promises'
 import { fixture } from './helpers.mjs'
-import { teamClaim, teamRelease, teamStatus } from '../template/.gated-pipeline/workflows/team-coordination.mjs'
+import { teamClaim, teamRelease, teamStatus, teamGuard } from '../template/.gated-pipeline/workflows/team-coordination.mjs'
 async function repo(t){const root=await fixture(t);const git=(...a)=>execFileSync('git',a,{cwd:root,stdio:'pipe'});git('init');git('-c','user.name=Fixture','-c','user.email=fixture@example.invalid','commit','--allow-empty','-m','fixture');const second=join(root,'second');git('worktree','add','-b','second',second);return {root,second}}
 const request=(task,owner,paths=[],resources=[])=>({task,owner,tool:'future-tool',runId:owner,paths,resources})
 test('claims are immediately shared across linked worktrees and disjoint work can proceed',async t=>{
@@ -49,4 +49,13 @@ test('invalid paths and linked state cannot write outside the shared Git state',
  await symlink(join(outside,'state.json'),join(root,'.git','gated-pipeline-team','claims.json'))
  await assert.rejects(teamClaim(root,request('alpha','agent-a',['src/'])),/linked|invalid/i)
  await assert.rejects(readFile(join(outside,'state.json')))
+})
+test('the guard blocks removing a worktree, or an ancestor of one, that still holds a live claim',async t=>{
+ const {root,second}=await repo(t);await teamClaim(second,request('beta','agent-b',['docs/']))
+ const blocked=await teamGuard(root,second);assert.equal(blocked.blocked,true);assert.match(blocked.claims[0].release,/release beta agent-b agent-b/)
+ assert.equal((await teamGuard(root,root)).blocked,true,'the main checkout is an ancestor of the claimed linked worktree')
+ assert.equal((await teamGuard(root,join(root,'elsewhere'))).blocked,false)
+ await teamRelease(second,'beta','agent-b','agent-b');assert.equal((await teamGuard(root,second)).blocked,false)
+ await assert.rejects(teamGuard(root,''),/worktree path/)
+ const out=execFileSync(process.execPath,[new URL('../template/.gated-pipeline/workflows/team-coordination.mjs',import.meta.url).pathname,'guard',join(root,'nowhere')],{cwd:root,encoding:'utf8'});assert.match(out,/"blocked": false/)
 })

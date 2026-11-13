@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { join } from 'node:path'
 import { execFileSync } from 'node:child_process'
 import { parseArgs } from '../bin/install.mjs'
-import { fixture, run, put, project, record, sha } from './helpers.mjs'
+import { fixture, run, put, project, record, sha, disposition } from './helpers.mjs'
 import { read, json } from '../lib/files.mjs'
 test('help is read-only even with --yes',async t=>{const dest=await fixture(t);const r=run(['--help','--yes'],dest);assert.equal(r.status,0);assert.match(r.stdout,/agent-neutral/);assert.equal(await read(join(dest,'.gated-pipeline.json')),null)})
 test('noninteractive install fails before writes when identity is incomplete',async t=>{const dest=await fixture(t);const r=run([],dest);assert.equal(r.status,1);assert.match(r.stderr,/Non-interactive/);assert.equal(await read(join(dest,'.gated-pipeline.json')),null)})
@@ -22,7 +22,7 @@ test('test-first inspects the branch without an evidence file',async t=>{
 test('check binds red receipts to the branch when --base is supplied',async t=>{
  const dest=await fixture(t);git(dest,'init','-q','--initial-branch=main');assert.equal(run(['--yes'],dest).status,0);const p=await project();p.paths.tests=['test/'];await put(dest,'pipeline.config.json',json(p));const base=commit(dest,'chore: scaffold')
  await put(dest,'test/add.test.mjs','test("x",()=>assert.ok(add()))\n');const red=commit(dest,'test: red');await put(dest,'src/add.mjs','export const add=()=>1\n');const head=commit(dest,'feat: add')
- const r=record();r.headSha=head;for(const a of r.attempts)a.headSha=head;r.attempts[3].redReceipts[0].commit=red;r.attempts[3].redReceipts[0].tests=['test/add.test.mjs'];await put(dest,'evidence.json',json(r))
+ const r=record();r.headSha=head;for(const a of r.attempts)a.headSha=head;r.attempts[3].redReceipts=[r.attempts[3].redReceipts[0]];r.attempts[3].noBrowserContract=disposition();r.attempts[3].redReceipts[0].commit=red;r.attempts[3].redReceipts[0].tests=['test/add.test.mjs'];await put(dest,'evidence.json',json(r))
  let c=run(['check','evidence.json',`--head=${head}`,`--base=${base}`],dest);assert.equal(c.status,0,c.stderr)
  r.attempts[3].redReceipts[0].tests=['test/other.test.mjs'];await put(dest,'evidence.json',json(r));c=run(['check','evidence.json',`--head=${head}`,`--base=${base}`],dest);assert.equal(c.status,1);assert.match(c.stderr+c.stdout,/not touched/)
 })
@@ -31,4 +31,16 @@ test('check/pr-body use a separate full head SHA and expose actual attribution',
  const r=run(['check','evidence.json',`--head=${sha}`,'--json'],dest);assert.equal(r.status,0,r.stderr);assert.equal(JSON.parse(r.stdout).valid,true)
  const body=run(['pr-body','evidence.json',`--head=${sha}`],dest);assert.equal(body.status,0,body.stderr);assert.match(body.stdout,/codex/);assert.match(body.stdout,/claude-code/)
  assert.equal(run(['check','evidence.json','--head='+'b'.repeat(40)],dest).status,1)
+})
+test('merge-regression command and check carry gates 1-5 across a clean merge of the target',async t=>{
+ const dest=await fixture(t);git(dest,'init','-q','--initial-branch=main');assert.equal(run(['--yes'],dest).status,0);const p=await project();p.paths.tests=['test/'];await put(dest,'pipeline.config.json',json(p));commit(dest,'chore: scaffold')
+ git(dest,'checkout','-q','-b','unit');await put(dest,'test/add.test.mjs','test("x",()=>assert.ok(add()))\n');const red=commit(dest,'test: red');await put(dest,'src/add.mjs','export const add=()=>1\n');const verified=commit(dest,'feat: add')
+ git(dest,'checkout','-q','main');await put(dest,'src/other.mjs','export const other=2\n');commit(dest,'feat: main moves');git(dest,'checkout','-q','unit');git(dest,'-c','user.name=F','-c','user.email=f@example.test','merge','-q','--no-edit','--no-ff','main');const head=git(dest,'rev-parse','HEAD')
+ let c=run(['merge-regression',`--verified-head=${verified}`,`--head=${head}`,'--unit-paths=src/add.mjs,test/'],dest);assert.equal(c.status,0,c.stderr);assert.match(c.stdout,/merge-regression movement/)
+ c=run(['merge-regression',`--verified-head=${verified}`,`--head=${head}`,'--unit-paths=src/'],dest);assert.equal(c.status,1);assert.match(c.stdout,/unit path src\/other\.mjs changed/)
+ const r=record();r.headSha=head;r.carriedHead=verified;r.unitPaths=['src/add.mjs','test/'];for(const [i,a] of r.attempts.entries())a.headSha=i<5?verified:head
+ r.attempts[3].redReceipts=[r.attempts[3].redReceipts[0]];r.attempts[3].noBrowserContract=disposition();r.attempts[3].redReceipts[0].commit=red;r.attempts[3].redReceipts[0].tests=['test/add.test.mjs'];await put(dest,'evidence.json',json(r))
+ c=run(['check','evidence.json',`--head=${head}`,`--base=${git(dest,'rev-parse',`${red}~1`)}`],dest);assert.equal(c.status,0,c.stderr+c.stdout)
+ const body=run(['pr-body','evidence.json',`--head=${head}`],dest);assert.match(body.stdout,/Carried from/)
+ r.unitPaths=['src/'];await put(dest,'evidence.json',json(r));c=run(['check','evidence.json',`--head=${head}`],dest);assert.equal(c.status,1);assert.match(c.stderr+c.stdout,/carriedHead: unit path/)
 })

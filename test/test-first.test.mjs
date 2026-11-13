@@ -49,9 +49,49 @@ test('a commit mixing tests and production code cannot show a red phase', async 
 })
 test('a branch that touches no production code needs no red commit', async t => {
   const { root, base } = await repo(t)
-  await put(root, 'docs/guide.md', 'prose\n'); await put(root, '.github/workflows/ci.yml', 'name: ci\n'); const head = commit(root, 'docs: prose')
+  await put(root, 'docs/guide.md', 'prose\n'); await put(root, '.github/pull_request_template.md', 'template\n'); const head = commit(root, 'docs: prose')
   const result = inspectTestFirst(root, { base, head, tests: ['test/'] })
   assert.deepEqual(result.errors, []); assert.equal(result.firstProduction, null)
+})
+test('a CI workflow line is production code, so it cannot ride in the red commit', async t => {
+  const { root, base } = await repo(t)
+  await put(root, 'test/a.test.mjs', UNIT); await put(root, '.github/workflows/ci.yml', 'name: ci\n'); const head = commit(root, 'test: red plus workflow')
+  const result = inspectTestFirst(root, { base, head, tests: ['test/'] })
+  assert.equal(result.ok, false); assert.match(result.errors.join('\n'), /together/)
+})
+// Merge-aware cases: the branch merges its target after the red commit.
+const THREE = UNIT + 'test("zero", () => { assert.equal(add(0, 0), 0) })\n'
+async function mergedRepo(t, { mainTest, featureAfterMerge = null }) {
+  const { root, base } = await repo(t)
+  await put(root, 'test/a.test.mjs', THREE); const red = commit(root, 'test: red')
+  git(root, 'checkout', '-q', '-b', 'feature')
+  await put(root, 'src/add.mjs', CODE); commit(root, 'feat: add')
+  git(root, 'checkout', '-q', 'main')
+  await put(root, 'src/other.mjs', 'export const other = 1\n'); if (mainTest !== null) await put(root, 'test/a.test.mjs', mainTest); commit(root, 'chore: main moves')
+  git(root, 'checkout', '-q', 'feature')
+  git(root, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.test', 'merge', '-q', '--no-edit', '--no-ff', 'main')
+  if (featureAfterMerge !== null) { await put(root, 'test/a.test.mjs', featureAfterMerge); commit(root, 'test: relax after merge') }
+  return { root, base, red, head: git(root, 'rev-parse', 'HEAD') }
+}
+test('production code that a merge of the target brings in is not this branch\'s production commit', async t => {
+  const { root, red, head } = await mergedRepo(t, { mainTest: null })
+  const result = inspectTestFirst(root, { base: git(root, 'rev-parse', `${red}~1`), head, tests: ['test/'], receipts: [receipt(red, ['test/a.test.mjs'])] })
+  assert.deepEqual(result.errors, []); assert.equal(result.merges, 1); assert.equal(result.firstRed, red)
+})
+test('an assertion the merged-in side removed is credited, not reported', async t => {
+  const { root, red, head } = await mergedRepo(t, { mainTest: UNIT })
+  const result = inspectTestFirst(root, { base: git(root, 'rev-parse', `${red}~1`), head, tests: ['test/'], receipts: [receipt(red, ['test/a.test.mjs'])] })
+  assert.deepEqual(result.errors, [])
+})
+test('an assertion the branch itself removed after the merge is still reported', async t => {
+  const { root, red, head } = await mergedRepo(t, { mainTest: UNIT, featureAfterMerge: WEAKENED })
+  const result = inspectTestFirst(root, { base: git(root, 'rev-parse', `${red}~1`), head, tests: ['test/'], receipts: [receipt(red, ['test/a.test.mjs'])] })
+  assert.equal(result.ok, false); assert.match(result.errors.join('\n'), /lost 1 assertion.*beyond the 1 the merged-in side removed/)
+})
+test('a merge commit cannot serve as a red receipt commit', async t => {
+  const { root, red, head } = await mergedRepo(t, { mainTest: null })
+  const result = inspectTestFirst(root, { base: git(root, 'rev-parse', `${red}~1`), head, tests: ['test/'], receipts: [receipt(head, ['test/a.test.mjs'])] })
+  assert.equal(result.ok, false); assert.match(result.errors.join('\n'), /merge commit/)
 })
 test('a receipt-listed file counts as a test even outside declared paths', async t => {
   const { root, base } = await repo(t)

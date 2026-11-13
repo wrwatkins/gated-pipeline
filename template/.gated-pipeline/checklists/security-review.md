@@ -9,4 +9,6 @@ Use the project's actual surfaces and sensitive fields from STACK.md.
 - Dependencies, untrusted content, outbound requests and redirect constraints.
 - Concurrency, replay, abuse limits and failure observability.
 
+Adversarial pass (recorded as the `adversarial` check): threat model; the trust boundaries each changed path touches; one probe per boundary with its expected refusal and observed result; findings; what could not be checked. No boundary touched is a claim with per-path reasoning, not an omission.
+
 A clean scan covers its stated scope only. Review provenance, not just value shape. Missing checks remain missing until run or explicitly justified as inapplicable.

@@ -1,6 +1,6 @@
 # Local merge readiness
 
-Framework skill version: 1.1.0; delivered and fingerprinted by the installed framework release.
+Framework skill version: 1.2.0; delivered and fingerprinted by the installed framework release.
 
 Use immediately before an authorized merge. Run locally in the current Codex,
 Claude or other agent workflow. No bot approval, hosted AI review or additional
@@ -27,15 +27,21 @@ or an authorized independent agent, never a renamed author session.
    fails. A skip is allowed only for the named job's documented, verified condition.
 4. Fetch all **latest** check runs for that same head:
    `gh api "repos/<owner>/<repo>/commits/<head>/check-runs?filter=latest&per_page=100" --paginate --slurp > <checks.json>`.
-   Run `node .gated-pipeline/workflows/merge-readiness.mjs <head> <review.json> merge-policy.json <checks.json>`.
-   Missing, stale, pending, failed, unapproved skipped/neutral or wrong-publisher
-   checks fail. This checker compares declared review metadata; inspect the real
+   After the target branch has moved, the PR's merge ref is stale and a rerun or
+   ready toggle tests the old one; refresh it (close and reopen, or push a
+   records-only commit) and wait for the new run before capturing checks.
+   Read the cadence inside the same window: `gated-pipeline cadence --json > cadence.json`,
+   then add `"reportIncluded": true` only when this PR carries the due report.
+   Run `node .gated-pipeline/workflows/merge-readiness.mjs <head> <review.json> merge-policy.json <checks.json> cadence.json`.
+   Missing, stale, pending (not `completed`), failed, unapproved skipped/neutral
+   or wrong-publisher checks fail, and so does an overdue cadence boundary. This checker compares declared review metadata; inspect the real
    cited evidence. It does not authenticate identities or verify receipt truth.
 5. Re-read the PR head immediately before merging. If it moved, stop and obtain
    current review/check evidence. With authorization and all gates satisfied,
    merge as the normal authorized account using
    `gh pr merge <number> --repo <owner>/<repo> --merge --match-head-commit <head>`.
-   Never use `--admin`, bypass branch rules or push directly to a protected branch.
+   Never squash: red receipts and gate attempts bind to commit SHAs that a squash
+   discards. Never use `--admin`, bypass branch rules or push directly to a protected branch.
    A head/base-move rejection requires refreshed evidence; do not blindly retry.
    Record the actual merge SHA, decision, actor and checks in the audit/trace.
 

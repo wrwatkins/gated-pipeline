@@ -293,6 +293,102 @@
                 "tests"
               ]
             }
+          },
+          "context": {
+            "enum": [
+              "fresh",
+              "resumed"
+            ],
+            "description": "Whether the actor started this attempt in a fresh context. Review and verification gates (5-9) must be fresh."
+          },
+          "supersedes": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "gate": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9
+              },
+              "attempt": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "required": [
+              "gate",
+              "attempt"
+            ],
+            "description": "The earlier FAIL attempt on the same gate that this attempt corrects. Required on the attempt after a FAIL; the failed attempt stays in the record."
+          },
+          "noBrowserContract": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "actor": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "enum": [
+                      "human",
+                      "agent"
+                    ]
+                  },
+                  "tool": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "model": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "minLength": 1
+                  },
+                  "runId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "id",
+                  "kind",
+                  "tool",
+                  "model",
+                  "runId"
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 40,
+                "maxLength": 2000
+              },
+              "inspected": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 50,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 500
+                }
+              }
+            },
+            "required": [
+              "actor",
+              "reason",
+              "inspected"
+            ],
+            "description": "The tester's disposition, on the gate-4 attempt, that the design names no browser-tier or integration contract, with what was inspected to reach it. Replaces the tester's red receipt only under that disposition."
           }
         },
         "required": [
@@ -307,6 +403,21 @@
           "findings"
         ]
       }
+    },
+    "carriedHead": {
+      "type": "string",
+      "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$",
+      "description": "The last fully gated head when the movement to headSha was regression-only (clean merges of the target and records-only commits). Bound by the merge-regression inspector; requires unitPaths."
+    },
+    "unitPaths": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Repo-relative files or directory prefixes ending in / that this unit owns; must be byte-identical between carriedHead and headSha."
     }
   },
   "required": [
