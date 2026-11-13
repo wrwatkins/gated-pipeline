@@ -10,6 +10,8 @@ export async function put(root,path,text){await mkdir(dirname(join(root,path)),{
 export const run=(args,cwd)=>spawnSync(process.execPath,[cli,...args],{cwd,encoding:'utf8',input:'',timeout:10000})
 export const readJSON=async path=>JSON.parse(await readFile(path,'utf8'))
 export async function project(){const value=await readJSON(join(TEMPLATE,'pipeline.config.json'));value.commands.test='node --test';return value}
+export const redCommit='c'.repeat(40)
+export const redReceipt=(actor,tests=['test/unit.test.mjs'])=>({actor,commit:redCommit,command:'node --test',exitCode:1,reference:'red tail: 2 failed, 0 passed',tests})
 export function record({profile='full',through=9}={}){
- return {schemaVersion:1,unit:'sample',profile,headSha:sha,attempts:Array.from({length:through},(_,i)=>({gate:i+1,attempt:1,result:'PASS',reason:null,headSha:sha,actor:{id:i===3?'author-session':`review-session-${i}`,kind:'agent',tool:i===3?'codex':'claude-code',model:null,runId:null},artifacts:[],evidence:[{check:i===3||i===5?'test':i===7?'rollback':'review',status:'pass',source:i===3||i===5?'command':'manual',command:i===3||i===5?'node --test':null,exitCode:i===3||i===5?0:null,reference:'recorded output',reason:null}],findings:[]}))}
+ return {schemaVersion:1,unit:'sample',profile,headSha:sha,attempts:Array.from({length:through},(_,i)=>{const actor={id:i===3?'author-session':`review-session-${i}`,kind:'agent',tool:i===3?'codex':'claude-code',model:null,runId:null};return {gate:i+1,attempt:1,result:'PASS',reason:null,headSha:sha,actor,artifacts:[],evidence:[{check:i===3||i===5?'test':i===7?'rollback':'review',status:'pass',source:i===3||i===5?'command':'manual',command:i===3||i===5?'node --test':null,exitCode:i===3||i===5?0:null,reference:'recorded output',reason:null}],findings:[],...(i===3?{redReceipts:[redReceipt(actor)]}:{})}})}
 }

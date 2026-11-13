@@ -1,70 +1,70 @@
 # gated-pipeline
 
-File-based delivery gates for Codex, Claude Code, other coding assistants and human contributors. Shared procedures, attributed PR evidence, safe framework updates, and setup diagnostics. Node 18+; no runtime packages, hosted service or model API calls.
+A delivery process for software written with AI coding assistants, kept as plain files in your repository.
+
+Every change passes through nine gates in order: requirements, architecture, technical design, development, code review, test, security, operations, and approval. Each gate is a role that any assistant or a person can carry. Each records what it checked, who did it, and what it found, in a JSON evidence file that a command validates before merge. Nothing here calls a model, runs a hosted service, or installs runtime packages. Node 18 or newer is the only requirement.
+
+## Why
+
+Assistants are fast and confident, and a fast confident author needs an independent reviewer, a tester who did not write the code, and a record that shows who did what. This framework makes those roles explicit, keeps their evidence in the repository, and gives you a validator that refuses a record with a missing gate, a self-review, or a stale commit.
 
 ## Install
 
-From your project root, using a checkout of this repository:
+From your project root, with a checkout of this repository:
 
 ```sh
 node /path/to/gated-pipeline/bin/install.mjs install --yes --slug=my-app --name="My App"
 ```
 
-Or install the package from GitHub, then use its CLI:
+Or install from GitHub and use the CLI:
 
 ```sh
 npm install --save-dev github:wrwatkins/gated-pipeline
 npx gated-pipeline install --yes --slug=my-app --name="My App"
 ```
 
-The default installs both adapters. `--agents=codex`, `--agents=claude`, or `--agents=none` selects a narrower setup. `AGENTS.md` always provides the shared entry point; Claude imports it through `CLAUDE.md`. Existing instructions are preserved outside an explicitly marked managed block. Skills have small native entry points pointing to shared procedures.
+The installer adds a `.gated-pipeline/` directory with the shared procedures, small entry points for Claude Code and Codex, and a managed block in `AGENTS.md`. Existing instructions outside that block are left alone. Choose `--agents=codex`, `--agents=claude`, or `--agents=none` for a narrower setup.
 
-Edit `pipeline.config.json` for commands, required checks, paths, protected branches and optional capabilities. Write project invariants and context in `STACK.md`, then run:
+## Configure
+
+1. Edit `pipeline.config.json`: your test, lint and build commands, which checks are required, which paths are tests, and which optional reviews you want.
+2. Write `STACK.md`: the project's real constraints and invariants in plain words.
+3. Check the setup:
 
 ```sh
 npx gated-pipeline doctor
-npx gated-pipeline hooks           # optional shared Git pre-push guard
-npx gated-pipeline hooks --check
+npx gated-pipeline hooks           # optional Git guard against pushing to protected branches
 ```
 
-A fresh scaffold deliberately reports an unconfigured test command until you supply one. `doctor` validates local setup; it does not assert that remote branch protection exists, CI passed, or an assistant loaded every instruction. The Git hook installer refuses conflicting hooks, symlinked hook paths and custom `core.hooksPath` instead of replacing existing safeguards.
+A fresh install reports an unconfigured test command until you supply one. That is deliberate.
 
+## How a change moves through
 
-## One process across agents
+1. **Requirements, architecture, design.** Numbered acceptance criteria, an architecture verdict, and a design that names the tests each criterion needs.
+2. **Tests before code.** The developer writes the unit tests red and commits them before any production code. The tester writes the browser or integration specs red at the same time. Both record a red receipt.
+3. **Development.** The developer makes every red test green.
+4. **Review, test, security, operations.** Independent roles, each with its own context. They can run at the same time when their surfaces do not overlap.
+5. **Approval.** The validator checks the record and the branch history, then a person with authority merges the reviewed commit.
 
-The nine roles are requirements → architecture → technical design → develop → code review → test → security → operations → approval. An optional discovery role precedes requirements. Profiles (`full`, `docs`, `chore`) vary applicable work; all nine gates remain represented and each no-op needs a reason. The opt-in `docs-lite` profile uses author preparation and one independent review for ordinary prose, with fast named CI and complete committed-diff verification, including submodule changes regardless of Git ignore settings. Replacement objects cannot substitute the recorded commits or trusted policy. Object content is read as raw blobs; rejected file modes and submodule rendering never invoke Git text-conversion drivers. Policy, instructions and release/audit evidence stay on the normal path. See [PROCESS](template/docs/PROCESS.md).
+The order of record never changes, and no role can approve its own work under a different name.
 
-Provider-neutral cards, roles, guides, schemas and orchestration live in `.gated-pipeline/`. Only applicable path-scoped Claude rules are generated under `.claude/rules/`. Codex uses `AGENTS.md` routing. Neither provider inherits the other's models, tool names or hook permissions. Models follow the current user/harness settings.
+## Commands
 
-The optional [review fan-out module](template/.gated-pipeline/workflows/review-gate.mjs) runs dimensions *within* gates 5, 6 or 7 using a caller-supplied reviewer function. Missing, failed, stale, malformed or timed-out results fail the aggregate. It does not invoke a paid service or substitute a performance inspection for the testing gate.
-
-
-## Choose the context you need
-
-The scaffold gives standards, context, versioned prompts, orchestration, audit,
-PII/security, human RACI, metrics and cost governance their own project-owned
-homes. [The repository map](template/docs/AI_REPOSITORY.md) routes to them.
-Keep GitHub's existing deterministic CI and local independent reviews; the
-framework installs no approval bot, hosted reviewer or background agent.
-
-| Task | Read on demand |
+| Command | What it does |
 |---|---|
-| Configure ownership, prompts, audit and budget policy | [AI-first contract](CLI.md#ai-first-repository-contract) |
-| Measure attempts, rework and missing usage before tuning | [Cost calibration](CLI.md#cost-calibration) |
-| Select models, scope context and compare snapshots | [Model and context costs](CLI.md#model-and-context-costs) |
-| Coordinate leads and check current-commit reviews | [Local review and team coordination](CLI.md#local-review-and-team-coordination) |
-| Adopt the ordinary prose fast path | [Docs-lite eligibility and evidence](template/.gated-pipeline/guides/docs-lite.md) |
-| Reuse tests/audits or clean up finished work | [Evidence reuse](template/.gated-pipeline/guides/evidence-reuse.md), [team cleanup](template/.gated-pipeline/skills/team-coordination.md#inspect-before-and-after-cleanup) |
-| Validate evidence and generate PR attribution | [Attributed PR evidence](CLI.md#attributed-pr-evidence) |
-| Understand checks and their limits | [What is enforced](CLI.md#what-is-enforced) |
-| Upgrade an existing scaffold safely | [Updates and migration](CLI.md#safe-updates-and-migration) |
-| Record lessons and schedule evidence-based reviews | [Lessons and cadence](CLI.md#lessons-and-cadence) |
+| `doctor` | Checks local setup |
+| `context --gate=N` | Lists the files a role should read for gate N |
+| `test-first --base --head` | Verifies tests came before code and were not weakened |
+| `check <evidence.json> --head` | Validates a gate evidence record; add `--base` to bind red receipts to the branch |
+| `pr-body <evidence.json> --head` | Renders the validated record for a pull request |
+| `cadence` | Reports which periodic reviews are due |
+| `sync` | Updates framework files without touching your edits |
 
-The [complete examples](examples/README.md) cover Node and Python projects with
-explicitly synthetic mixed-agent evidence. The [CI integration example](examples/ci/README.md)
-shows how to make checks blocking without privileged execution of untrusted PR
-code. Metadata describes declared evidence; retain the actual test logs and
-independent review. Document byte counts are not measured token or cost savings.
+Full reference, including what is and is not enforced: [CLI.md](CLI.md). Process rules: [PROCESS](template/docs/PROCESS.md). Portability and design notes: [GENERALIZATION-NOTES.md](GENERALIZATION-NOTES.md).
+
+## Profiles
+
+Not every change needs the full treatment. `full` is the default for anything that touches production behaviour. `docs` covers documentation-only changes, `chore` covers tooling and test-only changes, and the opt-in `docs-lite` path gives ordinary prose one independent review. Every profile still records every gate, and a skipped gate needs a written reason.
 
 ## Development
 
@@ -76,6 +76,6 @@ npm test
 npm run check
 ```
 
-Tests cover the nine-area contract, prompt fingerprints, audit privacy boundaries, unknown/exceeded cost checks, calibration completeness and duplicate-receipt protection, destructive-update regressions, v0.6 migration, hook refusal/allow cases, CLI behavior, attribution, evidence failure modes, cadence and workflow errors. Package checks verify that hidden adapter directories and executable assets ship. No live model calls, production services or paid reviews are needed to run this suite.
+## License
 
-MIT license. [Migration notes](GENERALIZATION-NOTES.md).
+MIT.

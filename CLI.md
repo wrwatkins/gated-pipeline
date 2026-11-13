@@ -172,7 +172,8 @@ existing GitHub checks or grants merge/deployment authority.
 ## What is enforced
 
 - Installer/sync: local edits and project state are preserved; conflicting framework updates stop before any files change.
-- Evidence command: invalid or incomplete records exit nonzero. The project must run this command as part of its workflow to make it blocking.
+- Evidence command: invalid or incomplete records exit nonzero. The project must run this command as part of its workflow to make it blocking. Under the `full` profile the gate-4 attempt must carry a red receipt; with `--base` each receipt is bound to the branch history.
+- Test-first command: `gated-pipeline test-first --base=<sha> --head=<sha>` reads Git alone and exits nonzero when production code precedes the first test commit, when a commit mixes tests and production code before any red commit, or when a declared test path lost assertions, gained a skip marker, or was deleted after a red receipt. It does not judge what a test proves.
 - Shared Git guard: blocks actual protected destination refs when installed, regardless of agent; local hooks can be bypassed and do not cover API merges.
 - Claude guard: provides early feedback for supported Bash push forms when project hooks are trusted/enabled. Codex does not run it.
 - Remote merge control: configure server-side required checks and branch protection. The scaffold does not configure GitHub permissions or install stack-specific scanners automatically.

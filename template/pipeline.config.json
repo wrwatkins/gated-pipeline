@@ -23,7 +23,8 @@
   "paths": {
     "api": [],
     "e2e": [],
-    "infrastructure": []
+    "infrastructure": [],
+    "tests": []
   },
   "capabilities": {
     "dependencies": false,

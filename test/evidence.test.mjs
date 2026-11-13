@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { checkEvidence, prBody } from '../lib/evidence.mjs'
-import { project, record, sha } from './helpers.mjs'
+import { project, record, sha, redReceipt } from './helpers.mjs'
 const check=async r=>checkEvidence(r,await project(),{head:sha})
 test('mixed Codex and Claude attribution produces a validated PR table',async()=>{
  const r=record(),result=await check(r);assert.deepEqual(result.errors,[]);const body=prBody(r,result.latest);assert.match(body,/author \| codex/);assert.match(body,/reviewer \| claude-code/);assert.match(body,/not exposed/)
@@ -21,7 +21,25 @@ for(const [name,mutate,pattern]of [
  ['duplicate check',r=>r.attempts[3].evidence.push({...r.attempts[3].evidence[0]}),/duplicate/],
  ['ambiguous human attribution',r=>r.attempts[3].actor.kind='human',/human attribution/],
  ['unsupported schema field',r=>r.trusted=true,/unknown field/],
+ ['full profile without a red receipt',r=>delete r.attempts[3].redReceipts,/red receipt/],
+ ['red receipt that did not fail',r=>r.attempts[3].redReceipts[0].exitCode=0,/red receipt/],
+ ['red receipt on the reviewed head itself',r=>r.attempts[3].redReceipts[0].commit=sha,/red receipt/],
+ ['red receipt naming no tests',r=>r.attempts[3].redReceipts[0].tests=[],/too few items/],
+ ['red receipt actor contradicting attribution',r=>r.attempts[3].redReceipts[0].actor={...r.attempts[3].actor,tool:'claude-code'},/contradictory/],
 ])test(name+' is rejected',async()=>{const r=record();mutate(r);assert.match((await check(r)).errors.join('\n'),pattern)})
+test('a second red receipt may carry the tester actor and renders in the PR body',async()=>{
+ const r=record();r.attempts[3].redReceipts.push(redReceipt(r.attempts[5].actor,['e2e/flow.spec.mjs']));const result=await check(r);assert.deepEqual(result.errors,[])
+ const body=prBody(r,result.latest);assert.match(body,/red receipt/);assert.match(body,/e2e\/flow\.spec\.mjs/);assert.match(body,/review-session-5/)
+})
+test('chore and docs profiles do not require a red receipt but validate one when present',async()=>{
+ const r=record({profile:'chore'});delete r.attempts[3].redReceipts;assert.doesNotMatch((await check(r)).errors.join('\n'),/red receipt/)
+ r.attempts[3].redReceipts=[{...redReceipt(r.attempts[3].actor),exitCode:0}];assert.match((await check(r)).errors.join('\n'),/red receipt/)
+})
+test('branch inspection findings attach to gate 4',async()=>{
+ const r=record();const errors=checkEvidence(r,await project(),{head:sha,testFirst:{ok:false,errors:['src/x.mjs changed before any test commit']}}).errors
+ assert.match(errors.join('\n'),/Gate 4: .*before any test commit/)
+ assert.deepEqual(checkEvidence(r,await project(),{head:sha,testFirst:{ok:true,errors:[]}}).errors,[])
+})
 test('empty reviews cannot pass',async()=>{const r=record();r.attempts=[];assert.ok((await check(r)).errors.length)})
 test('docs no-object gates and per-check n/a retain explicit real gate completion',async()=>{
  const r=record({profile:'docs'});for(const entry of r.attempts.slice(0,3)){entry.result='PASS_NA';entry.reason='documentation-only wording';entry.evidence=[]}
