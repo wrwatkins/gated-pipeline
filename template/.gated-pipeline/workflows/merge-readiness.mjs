@@ -9,8 +9,16 @@ const actor = value => keys(value, ['id', 'tool', 'runId']) && text(value.id) &&
 
 // Only validates declared evidence and fresh platform metadata supplied by the
 // caller. No authentication, fetching, model invocation, approval or merge.
-export function verifyMerge({ head, review, policy, checks } = {}) {
+// `cadence` is optional: the output of `gated-pipeline cadence --json`, re-read
+// inside the merge window. A due boundary blocks every merge except the one
+// that carries the report (reportIncluded: true), so the count can never drift
+// past a boundary unnoticed.
+export function verifyMerge({ head, review, policy, checks, cadence = null } = {}) {
   const errors = []
+  if (cadence !== null) {
+    if (!object(cadence) || !Array.isArray(cadence.due) || typeof cadence.reportIncluded !== 'boolean') errors.push('Malformed cadence input; supply {due: [...], reportIncluded: boolean} from a fresh cadence read')
+    else if (cadence.due.length && !cadence.reportIncluded) errors.push(`Cadence review overdue at boundary ${cadence.due.map(d => `${d.boundary} (${d.role})`).join(', ')}; merge only the PR that carries the report`)
+  }
   if (!/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(head || '')) errors.push('Supply the observed full PR head')
   if (!keys(review, ['schemaVersion', 'headSha', 'result', 'author', 'reviewer', 'evidence']) || review.schemaVersion !== 1 || review.headSha !== head || review.result !== 'PASS' || !actor(review.author) || !actor(review.reviewer) || !Array.isArray(review.evidence) || !review.evidence.length || !review.evidence.every(text)) {
     errors.push('Missing, malformed, failed or stale independent review receipt')
@@ -48,13 +56,13 @@ async function readJSON(path) {
   } catch { throw new Error('Missing, linked, oversized or malformed merge-readiness input') }
 }
 export async function main(args = process.argv.slice(2)) {
-  if (args.length !== 4) throw new Error('Usage: merge-readiness.mjs <observed-head> <review.json> <policy.json> <checks.json>')
-  const [head, reviewPath, policyPath, checksPath] = args
-  const review = await readJSON(reviewPath), policy = await readJSON(policyPath), pages = await readJSON(checksPath)
+  if (args.length !== 4 && args.length !== 5) throw new Error('Usage: merge-readiness.mjs <observed-head> <review.json> <policy.json> <checks.json> [cadence.json]')
+  const [head, reviewPath, policyPath, checksPath, cadencePath] = args
+  const review = await readJSON(reviewPath), policy = await readJSON(policyPath), pages = await readJSON(checksPath), cadence = cadencePath ? await readJSON(cadencePath) : null
   // gh api --paginate --slurp returns every REST page. Accept a plain array of
   // check runs too, for isolated local tests and already-normalized snapshots.
   const checks = Array.isArray(pages) && pages.length && pages.every(page => object(page) && Array.isArray(page.check_runs)) ? pages.flatMap(page => page.check_runs) : pages
-  const result = verifyMerge({ head, review, policy, checks })
+  const result = verifyMerge({ head, review, policy, checks, cadence })
   console.log(JSON.stringify(result, null, 2))
   if (!result.ready) process.exitCode = 1
 }

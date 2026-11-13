@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process'
-import { lstat, mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
+import { lstat, mkdir, readFile, realpath, rename, rm, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { randomUUID } from 'node:crypto'
 import { pathToFileURL } from 'node:url'
@@ -89,6 +89,20 @@ export async function teamRelease(root, task, owner, runId) {
     return { schemaVersion: 1, claims: record.claims.filter(claim => claim.task !== task) }
   })
 }
+// Release is bound to the claim's worktree path, so removing a claimed worktree
+// first strands the claim. The guard reads state only and names the release
+// command; it never claims, releases or deletes anything.
+const within = (path, root) => { path = path.replace(/\/+$/, ''); root = root.replace(/\/+$/, ''); return path === root || path.startsWith(root + '/') || root.startsWith(path + '/') }
+export async function teamGuard(root, target) {
+  if (!string(target)) throw new Error('Supply the worktree path to remove')
+  const { directory } = location(root)
+  const real = async path => { try { return await realpath(path) } catch { return resolve(path) } }
+  const absolute = await real(resolve(root, target))
+  const claims = []
+  for (const claim of (await state(directory)).claims) if (within(absolute, await real(claim.worktree))) claims.push(claim)
+  const blocking = claims
+  return { target: absolute, blocked: blocking.length > 0, claims: blocking.map(claim => ({ task: claim.task, owner: claim.owner, worktree: claim.worktree, release: `node .gated-pipeline/workflows/team-coordination.mjs release ${claim.task} ${claim.owner} ${claim.runId}` })), note: blocking.length ? 'Release the claim from its own worktree first; removing the worktree would strand it.' : 'No live claim binds this path. An unregistered worktree may still be active; inspect it before removal.' }
+}
 export async function main(args = process.argv.slice(2)) {
   let result
   if (args.length === 1 && args[0] === 'status') result = await teamStatus()
@@ -97,7 +111,8 @@ export async function main(args = process.argv.slice(2)) {
     try { const stat = await regular(args[1]); if (!stat || stat.size > 65536) throw new Error(); const bytes = await readFile(args[1]); if (bytes.length > 65536) throw new Error(); request = JSON.parse(bytes) } catch { throw new Error('Invalid claim JSON file') }
     result = await teamClaim(process.cwd(), request)
   } else if (args.length === 4 && args[0] === 'release') result = await teamRelease(process.cwd(), ...args.slice(1))
-  else throw new Error('Usage: team-coordination.mjs status | claim <claim.json> | release <task> <owner> <runId>')
+  else if (args.length === 2 && args[0] === 'guard') { result = await teamGuard(process.cwd(), args[1]); if (result.blocked) process.exitCode = 3 }
+  else throw new Error('Usage: team-coordination.mjs status | claim <claim.json> | release <task> <owner> <runId> | guard <worktree-path>')
   console.log(JSON.stringify(result, null, 2))
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) main().catch(error => { console.error(error.message); process.exitCode = 1 })
