@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "checks": [
+    {
+      "name": "test (18)",
+      "app": "github-actions",
+      "conclusions": ["success"],
+      "skipReason": null
+    },
+    {
+      "name": "test (22)",
+      "app": "github-actions",
+      "conclusions": ["success"],
+      "skipReason": null
+    },
+    {
+      "name": "test (24)",
+      "app": "github-actions",
+      "conclusions": ["success"],
+      "skipReason": null
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Synthetic test-data policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "policyId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$" },
+    "productionPii": { "const": "forbidden" },
+    "pseudonymizedProductionPii": { "const": "forbidden" },
+    "productionProfiling": { "enum": ["forbidden", "approval_required_aggregate_only"] },
+    "nonPiiContent": { "const": "synthetic_required" },
+    "generatedDataRoot": { "type": "string", "pattern": "^\\.?[A-Za-z0-9][A-Za-z0-9._/-]{0,239}$" },
+    "environments": {
+      "type": "array",
+      "items": { "enum": ["local", "test", "ci", "demo", "performance"] },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "tiers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "enum": ["dev", "performance", "stress"] },
+          "users": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+          "articles": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          "events": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          "relatedRecords": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 }
+        },
+        "required": ["name", "users", "articles", "events", "relatedRecords"],
+        "additionalProperties": false
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "exceptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$" },
+          "kind": { "const": "map_geometry" },
+          "path": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,239}$" },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "reason": { "type": "string", "minLength": 1 }
+        },
+        "required": ["id", "kind", "path", "sha256", "reason"],
+        "additionalProperties": false
+      },
+      "uniqueItems": true
+    },
+    "commands": {
+      "type": "object",
+      "properties": {
+        "generate": { "type": "string", "minLength": 1 },
+        "validate": { "type": "string", "minLength": 1 },
+        "ci": { "type": "string", "minLength": 1 }
+      },
+      "required": ["generate", "validate", "ci"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["schemaVersion", "policyId", "productionPii", "pseudonymizedProductionPii", "productionProfiling", "nonPiiContent", "generatedDataRoot", "environments", "tiers", "exceptions", "commands"],
+  "additionalProperties": false
+}
