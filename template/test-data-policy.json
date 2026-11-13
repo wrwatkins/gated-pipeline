@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "policyId": "synthetic-test-data",
+  "productionPii": "forbidden",
+  "pseudonymizedProductionPii": "forbidden",
+  "productionProfiling": "forbidden",
+  "nonPiiContent": "synthetic_required",
+  "generatedDataRoot": ".test-data",
+  "environments": ["local", "test", "ci", "demo", "performance"],
+  "tiers": [
+    { "name": "dev", "users": 2000, "articles": 5000, "events": 2500, "relatedRecords": 20000 },
+    { "name": "performance", "users": 10000, "articles": 50000, "events": 25000, "relatedRecords": 250000 },
+    { "name": "stress", "users": 50000, "articles": 250000, "events": 100000, "relatedRecords": 2000000 }
+  ],
+  "exceptions": [],
+  "commands": {
+    "generate": "configure a deterministic synthetic-data generator",
+    "validate": "configure a generated-data validator",
+    "ci": "configure a required synthetic-data policy check"
+  }
+}

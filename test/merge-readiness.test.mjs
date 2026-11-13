@@ -1,6 +1,9 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { verifyMerge } from '../template/.gated-pipeline/workflows/merge-readiness.mjs'
+import { ROOT } from '../lib/scaffold.mjs'
 const head='a'.repeat(40)
 const fixture=()=>({head,review:{schemaVersion:1,headSha:head,result:'PASS',author:{id:'author',tool:'future-tool',runId:'author-run'},reviewer:{id:'reviewer',tool:'codex',runId:'review-run'},evidence:['synthetic independent review']},policy:{schemaVersion:1,checks:[{name:'test',app:'github-actions',conclusions:['success'],skipReason:null},{name:'lint',app:'github-actions',conclusions:['success'],skipReason:null}]},checks:[{name:'test',head_sha:head,status:'completed',conclusion:'success',app:{slug:'github-actions'}},{name:'lint',head_sha:head,status:'completed',conclusion:'success',app:{slug:'github-actions'}}]})
 test('current independent review and every named check pass',()=>assert.equal(verifyMerge(fixture()).ready,true))
@@ -33,4 +36,16 @@ test('an additional failing or pending check cannot be hidden by the required li
 test('malformed metadata fails closed without reflecting provider payloads',()=>{
  const p=fixture();p.checks=[{PRIVATE_KEY:'PRIVATE_BODY'}]
  const result=verifyMerge(p);assert.equal(result.ready,false);assert.doesNotMatch(JSON.stringify(result),/PRIVATE_/)
+})
+test('repository policy pins the three supported Node CI jobs', async()=>{
+ const policy=JSON.parse(await readFile(join(ROOT,'merge-policy.json'),'utf8'))
+ const expected=[
+  {name:'test (18)',app:'github-actions',conclusions:['success'],skipReason:null},
+  {name:'test (22)',app:'github-actions',conclusions:['success'],skipReason:null},
+  {name:'test (24)',app:'github-actions',conclusions:['success'],skipReason:null}
+ ]
+ assert.deepEqual(policy,{schemaVersion:1,checks:expected})
+ const checks=expected.map(rule=>({name:rule.name,head_sha:head,status:'completed',conclusion:'success',app:{slug:rule.app}}))
+ const result=verifyMerge({head,review:fixture().review,policy,checks})
+ assert.equal(result.ready,true)
 })

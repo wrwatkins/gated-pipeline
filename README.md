@@ -66,6 +66,16 @@ Full reference, including what is and is not enforced: [CLI.md](CLI.md). Process
 
 Not every change needs the full treatment. `full` is the default for anything that touches production behaviour. `docs` covers documentation-only changes, `chore` covers tooling and test-only changes, and the opt-in `docs-lite` path gives ordinary prose one independent review. Every profile still records every gate, and a skipped gate needs a written reason.
 
+## Development
+
+The [contributor task ledger](docs/TASKS.md) records queued framework work.
+Synthetic-data disposition: the [synthetic non-production data policy and scale-testing plan](docs/plans/synthetic-data-policy-2026-09-11.md) is merged; its framework policy/receipt contract is in independent review, while Woods application generators remain sequenced behind that repository's plan integration.
+
+```sh
+npm test
+npm run check
+```
+
 ## License
 
 MIT.

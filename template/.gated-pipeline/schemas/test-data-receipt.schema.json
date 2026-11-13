@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Synthetic test-data receipt",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "policySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "tier": { "enum": ["dev", "performance", "stress"] },
+    "source": { "const": "synthetic" },
+    "profile": { "enum": ["not_used", "aggregate_once_approved"] },
+    "profileApprovalRef": { "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }] },
+    "profileSummaryRef": { "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }] },
+    "seed": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" },
+    "outputRoot": { "type": "string", "pattern": "^\\.?[A-Za-z0-9][A-Za-z0-9._/-]{0,239}$" },
+    "counts": {
+      "type": "object",
+      "properties": {
+        "users": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+        "articles": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+        "events": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+        "relatedRecords": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 }
+      },
+      "required": ["users", "articles", "events", "relatedRecords"],
+      "additionalProperties": false
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "elapsedMs": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+        "peakMemoryBytes": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 }
+      },
+      "required": ["elapsedMs", "peakMemoryBytes"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["schemaVersion", "policySha256", "tier", "source", "profile", "profileApprovalRef", "profileSummaryRef", "seed", "outputRoot", "counts", "metrics"],
+  "additionalProperties": false
+}
